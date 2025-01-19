@@ -8,3 +8,12 @@
 
 
 ## Front-End
+
+
+## Back-End
+
+
+## Machine-Learning & Artificial Intelligence
+
+
+## Additional
