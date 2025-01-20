@@ -27,6 +27,13 @@
 
 ## Machine-Learning & Artificial Intelligence
 
+### AL/LLM
+[LLMs-from-scratch](https://github.com/rasbt/LLMs-from-scratch)
+
+[Gen-AI & LLM Learning](https://www.nvidia.com/en-us/learn/learning-path/generative-ai-llm/?ncid=ref-inpa-317254&deeplink=courses--4#courses-item-7757ba5d77)
+
+[AI Learning](https://www.nvidia.com/en-us/learn/ai-learning-essentials/?ncid=ref-inpa-719993)
+
 ### Gen-AI Chatbot
 > API: []()
 
