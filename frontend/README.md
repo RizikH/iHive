@@ -41,3 +41,32 @@
 
 
 ## Additional
+- Welcome/Home Page [Color/Style](https://pin.it/7psqTW84U). 
+p.s. black, white, orange...
+- [iHive Logo](https://pin.it/7tnCj3e34).
+
+### Color
+- Black: 
+    - #000000;
+    - #2F2F2F;  -> lighter, background-color
+    - #333535;  -> words?
+- White: #FFFFFF;
+- Orange: 
+    - #C6933D;  -> darker, background-color
+    - #F3AE3D;  -> lighter
+    - #F2A92D;  -> words
+
+### Conbination:
+> [Overall](https://pin.it/3uVu6Afb5), [Logo](https://pin.it/3uVu6Afb5)
+
+```
+logo {
+    color: #FFFFFF;
+    background-color: #C6933D;
+}
+
+overall {
+    background-color: #F2A92D;
+    color: #000000;
+}
+```
