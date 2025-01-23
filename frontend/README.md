@@ -70,3 +70,16 @@ overall {
     color: #000000;
 }
 ```
+
+Light Mode:
+```
+:root {
+    --primary-color: #2e2e33;
+    --secondary-color: #555;
+    --background-color: #F5F5F5;
+    --card-background: #fff;
+    --border-color: #eee;
+}
+```
+
+Dark Mode:
