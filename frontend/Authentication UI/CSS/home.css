@@ -14,13 +14,13 @@ body {
     line-height: 1.6;
     margin: 0;
     padding: 0;
-    background: #F5F5F5;
+    background: #1d1e20;
 }
 
 /* Header and Navigation */
 .header {
     padding: 1rem;
-    border-bottom: 1px solid var(--border-color);
+    border-bottom: 1px solid var(--background-color);
 }
 
 .nav {
@@ -39,7 +39,7 @@ body {
 
 .nav-links a {
     text-decoration: none;
-    color: #000;
+    color: style="color: #6C6C6C;";
 }
 
 /* Main Content */
@@ -52,6 +52,7 @@ body {
 /* Welcome Section */
 .welcome {
     margin-bottom: 3rem;
+    color: #6C6C6C;
 }
 
 .welcome h1 {
@@ -69,9 +70,9 @@ body {
 .post-card {
     padding: 1.5rem;
     margin-bottom: 1.5rem;
-    border: 1px solid #fff;
+    border: 0px solid #fff;
     border-radius: 8px;
-    background: #fff;
+    background: var(--primary-color);
     transition: transform 0.2s;
 }
 
@@ -81,7 +82,7 @@ body {
 
 .post-card h2 {
     margin: 0 0 1rem 0;
-    color: #000;
+    color: #fff;
 }
 
 .post-card footer {
@@ -90,28 +91,4 @@ body {
     font-size: 0.9rem;
     display: flex;
     gap: 1rem;
-}
-
-/* Dark mode */
-@media (prefers-color-scheme: dark) {
-    :root {
-        --primary-color: #fff;
-        --secondary-color: #888;
-        --background-color: #1d1e20;
-        --card-background: #2e2e33;
-        --border-color: #333;
-    }
-}
-
-/* Responsive design */
-@media (max-width: 768px) {
-    .nav {
-        flex-direction: column;
-        gap: 1rem;
-    }
-
-    .nav-links {
-        flex-wrap: wrap;
-        justify-content: center;
-    }
 }
