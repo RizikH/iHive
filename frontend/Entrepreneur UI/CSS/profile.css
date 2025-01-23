@@ -57,6 +57,7 @@ body {
     height: 200px;
     border-radius: 50%;
     margin-bottom: 1rem;
+    cursor: pointer;  /* Users can change their avatar here */
 }
 
 .titles p {
