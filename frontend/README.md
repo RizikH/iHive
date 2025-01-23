@@ -46,7 +46,7 @@ p.s. black, white, orange...
 - [iHive Logo](https://pin.it/7tnCj3e34).
 
 ### Color
-- Black: 
+- Black: #1a1a1a  /* Best background-color:black; */
     - #000000;
     - #2F2F2F;  -> lighter, background-color
     - #333535;  -> words?
