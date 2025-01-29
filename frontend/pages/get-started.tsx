@@ -1,26 +1,61 @@
 import React from 'react';
-import styles from '../styles/get-started.css';
+import Head from 'next/head';
+import Image from 'next/image';
+import Link from 'next/link';
+import styles from '../styles/get-started.module.css';
 
-const GetStarted = () => {
+const GetStarted: React.FC = () => {
     return (
-        <nav>
-            <div className={styles.logo}>iHive</div>
-            <div className={styles.nav-links}>
-                <a href="#about">About</a>
-                <a href="#features">Features</a>
-                <a href="#contact">Contact</a>
-            </div>
-        </nav>
-        <main className={styles.main-contant}>
-            <div className={styles.intro-text}>
-                <h1>WELCOME TO<br>THE iHIVE.<br>GET STARTED.</h1>
-                <p>Connect, collaborate, and create in our digital repo-system. 
-                Join the community of investor and entrepreneur.</p>
-                <a href="#sign-up" className={styles.cta-button} title="Sign up">Get Started</a>
-            </div>
-            <div className={ihive-icon}>
-                <img src="../app/iHive.png" alt="iHive">
-            </div>
-        </main>
+        <>
+            <Head>
+                <meta charSet="UTF-8" />
+                <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+                <meta name="Author" content="Yixi Xie" />
+                <meta name="Description" content="Main profile page." />
+                <title>iHive</title>
+                <link rel="icon" href="/Images/iHive.png" />
+            </Head>
+
+            <nav className={styles.nav}>
+                <div className={styles.logo}>iHive</div>
+                <div className={styles['nav-links']}>
+                    <Link href="#about">About</Link>
+                    <Link href="#features">Features</Link>
+                    <Link href="#contact">Contact</Link>
+                </div>
+            </nav>
+
+            <main className={styles['main-content']}>
+                <div className={styles['intro-text']}>
+                    <h1>
+                        WELCOME TO<br />
+                        THE iHIVE.<br />
+                        GET STARTED.
+                    </h1>
+                    <p>
+                        Connect, collaborate, and create in our digital repo-system.
+                        Join the community of investor and entrepreneur.
+                    </p>
+                    <Link 
+                        href="#get-started" 
+                        className={styles['cta-button']} 
+                        title="login/signup page"
+                    >
+                        Get Started
+                    </Link>
+                </div>
+                <div className={styles['ihive-icon']}>
+                    <Image 
+                        src="/Images/iHive.png" 
+                        alt="iHive"
+                        width={300}  // Adjust
+                        height={300} // Adjust
+                        priority
+                    />
+                </div>
+            </main>
+        </>
     );
 };
+
+export default GetStarted;
