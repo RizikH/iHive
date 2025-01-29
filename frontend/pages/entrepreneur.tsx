@@ -36,7 +36,7 @@ const EntrepreneurProfile: React.FC = () => {
                     <Link href="#about">About/Bio</Link>
                     <Link href="#repo">Repository</Link>
                     <Link href="#setting">Setting</Link>
-                    <Link href="#signout">Signout</Link>
+                    <Link href="#get-started">Signout</Link>
                 </div>
             </nav>
 

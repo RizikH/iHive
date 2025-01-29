@@ -1,0 +1,51 @@
+# Ignore environment variables
+.env
+
+# Ignore all .zip files
+*.zip
+
+# Ignore Node.js dependencies
+node_modules/
+
+# Ignore build outputs
+dist/
+build/
+
+# Ignore log files
+*.log
+logs/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# Ignore operating system files
+.DS_Store         # macOS
+Thumbs.db         # Windows
+desktop.ini       # Windows
+
+# Ignore IDE/Editor specific files
+.vscode/
+.idea/
+*.swp             # Vim swap files
+
+# Ignore temporary files
+*.tmp
+*.temp
+*.bak
+*.old
+*.orig
+
+# Ignore database files
+*.sqlite
+*.sqlite3
+*.db
+*.sql
+*.tar.gz
+
+# Ignore uploads and generated files
+uploads/
+generated/
+
+# Ignore Git configuration files
+.gitconfig
+.gitignore         # Only relevant when copying
