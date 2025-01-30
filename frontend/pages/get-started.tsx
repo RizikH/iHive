@@ -3,6 +3,7 @@ import Head from 'next/head';
 import Image from 'next/image';
 import Link from 'next/link';
 import styles from '../styles/get-started.module.css';
+import '../styles/globals.css';
 
 const GetStarted: React.FC = () => {
     return (
