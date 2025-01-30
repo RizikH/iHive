@@ -48,3 +48,7 @@ generated/
 
 # Ignore Git configuration files
 .gitconfig
+<<<<<<< HEAD
+=======
+.gitignore         # Only relevant when copying
+>>>>>>> 7c9cc540c854caed7104e6783e992f44fe8e62ae
