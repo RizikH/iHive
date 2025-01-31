@@ -1,0 +1,73 @@
+.logo {
+    font-size: 1.5rem;
+    font-weight: bold;
+    color:#ffffff;
+}
+
+.nav-links {
+    display: flex;
+    gap: 2rem;
+    font-weight: bold;
+    color:#ffffff;
+}
+
+.nav-links a, .nav-links:visited {
+    color: #ccc;
+    background-color: transparent;
+    text-decoration: none;
+}
+
+.nav-links:hover {
+    background-color: transparent;
+    text-decoration: underline;
+}
+
+.nav-links:active {
+    background-color: transparent;
+    text-decoration: none;
+}
+
+.main-content {
+    flex: 1;
+    display: flex;
+    align-items: center;
+    padding: 4rem;
+    gap: 4rem;
+}
+
+.intro-text {
+    flex: 1;
+}
+
+.intro-text h1 {
+    font-size: 4rem;
+    font-weight: bold;
+    line-height: 1.2;
+    margin-bottom: 1.5rem;
+}
+
+.intro-text p {
+    font-size: 1.2rem;
+    color: #666;
+    margin-bottom: 2rem;
+}
+
+.cta-button {
+    display: inline-block;
+    padding: 1rem 2rem;
+    background-color: #ff6b35;
+    color: white;
+    text-decoration: none;
+    border-radius: 4px;
+    font-weight: bold;
+}
+
+.ihive-icon {
+    flex: 1;
+    text-align: right;
+}
+
+.ihive-icon img {
+    max-width: 100%;
+    height: auto;
+}

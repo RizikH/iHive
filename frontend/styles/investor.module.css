@@ -1,5 +1,6 @@
 /* Page container to hold both sides */
 .pageContainer {
+<<<<<<< HEAD
   display: flex;
   justify-content: space-between;
   padding: 20px;
@@ -33,10 +34,49 @@
 .postCard p {
   font-size: 14px;
   color: #666;
+=======
+    display: flex;
+    justify-content: space-between;
+    padding: 20px;
+    background-color: var(--background);
+    /* Consistent background */
+    min-height: 100vh;
+}
+
+/* Left Side: Grid for posts (Matches Entrepreneur style layout) */
+.postsGrid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 20px;
+    width: 70%;
+    padding-right: 20px;
+}
+
+.postCard {
+    background-color: white;
+    border-radius: 8px;
+    padding: 20px;
+    box-shadow: 0px 4px 6px rgba(0, 0, 0, 0.1);
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+.postCard h3 {
+    color: var(--foreground);
+    /* Use consistent foreground color */
+    font-size: 18px;
+    margin-bottom: 10px;
+}
+
+.postCard p {
+    font-size: 14px;
+    color: var(--foreground);
+    /* Same as above */
+>>>>>>> sam-buttonow
 }
 
 /* Hover effect on posts */
 .postCard:hover {
+<<<<<<< HEAD
   transform: translateY(-5px);
   box-shadow: 0px 6px 12px rgba(0, 0, 0, 0.1);
 }
@@ -88,3 +128,95 @@
 .profileButton:focus {
   outline: none;
 }
+=======
+    transform: translateY(-5px);
+    box-shadow: 0px 6px 12px rgba(0, 0, 0, 0.1);
+}
+
+/* Right Side: Profile (Matching Entrepreneur profile style) */
+.profile {
+    width: 30%;
+    background-color: white;
+    border-radius: 8px;
+    padding: 20px;
+    box-shadow: 0px 4px 6px rgba(0, 0, 0, 0.1);
+}
+
+.profile h2 {
+    color: var(--foreground);
+    /* Match the color of the Entrepreneur profile */
+    font-size: 22px;
+    margin-bottom: 15px;
+}
+
+.profileContent p {
+    color: var(--foreground);
+    font-size: 14px;
+    margin-bottom: 20px;
+}
+
+/* Profile button container for consistency */
+.buttonsContainer {
+    display: flex;
+    flex-direction: column;
+}
+
+.profileButton {
+    background-color: #ffcc00;
+    /* Matching Entrepreneur's accent color */
+    color: var(--foreground);
+    border: none;
+    padding: 12px;
+    margin: 10px 0;
+    cursor: pointer;
+    font-size: 16px;
+    border-radius: 4px;
+    transition: background-color 0.3s ease, transform 0.3s ease;
+}
+
+.profileButton:hover {
+    background-color: #ffaa00;
+    /* Darker yellow for hover */
+    transform: scale(1.05);
+}
+
+.profileButton:focus {
+    outline: none;
+}
+
+
+
+/* Media Queries for Mobile responsiveness */
+@media (max-width: 768px) {
+    .pageContainer {
+        flex-direction: column;
+        padding: 10px;
+        /* Reduced padding for smaller screens */
+    }
+
+    .postsGrid {
+        width: 100%;
+        grid-template-columns: 1fr;
+        /* Stacks posts vertically */
+        padding-right: 0;
+    }
+
+    .profile {
+        width: 100%;
+        margin-top: 20px;
+    }
+
+    .navbar {
+        flex-direction: column;
+        text-align: center;
+    }
+
+    .nav-links {
+        margin-top: 1rem;
+    }
+
+    .nav-links a {
+        margin: 0 1rem;
+    }
+}
+>>>>>>> sam-buttonow
