@@ -25,34 +25,6 @@ body {
     flex-direction: column;
 }
 
-/* Global Styles for Navbar */
-.navbar {
-    display: flex;
-    justify-content: space-between;
-    padding: 1rem 2rem;
-    align-items: center;
-    background-color: var(--foreground); /* Consistent background color */
-    font-family: 'Arial', sans-serif; /* Use a global font family */
-    color: var(--foreground); /* Ensure text color is consistent */
-  }
-  
-  .navbar .logo {
-    font-weight: bold;
-    font-size: 1.2rem;
-  }
-  
-  .navbar .nav-links a {
-    color: var(--link-color); /* Link color to maintain consistency */
-    text-decoration: none;
-    margin-left: 2rem;
-    transition: color 0.3s ease;
-  }
-  
-  .navbar .nav-links a:hover {
-    color: var(--hover-color); /* Hover effect on links */
-  }
-  
-
 
 footer {
     text-align: center;
@@ -76,9 +48,9 @@ footer a:hover {
     background-color: var(--foreground);
     color: white;
     font-size: 14px;
-  }
-  
-  .footer p {
+}
+
+.footer p {
     margin: 0;
     font-size: 12px;
-  }
+}
