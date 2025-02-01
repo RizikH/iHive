@@ -1,35 +1,32 @@
-// Import required modules
-require('dotenv').config(); // Load .env file
+require('dotenv').config();
 const express = require('express');
-const bodyParser = require('body-parser');
 const cors = require('cors');
-const { createClient } = require('@supabase/supabase-js');
+const bodyParser = require('body-parser');
 
-// Initialize the Express app
+// Import Routes
+const userRoutes = require('./backend/routes/userRoutes');
+const ideaRoutes = require('./backend/routes/ideaRoutes');
+
 const app = express();
-const PORT = process.env.PORT || 5432;
 
 // Middleware
 app.use(cors());
-app.use(bodyParser.json()); // Parse JSON bodies
+app.use(express.json());
+app.use(express.urlencoded({ extended: true }));
 
-// Supabase Client Setup
-const supabase = createClient(
-    process.env.SUPABASE_URL,
-    process.env.SUPABASE_ANON_KEY
-);
+// API Routes
+app.use('/api/users', userRoutes);
+app.use('/api/ideas', ideaRoutes);
 
-
-// Import Routers
-const ideasRouter = require('./backend/routes/ideaRoutes');
-
-
-// Default route
-app.get('/', (req, res) => {
-    res.send('Welcome to the iHive server!');
+app.get("/", (req, res) => {
+    res.send("Hello and welcome to iHive.");
 });
 
-// Start the server
+// Global Error Handler
+const errorHandler = require('./backend/middleware/errorHandler');
+app.use(errorHandler);
+
+const PORT = process.env.PORT || 5432;
 app.listen(PORT, () => {
-    console.log(`Server is running on http://localhost:${PORT}`);
+    console.log(`🚀 Server running on port ${PORT}`);
 });
