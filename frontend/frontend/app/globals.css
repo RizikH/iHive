@@ -1,0 +1,23 @@
+:root {
+  --font-inter: 'Inter', sans-serif;
+  --font-roboto: 'Roboto', sans-serif;
+  --background: #ffffff;
+  --foreground: #171717;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    --background: #0a0a0a;
+    --foreground: #ededed;
+  }
+}
+
+body {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+  color: var(--foreground);
+  background: var(--background);
+  font-family: var(--font-inter), var(--font-roboto), Arial, sans-serif;
+  -webkit-font-smoothing: antialiased;
+}
