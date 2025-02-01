@@ -1,13 +1,11 @@
 'use client';
 
 import Link from 'next/link';
-<<<<<<< HEAD
-import styles from '@/styles/home.module.css';
-=======
-import styles from '../styles/Home.module.css';
+import styles from '../styles/home.module.css';
 import '../styles/globals.css';
+import React from "react";
 
->>>>>>> sam-buttonow
+
 
 export default function Home() {
   return (

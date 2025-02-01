@@ -3,82 +3,19 @@
 @tailwind utilities;
 
 :root {
-    --background: #ffffff;
-    --foreground: #171717;
+  --background: #ffffff;
+  --foreground: #171717;
 }
 
 @media (prefers-color-scheme: dark) {
-    :root {
-        --background: #0a0a0a;
-        --foreground: #ededed;
-    }
+  :root {
+    --background: #0a0a0a;
+    --foreground: #ededed;
+  }
 }
 
 body {
-    margin: 0;
-    padding: 0;
-    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;
-    background-color: var(--background-color);
-    color: var(--text-color);
-    min-height: 100vh;
-    display: flex;
-    flex-direction: column;
+  color: var(--foreground);
+  background: var(--background);
+  font-family: Arial, Helvetica, sans-serif;
 }
-
-/* Global Styles for Navbar */
-.navbar {
-    display: flex;
-    justify-content: space-between;
-    padding: 1rem 2rem;
-    align-items: center;
-    background-color: var(--foreground); /* Consistent background color */
-    font-family: 'Arial', sans-serif; /* Use a global font family */
-    color: var(--foreground); /* Ensure text color is consistent */
-  }
-  
-  .navbar .logo {
-    font-weight: bold;
-    font-size: 1.2rem;
-  }
-  
-  .navbar .nav-links a {
-    color: var(--link-color); /* Link color to maintain consistency */
-    text-decoration: none;
-    margin-left: 2rem;
-    transition: color 0.3s ease;
-  }
-  
-  .navbar .nav-links a:hover {
-    color: var(--hover-color); /* Hover effect on links */
-  }
-  
-
-
-footer {
-    text-align: center;
-    padding: 1rem;
-    margin-top: auto;
-}
-
-footer a {
-    color: var(--link-color);
-    text-decoration: none;
-}
-
-footer a:hover {
-    color: var(--hover-color);
-}
-
-/* Footer */
-.footer {
-    text-align: center;
-    padding: 20px;
-    background-color: var(--foreground);
-    color: white;
-    font-size: 14px;
-  }
-  
-  .footer p {
-    margin: 0;
-    font-size: 12px;
-  }
