@@ -3,17 +3,21 @@
     "version": "1.0.0",
     "private": true,
     "scripts": {
-      "dev": "nodemon app.js",
-      "start": "node app.js"
+        "dev": "nodemon app.js",
+        "start": "node app.js"
     },
     "dependencies": {
-      "dotenv": "latest",
-      "express": "latest",
-      "body-parser": "latest",
-      "cors": "latest",
-      "@supabase/supabase-js": "latest",
-      "openai": "latest",
-      "jsonwebtoken": "latest"
+        "@supabase/supabase-js": "latest",
+        "body-parser": "latest",
+        "cors": "latest",
+        "dotenv": "^16.4.7",
+        "express": "latest",
+        "jsonwebtoken": "latest",
+        "openai": "latest"
+    },
+    "devDependencies": {
+        "autoprefixer": "^10.4.20",
+        "postcss": "^8.5.1",
+        "tailwindcss": "^4.0.2"
     }
-  }
-  
+}
