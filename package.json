@@ -1,0 +1,18 @@
+{
+    "name": "backend",
+    "version": "1.0.0",
+    "private": true,
+    "scripts": {
+        "dev": "nodemon app.js",
+        "start": "node app.js"
+    },
+    "dependencies": {
+        "@supabase/supabase-js": "latest",
+        "body-parser": "latest",
+        "cors": "latest",
+        "dotenv": "^16.4.7",
+        "express": "latest",
+        "jsonwebtoken": "latest",
+        "openai": "latest"
+    }
+}

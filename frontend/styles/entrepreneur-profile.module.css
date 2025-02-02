@@ -1,0 +1,122 @@
+.container {
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    background-color: #2d2d2d;
+    color: #ffffff;
+  }
+  
+.navbar {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 1rem 2rem;
+    background-color: #212121;
+  }
+  
+  .logo {
+    font-size: 1.5rem;
+    font-weight: bold;
+  }
+  
+  .navLinks {
+    display: flex;
+    gap: 2rem;
+  }
+  
+  .navLinks a {
+    color: #ffffff;
+    text-decoration: none;
+    transition: color 0.3s ease;
+}
+
+.nav-links a:hover {
+    color: var(--hover-color);
+}
+
+
+.profileSection {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+    padding: 2rem;
+    margin: 0 auto;
+    width: 100%;
+}
+
+.profileImage {
+    width: 200px;
+    height: 200px;
+    border-radius: 50%;
+    overflow: hidden;
+    margin: 2rem auto;
+}
+
+.profileImage img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+.name {
+    font-size: 2.5rem;
+    margin: 1rem 0;
+    text-align: center;
+}
+
+.titles {
+    margin: 1rem 0;
+    text-align: center;
+}
+
+.titles p {
+    margin: 0.5rem 0;
+    color: #cccccc;
+}
+
+.socialLinks {
+    display: flex;
+    gap: 1.5rem;
+    justify-content: center;
+    margin: 1.5rem 0;
+}
+
+.socialIcon {
+    color: #ffffff;
+    font-size: 1.5rem;
+    transition: color 0.3s ease;
+}
+
+.socialIcon:hover {
+    color: #cccccc;
+}
+
+.footer {
+    text-align: center;
+    padding: 1rem;
+    background-color: #212121;
+    font-size: 0.9rem;
+}
+
+.footer a {
+    color: #ffffff;
+    text-decoration: none;
+}
+
+.footer a:hover {
+    color: #cccccc;
+}
+
+@media (max-width: 768px) {
+    .navbar {
+      flex-direction: column;
+      text-align: center;
+      gap: 1rem;
+    }
+  
+    .navLinks {
+      gap: 1rem;
+    }
+}
