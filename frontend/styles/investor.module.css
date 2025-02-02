@@ -239,16 +239,3 @@
     width: 100%;
     margin-top: 20px;
 }
-
-.navbar {
-    flex-direction: column;
-    text-align: center;
-}
-
-.nav-links {
-    margin-top: 1rem;
-}
-
-.nav-links a {
-    margin: 0 1rem;
-}
