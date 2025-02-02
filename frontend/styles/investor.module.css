@@ -1,222 +1,149 @@
-/* Page container to hold both sides */
-.pageContainer {
-<<<<<<< HEAD
-  display: flex;
-  justify-content: space-between;
-  padding: 20px;
-  background-color: #f4f4f9;
-  min-height: 100vh;
-}
-
-/* Left Side: Grid for posts */
-.postsGrid {
-  display: grid;
-  grid-template-columns: repeat(2, 1fr);
-  gap: 20px;
-  width: 70%;
-  padding-right: 20px;
-}
-
-.postCard {
-  background-color: white;
-  border-radius: 8px;
-  padding: 20px;
-  box-shadow: 0px 4px 6px rgba(0, 0, 0, 0.1);
-  transition: transform 0.3s ease, box-shadow 0.3s ease;
-}
-
-.postCard h3 {
-  color: #333;
-  font-size: 18px;
-  margin-bottom: 10px;
-}
-
-.postCard p {
-  font-size: 14px;
-  color: #666;
-=======
+.navbar {
     display: flex;
     justify-content: space-between;
-    padding: 20px;
-    background-color: var(--background);
-    /* Consistent background */
-    min-height: 100vh;
+    padding: 1rem 2rem;
+    align-items: center;
 }
 
-/* Left Side: Grid for posts (Matches Entrepreneur style layout) */
+.logo {
+    font-weight: bold;
+    font-size: 1.2rem;
+}
+
+.nav-links a {
+    color: var(--link-color);
+    text-decoration: none;
+    margin-left: 2rem;
+    transition: color 0.3s ease;
+}
+
+.nav-links a:hover {
+    color: var(--hover-color);
+}
+/* Container for the two-column layout */
+.pageContainer {
+    display: flex;
+    justify-content: space-between;
+    padding: 2rem;
+}
+
 .postsGrid {
+    flex: 0 0 60%;
     display: grid;
     grid-template-columns: repeat(2, 1fr);
-    gap: 20px;
-    width: 70%;
-    padding-right: 20px;
+    gap: 1.5rem;
 }
 
-.postCard {
-    background-color: white;
-    border-radius: 8px;
-    padding: 20px;
-    box-shadow: 0px 4px 6px rgba(0, 0, 0, 0.1);
-    transition: transform 0.3s ease, box-shadow 0.3s ease;
+.profile {
+    flex: 0 0 35%;
+    background-color: var(--background);
+    padding: 2rem;
+    border-radius: 10px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
 }
 
-.postCard h3 {
-    color: var(--foreground);
-    /* Use consistent foreground color */
-    font-size: 18px;
-    margin-bottom: 10px;
+.profileContent {
+    text-align: center;
 }
 
 .postCard p {
-    font-size: 14px;
-    color: var(--foreground);
-    /* Same as above */
->>>>>>> sam-buttonow
-}
-
-/* Hover effect on posts */
-.postCard:hover {
-<<<<<<< HEAD
-  transform: translateY(-5px);
-  box-shadow: 0px 6px 12px rgba(0, 0, 0, 0.1);
-}
-
-/* Right Side: Profile */
-.profile {
-  width: 30%;
-  background-color: white;
-  border-radius: 8px;
-  padding: 20px;
-  box-shadow: 0px 4px 6px rgba(0, 0, 0, 0.1);
-}
-
-.profile h2 {
-  color: #333;
-  font-size: 22px;
-  margin-bottom: 15px;
-}
-
-.profileContent p {
-  color: #666;
   font-size: 14px;
-  margin-bottom: 20px;
+  color: #666;
+    display: flex;
+    justify-content: space-between;
+    padding: 2rem;
 }
 
-/* Buttons container */
-.buttonsContainer {
-  display: flex;
-  flex-direction: column;
+.postsGrid {
+    flex: 0 0 60%;
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 1.5rem;
 }
 
-.profileButton {
-  background-color: #ffcc00; /* Yellow background for buttons */
-  color: #333;
-  border: none;
-  padding: 12px;
-  margin: 10px 0;
-  cursor: pointer;
-  font-size: 16px;
-  border-radius: 4px;
-  transition: background-color 0.3s ease, transform 0.3s ease;
-}
-
-.profileButton:hover {
-  background-color: #ffaa00; /* Darker yellow for hover */
-  transform: scale(1.05);
-}
-
-.profileButton:focus {
-  outline: none;
-}
-=======
-    transform: translateY(-5px);
-    box-shadow: 0px 6px 12px rgba(0, 0, 0, 0.1);
-}
-
-/* Right Side: Profile (Matching Entrepreneur profile style) */
 .profile {
-    width: 30%;
-    background-color: white;
-    border-radius: 8px;
-    padding: 20px;
-    box-shadow: 0px 4px 6px rgba(0, 0, 0, 0.1);
+    flex: 0 0 35%;
+    background-color: var(--background);
+    padding: 2rem;
+    border-radius: 10px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
 }
 
-.profile h2 {
-    color: var(--foreground);
-    /* Match the color of the Entrepreneur profile */
-    font-size: 22px;
-    margin-bottom: 15px;
+.profileContent {
+    text-align: center;
 }
 
-.profileContent p {
-    color: var(--foreground);
-    font-size: 14px;
-    margin-bottom: 20px;
+.profile-image {
+    width: 150px;
+    height: 150px;
+    margin: 0 auto;
+    border-radius: 50%;
+    overflow: hidden;
 }
 
-/* Profile button container for consistency */
+.profile-image img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+.investor-stats {
+    margin: 1.5rem 0;
+}
+
 .buttonsContainer {
     display: flex;
     flex-direction: column;
+    gap: 1rem;
 }
 
 .profileButton {
-    background-color: #ffcc00;
-    /* Matching Entrepreneur's accent color */
-    color: var(--foreground);
+    padding: 0.8rem 1.5rem;
+    background-color: #0069d9;
+    color: white;
     border: none;
-    padding: 12px;
-    margin: 10px 0;
+    border-radius: 5px;
     cursor: pointer;
-    font-size: 16px;
-    border-radius: 4px;
-    transition: background-color 0.3s ease, transform 0.3s ease;
+    transition: background-color 0.3s;
 }
 
 .profileButton:hover {
-    background-color: #ffaa00;
-    /* Darker yellow for hover */
-    transform: scale(1.05);
+    background-color: #0056b3;
 }
 
-.profileButton:focus {
-    outline: none;
+/* Post Card Styling */
+.postCard {
+    background-color: white;
+    padding: 1.5rem;
+    border-radius: 8px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
 }
 
-
-
-/* Media Queries for Mobile responsiveness */
-@media (max-width: 768px) {
-    .pageContainer {
-        flex-direction: column;
-        padding: 10px;
-        /* Reduced padding for smaller screens */
-    }
-
-    .postsGrid {
-        width: 100%;
-        grid-template-columns: 1fr;
-        /* Stacks posts vertically */
-        padding-right: 0;
-    }
-
-    .profile {
-        width: 100%;
-        margin-top: 20px;
-    }
-
-    .navbar {
-        flex-direction: column;
-        text-align: center;
-    }
-
-    .nav-links {
-        margin-top: 1rem;
-    }
-
-    .nav-links a {
-        margin: 0 1rem;
-    }
+.fundingProgress {
+    margin-top: 10px;
 }
->>>>>>> sam-buttonow
+
+.fundingBar {
+    width: 100%;
+    height: 10px;
+    background-color: #e0e0e0;
+}
+
+.fundingBar > div {
+    height: 100%;
+    background-color: #00c853;
+}
+
+.investButton {
+    margin-top: 1rem;
+    background-color: #0069d9;
+    color: white;
+    border: none;
+    padding: 0.6rem 1.2rem;
+    border-radius: 5px;
+    cursor: pointer;
+}
+
+.investButton:hover {
+    background-color: #0056b3;
+}
