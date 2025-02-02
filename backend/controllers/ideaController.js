@@ -1,80 +1,71 @@
-const { createClient } = require('@supabase/supabase-js');
+const Idea = require('../models/Idea');
 
-const supabaseUrl = process.env.SUPABASE_URL;
-const supabaseAnonKey = process.env.SUPABASE_ANON_KEY;
-const supabase = createClient(supabaseUrl, supabaseAnonKey);
-
-// Get all ideas
-exports.getAllIdeas = async (req, res) => {
+// GET /api/ideas
+const getAllIdeas = async (req, res) => {
     try {
-        const { data: ideas, error } = await supabase
-            .from('ideas')
-            .select('*');
-        if (error) throw error;
+        const ideas = await Idea.getAllIdeas();
         res.json(ideas);
     } catch (error) {
-        res.status(500).json({ message: error.message });
+        res.status(500).json({ error: error.message });
     }
 };
 
-// Create a new idea
-exports.createIdea = async (req, res) => {
+// POST /api/ideas
+const createIdea = async (req, res) => {
     try {
-        const { data: newIdea, error } = await supabase
-            .from('ideas')
-            .insert([req.body])
-            .single();
-        if (error) throw error;
+        const newIdea = await Idea.createIdea(req.body);
         res.status(201).json(newIdea);
     } catch (error) {
-        res.status(400).json({ message: error.message });
+        res.status(400).json({ error: error.message });
     }
 };
 
-// Get an idea by ID
-exports.getIdeaById = async (req, res) => {
+// GET /api/ideas/:id
+const getIdeaById = async (req, res) => {
     try {
-        const { data: idea, error } = await supabase
-            .from('ideas')
-            .select('*')
-            .eq('id', req.params.id)
-            .single();
-        if (error) throw error;
-        if (!idea) return res.status(404).json({ message: 'Idea not found' });
-        res.json(idea);
+        const idea = await Idea.getIdeaById(req.params.id);
+        if (idea) {
+            res.json(idea);
+        } else {
+            res.status(404).json({ message: 'Idea not found' });
+        }
     } catch (error) {
-        res.status(500).json({ message: error.message });
+        res.status(500).json({ error: error.message });
     }
 };
 
-// Update an idea by ID
-exports.updateIdea = async (req, res) => {
+// PUT /api/ideas/:id
+const updateIdea = async (req, res) => {
     try {
-        const { data: idea, error } = await supabase
-            .from('ideas')
-            .update(req.body)
-            .eq('id', req.params.id)
-            .single();
-        if (error) throw error;
-        if (!idea) return res.status(404).json({ message: 'Idea not found' });
-        res.json(idea);
+        const updatedIdea = await Idea.updateIdea(req.params.id, req.body);
+        if (updatedIdea) {
+            res.json(updatedIdea);
+        } else {
+            res.status(404).json({ message: 'Idea not found' });
+        }
     } catch (error) {
-        res.status(400).json({ message: error.message });
+        res.status(400).json({ error: error.message });
     }
 };
 
-// Delete an idea by ID
-exports.deleteIdea = async (req, res) => {
+// DELETE /api/ideas/:id
+const deleteIdea = async (req, res) => {
     try {
-        const { data: idea, error } = await supabase
-            .from('ideas')
-            .delete()
-            .eq('id', req.params.id)
-            .single();
-        if (error) throw error;
-        if (!idea) return res.status(404).json({ message: 'Idea not found' });
-        res.json({ message: 'Idea deleted' });
+        const deletedIdea = await Idea.deleteIdea(req.params.id);
+        if (deletedIdea) {
+            res.json({ message: 'Idea deleted' });
+        } else {
+            res.status(404).json({ message: 'Idea not found' });
+        }
     } catch (error) {
-        res.status(500).json({ message: error.message });
+        res.status(500).json({ error: error.message });
     }
+};
+
+module.exports = {
+    getAllIdeas,
+    createIdea,
+    getIdeaById,
+    updateIdea,
+    deleteIdea
 };
