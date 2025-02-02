@@ -14,7 +14,7 @@ export default function Home() {
         <div className={styles['nav-links']}>
           <Link href="#investments">Investments</Link>
           <Link href="#setting">Settings</Link>
-          <Link href="#get-started">Signout</Link>
+          <Link href="get-started">Signout</Link>
         </div>
       </nav>
 
