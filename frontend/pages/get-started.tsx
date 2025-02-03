@@ -19,9 +19,9 @@ const GetStarted: React.FC = () => {
             <nav className={styles.navContainer}>
                 <div className={styles.logo}>iHive</div>
                 <div className={styles['nav-links']}>
-                    <Link href="#about">About</Link>
-                    <Link href="#features">Features</Link>
-                    <Link href="#contact">Contact</Link>
+                    <Link href="/about">About</Link>
+                    <Link href="/community">Community</Link>
+                    <Link href="/contact">Contact</Link>
                 </div>
             </nav>
 
@@ -33,13 +33,13 @@ const GetStarted: React.FC = () => {
                         GET STARTED.
                     </h1>
                     <p>
-                        Connect, collaborate, and create in our digital repo-system.
+                        Connect, collaborate, and create in our digital repo-system.<br />
                         Join the community of investor and entrepreneur.
                     </p>
                     <Link 
                         href="/" 
                         className={styles['cta-button']} 
-                        title="login/signup page"
+                        title="login/signup"
                     >
                         Get Started
                     </Link>

@@ -9,12 +9,6 @@ export default function Repository() {
         <div className={styles.brand}>
           <Link href="/">iHive</Link>
         </div>
-        <nav className={styles.nav}>
-          <Link href="/">Home</Link>
-          <Link href="/repository">Repository</Link>
-          <Link href="/entrepreneur">Profile</Link>
-          <Link href="/get-started">Sign Out</Link>
-        </nav>
         <div className={styles.toolbox}>
           <div className={styles.searchTool}>
             <svg width="18" height="18" viewBox="0 0 24 24">
@@ -24,6 +18,11 @@ export default function Repository() {
           </div>
           <div className={styles.searchTool}>Search</div>
         </div>
+        <nav className={styles.nav}>
+          <Link href="/repository">Repository</Link>
+          <Link href="/entrepreneur">Profile</Link>
+          <Link href="/get-started">Sign Out</Link>
+        </nav>
       </header>
 
       <main className={styles.main}>

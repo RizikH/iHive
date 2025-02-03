@@ -26,11 +26,11 @@ const EntrepreneurProfile = () => {
     <div className={styles.container}>
       {/* Navigation */}
       <nav className={styles.navbar}>
-        <div className={styles.logo}>IHIVE</div>
+        <Link href="/" className={styles.logo}>iHive</Link>
         <div className={styles.navLinks}>
-          <Link href="/">Home</Link>
           <Link href="/repository">Repository</Link>
-          <Link href="/projects">Projects</Link>
+          <Link href="/setting">Setting</Link>
+          <Link href="/sponsor">Your Sponsors</Link>
           <Link href="/get-started">Sign Out</Link>
         </div>
       </nav>
@@ -38,7 +38,7 @@ const EntrepreneurProfile = () => {
       {/* Profile Section */}
       <main className={styles.profileSection}>
         <div className={styles.profileImage}>
-            <img src="/Images/sample.jpeg" alt="Profile" />
+            <img src="/Images/sample.jpeg" alt="Profile" title="Change your Avatar"/>
         </div>
         
         <h1 className={styles.name}>Yixi Xie</h1>
@@ -49,13 +49,13 @@ const EntrepreneurProfile = () => {
 
         {/* Social Links */}
         <div className={styles.socialLinks}>
-          <Link href="https://github.com" className={styles.socialIcon}>
+          <Link href="https://github.com" className={styles.socialIcon} title="GitHub">
             <FontAwesomeIcon icon={faGithub} />
           </Link>
-          <Link href="https://linkedin.com" className={styles.socialIcon}>
+          <Link href="https://linkedin.com" className={styles.socialIcon} title="Linkedin">
             <FontAwesomeIcon icon={faLinkedin} />
           </Link>
-          <Link href="https://twitter.com" className={styles.socialIcon}>
+          <Link href="https://twitter.com" className={styles.socialIcon} title="X">
             <FontAwesomeIcon icon={faXTwitter} />
           </Link>
         </div>

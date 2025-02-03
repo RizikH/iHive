@@ -52,6 +52,7 @@
     border-radius: 50%;
     overflow: hidden;
     margin: 2rem auto;
+    cursor: pointer;
 }
 
 .profileImage img {
