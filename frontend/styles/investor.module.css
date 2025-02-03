@@ -54,13 +54,10 @@
 }
 
 .postCard p {
-<<<<<<< HEAD
     font-size: 14px;
     color: #666;
-=======
     font-size: 14px;
     color: #666;
->>>>>>> sam-buttonow
     display: flex;
     justify-content: space-between;
     padding: 2rem;
