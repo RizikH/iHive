@@ -1,8 +1,8 @@
 /* Header Styles */
 .container {
-    background-color: #1a1a1a;
+    background-color: #ffffff;
     min-height: 100vh;
-    color: #ffffff;
+    color: #000000;
 }
 
 .header {
@@ -24,14 +24,14 @@
 }
 
 .sidebarBtn svg {
-    stroke: #ffffff;
+    stroke: #000000;
     stroke-width: 2;
     stroke-linecap: round;
     stroke-linejoin: round;
 }
 
 .brand a {
-    color: #ffffff;
+    color: #000000;
     text-decoration: none;
     font-size: 1.5rem;
     font-weight: 500;
@@ -43,13 +43,13 @@
 }
 
 .nav a {
-    color: #999999;
+    color: #000000;
     text-decoration: none;
     font-size: 0.9rem;
 }
 
 .nav a:hover {
-    color: #ffffff;
+    color: #1a1a1a;
 }
 
 .toolbox {
@@ -59,12 +59,12 @@
 }
 
 .searchTool svg {
-    stroke: #ffffff;
+    stroke: #1a1a1a;
     cursor: pointer;
 }
 
 .searchTool {
-    color: #ffffff;
+    color: #000000;
     font-size: 0.9rem;
 }
 
@@ -85,7 +85,7 @@
     z-index: 2;
     width: 80px;
     height: 80px;
-    background: #333333;
+    background: #000000;
     border-radius: 4px;
     display: flex;
     align-items: center;
@@ -98,7 +98,7 @@
     top: 90px;
     bottom: 0;
     width: 2px;
-    background-color: #333333;
+    background-color: #cccccc;
 }
 
 .githubLink {

@@ -2,8 +2,8 @@
     min-height: 100vh;
     display: flex;
     flex-direction: column;
-    background-color: #2d2d2d;
-    color: #ffffff;
+    background-color: #ffffff;
+    color: #000000;
   }
   
 .navbar {
@@ -11,7 +11,6 @@
     justify-content: space-between;
     align-items: center;
     padding: 1rem 2rem;
-    background-color: #212121;
   }
   
   .logo {
@@ -25,7 +24,7 @@
   }
   
   .navLinks a {
-    color: #ffffff;
+    color: #000000;
     text-decoration: none;
     transition: color 0.3s ease;
 }
@@ -74,7 +73,7 @@
 
 .titles p {
     margin: 0.5rem 0;
-    color: #cccccc;
+    color: #1a1a1a;
 }
 
 .socialLinks {
@@ -97,17 +96,17 @@
 .footer {
     text-align: center;
     padding: 1rem;
-    background-color: #212121;
+    background-color: #ffffff;
     font-size: 0.9rem;
 }
 
 .footer a {
-    color: #ffffff;
+    color: #000000;
     text-decoration: none;
 }
 
 .footer a:hover {
-    color: #cccccc;
+    color: #1a1a1a;
 }
 
 @media (max-width: 768px) {
