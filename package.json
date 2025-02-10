@@ -13,7 +13,7 @@
         "dotenv": "^16.4.7",
         "express": "latest",
         "jsonwebtoken": "latest",
-        "openai": "latest"
+        "openai": "^4.83.0"
     },
     "devDependencies": {
         "autoprefixer": "^10.4.20",

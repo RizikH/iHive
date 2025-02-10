@@ -1,22 +1,15 @@
-const { Configuration, OpenAIApi } = require("openai");
+import OpenAI from "openai";
 
-const configuration = new Configuration({
-    apiKey: process.env.OPENAI_API_KEY,
+const openai = new OpenAI({
+  apiKey: "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",
 });
-const openai = new OpenAIApi(configuration);
 
-async function suggestTags(description) {
-    try {
-        const response = await openai.createCompletion({
-            model: "text-davinci-003",
-            prompt: `Suggest tags for: "${description}"`,
-            max_tokens: 50,
-        });
-        return response.data.choices[0].text.split(",").map(tag => tag.trim());
-    } catch (error) {
-        console.error("Error suggesting tags:", error.message);
-        throw new Error("Failed to generate tags.");
-    }
-}
+const completion = openai.chat.completions.create({
+  model: "gpt-4o-mini",
+  store: true,
+  messages: [
+    {"role": "user", "content": "write a haiku"}, // This is where you can change the prompt from write a haiku to get the tags.
+  ],
+});
 
-module.exports = { suggestTags };
+completion.then((result) => console.log(result.choices[0].message));
