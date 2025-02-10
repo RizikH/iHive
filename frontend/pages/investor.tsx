@@ -13,46 +13,60 @@ const InvestorPage = () => {
         description: string;
         category?: string;
         funding_progress?: number;
+        tags_name?: { id: number; tag_id: number }[]; // Association table
     }
 
-    const [ideas, setIdeas] = useState<Idea[]>([]);  // State to hold ideas
-    const [tags, setTags] = useState([]);   // State to hold tags 
-    const [loading, setLoading] = useState(true);  // Loading state
-    const [error, setError] = useState(null);      // Error state
+    interface Tag {
+        id: number;
+        name: string;
+    }
+
+    const [ideas, setIdeas] = useState<Idea[]>([]);
+    const [tags, setTags] = useState<Tag[]>([]);
+    const [loadingIdeas, setLoadingIdeas] = useState(true);
+    const [loadingTags, setLoadingTags] = useState(true);
+    const [errorIdeas, setErrorIdeas] = useState<string | null>(null);
+    const [errorTags, setErrorTags] = useState<string | null>(null);
 
     useEffect(() => {
         const fetchIdeas = async () => {
             try {
-                const response = await fetch('http://localhost:5432/api/ideas');  
+                const response = await fetch('http://localhost:5432/api/ideas');
+                if (!response.ok) throw new Error('Failed to fetch ideas');
+                const data = await response.json();
+                setIdeas(data);
+            } catch (err: any) {
+                setErrorIdeas(err.message);
+            } finally {
+                setLoadingIdeas(false);
+            }
+        };
+
+        const fetchTags = async () => {
+            try {
+                const response = await fetch('http://localhost:5432/api/tags');
                 if (!response.ok) throw new Error('Failed to fetch tags');
                 const data = await response.json();
-                setIdeas(data);  // Store ideas in state
-            } catch (err) {
-                setError(err.message);
+                setTags(data);
+            } catch (err: any) {
+                setErrorTags(err.message);
             } finally {
-                setLoading(false);
+                setLoadingTags(false);
             }
         };
 
         fetchIdeas();
-    }, []);
-
-    useEffect(() => {
-        const fetchTags = async () => {
-            try {
-                const response = await fetch('http://localhost:5432/api/tags');  
-                if (!response.ok) throw new Error('Failed to fetch tags');
-                const data = await response.json();
-                setTags(data);  // Store ideas in state
-            } catch (err) {
-                setError(err.message);
-            } finally {
-                setLoading(false);
-            }
-        };
-
         fetchTags();
     }, []);
+
+    // Helper function to get tag names for an idea
+    const getIdeaTags = (idea: Idea): string[] => {
+        return idea.tags_name
+            ? idea.tags_name
+                  .map((tag) => tags.find((t) => t.id === tag.tag_id)?.name)
+                  .filter(Boolean) as string[]
+            : [];
+    };
 
     return (
         <>
@@ -81,18 +95,22 @@ const InvestorPage = () => {
             <main className={styles.pageContainer}>
                 {/* Left Side: Posts Grid */}
                 <div className={styles.postsGrid}>
-                    {loading && <p>Loading ideas...</p>}
-                    {error && <p>Error: {error}</p>}
-                    {!loading && !error && ideas.length === 0 && <p>No ideas found.</p>}
+                    {loadingIdeas && <p>Loading ideas...</p>}
+                    {errorIdeas && <p>Error: {errorIdeas}</p>}
+                    {!loadingIdeas && !errorIdeas && ideas.length === 0 && <p>No ideas found.</p>}
 
                     {ideas.map((idea) => (
                         <div className={styles.postCard} key={idea.id}>
                             <h3>{idea.title}</h3>
                             <p>{idea.description}</p>
                             <div className={styles.tags}>
-                                {idea.category?.split(',').map((category, index) => (
-                                    <span key={index}>#{category.trim()}</span>
-                                )) || <span>#NoTags</span>}
+                                {getIdeaTags(idea).length > 0 ? (
+                                    getIdeaTags(idea).map((tag, index) => (
+                                        <span key={index}>#{tag}</span>
+                                    ))
+                                ) : (
+                                    <span>#NoTags</span>
+                                )}
                             </div>
                             <div className={styles.fundingProgress}>
                                 <div
