@@ -1,6 +1,7 @@
 import styles from '@/styles/repo.module.css'
 import Image from 'next/image'
 import Link from 'next/link'
+import MarqueeDemo from '@/components/marquee-demo'  /* MagicUI - Floating Cards */
 
 export default function Repository() {
   return (
@@ -26,6 +27,12 @@ export default function Repository() {
       </header>
 
       <main className={styles.main}>
+
+        <div className={styles.marquee}>
+          <h1>Marquee Demo</h1>
+          <MarqueeDemo />
+        </div>
+
         <div className={styles.timelineContainer}>
           <div className={styles.timelineIcon}>
             <Image 
