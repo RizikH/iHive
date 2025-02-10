@@ -6,6 +6,7 @@ const bodyParser = require('body-parser');
 // Import Routes
 const userRoutes = require('./backend/routes/userRoutes');
 const ideaRoutes = require('./backend/routes/ideaRoutes');
+const tagRoutes = require('./backend/routes/tagRoutes');
 
 const app = express();
 
@@ -17,6 +18,7 @@ app.use(express.urlencoded({ extended: true }));
 // API Routes
 app.use('/api/users', userRoutes);
 app.use('/api/ideas', ideaRoutes);
+app.use("/api/tags",tagRoutes);
 
 app.get("/", (req, res) => {
     res.send("Hello and welcome to iHive.");

@@ -1,0 +1,70 @@
+const supabase = require("../config/db");
+
+// ✅ Get all ideas
+const getAllIdeas = async () => {
+    const { data, error } = await supabase
+        .from("ideas")
+        .select("*")
+        .order("created_at", { ascending: false });
+
+    if (error) throw error;
+    return data;
+};
+
+// ✅ Get an idea by ID
+const getIdeaById = async (id) => {
+    const { data, error } = await supabase
+        .from("ideas")
+        .select("*")
+        .eq("id", id)
+        .single();
+
+    if (error) throw error;
+    return data;
+};
+
+// ✅ Create a new idea
+const createIdea = async (ideaData) => {
+    const { data, error } = await supabase
+        .from("ideas")
+        .insert([ideaData])
+        .select()
+        .single();
+
+    if (error) throw error;
+    return data;
+};
+
+// ✅ Update an idea
+const updateIdea = async (id, ideaData) => {
+    const { data, error } = await supabase
+        .from("ideas")
+        .update(ideaData)
+        .eq("id", id)
+        .select()
+        .single();
+
+    if (error) throw error;
+    return data;
+};
+
+// ✅ Delete an idea
+const deleteIdea = async (id) => {
+    const { data, error } = await supabase
+        .from("ideas")
+        .delete()
+        .eq("id", id)
+        .select()
+        .single();
+
+    if (error) throw error;
+    return data;
+};
+
+module.exports = {
+    getAllIdeas,
+    getIdeaById,
+    createIdea,
+    updateIdea,
+    deleteIdea
+};
