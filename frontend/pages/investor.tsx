@@ -7,7 +7,16 @@ import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faGithub, faTwitter, faLinkedin } from '@fortawesome/free-brands-svg-icons';
 
 const InvestorPage = () => {
-    const [ideas, setIdeas] = useState([]);  // State to hold ideas
+    interface Idea {
+        id: number;
+        title: string;
+        description: string;
+        category?: string;
+        funding_progress?: number;
+    }
+
+    const [ideas, setIdeas] = useState<Idea[]>([]);  // State to hold ideas
+    const [tags, setTags] = useState([]);   // State to hold tags 
     const [loading, setLoading] = useState(true);  // Loading state
     const [error, setError] = useState(null);      // Error state
 
@@ -15,7 +24,7 @@ const InvestorPage = () => {
         const fetchIdeas = async () => {
             try {
                 const response = await fetch('http://localhost:5432/api/ideas');  
-                if (!response.ok) throw new Error('Failed to fetch ideas');
+                if (!response.ok) throw new Error('Failed to fetch tags');
                 const data = await response.json();
                 setIdeas(data);  // Store ideas in state
             } catch (err) {
@@ -28,9 +37,26 @@ const InvestorPage = () => {
         fetchIdeas();
     }, []);
 
+    useEffect(() => {
+        const fetchTags = async () => {
+            try {
+                const response = await fetch('http://localhost:5432/api/tags');  
+                if (!response.ok) throw new Error('Failed to fetch tags');
+                const data = await response.json();
+                setTags(data);  // Store ideas in state
+            } catch (err) {
+                setError(err.message);
+            } finally {
+                setLoading(false);
+            }
+        };
+
+        fetchTags();
+    }, []);
+
     return (
         <>
-            {/* <Head>
+            <Head>
                 <meta charSet="UTF-8" />
                 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
                 <meta name="Author" content="Yixi Xie" />
@@ -41,7 +67,7 @@ const InvestorPage = () => {
                     href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.7.2/css/all.min.css"
                 />
                 <link rel="icon" href="/Images/iHive.png" />
-            </Head> */}
+            </Head>
 
             <nav className={styles.navbar}>
                 <div className={styles.logo}>iHive - Investor</div>
@@ -64,8 +90,8 @@ const InvestorPage = () => {
                             <h3>{idea.title}</h3>
                             <p>{idea.description}</p>
                             <div className={styles.tags}>
-                                {idea.tags?.split(',').map((tag, index) => (
-                                    <span key={index}>#{tag.trim()}</span>
+                                {idea.category?.split(',').map((category, index) => (
+                                    <span key={index}>#{category.trim()}</span>
                                 )) || <span>#NoTags</span>}
                             </div>
                             <div className={styles.fundingProgress}>
