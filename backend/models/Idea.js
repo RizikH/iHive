@@ -3,11 +3,14 @@ const supabase = require("../config/db");
 // ✅ Get all ideas
 const getAllIdeas = async () => {
     const { data, error } = await supabase
-        .from("ideas")
-        .select("*")
+        .from('ideas')
+        .select('*, idea_tags(*, tags(*))')
         .order("created_at", { ascending: false });
 
-    if (error) throw error;
+    if (error) {
+        console.error('Error fetching data:', error);
+        return null;
+    }
     return data;
 };
 
