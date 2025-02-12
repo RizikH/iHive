@@ -4,6 +4,7 @@ import Image from 'next/image';
 import Link from 'next/link';
 import styles from '../styles/get-started.module.css';
 import '../styles/globals.css';
+import BoxRevealDemo from '@/components/box-reveal-demo'
 
 const GetStarted: React.FC = () => {
     return (
@@ -16,14 +17,28 @@ const GetStarted: React.FC = () => {
                 <link rel="icon" href="/Images/iHive.png" />
             </Head>
 
-            <nav className={styles.navContainer}>
-                <div className={styles.logo}>iHive</div>
-                <div className={styles['nav-links']}>
-                    <Link href="/about">About</Link>
-                    <Link href="/community">Community</Link>
-                    <Link href="/contact">Contact</Link>
-                </div>
-            </nav>
+            
+
+            
+                <nav className={styles.navContainer}>
+                    <div className={styles.logo}>
+                    <Image
+                        src="/Images/iHive.png"
+                        alt="Logo"
+                        title="Home"
+                        width={35}
+                        height={35}
+                        className={styles.logoImage}
+                    />
+                    <Link href="/">iHive</Link>
+                    </div>
+                    <div className={styles['nav-links']}>
+                        <Link href="/about">About</Link>
+                        <Link href="/community">Community</Link>
+                        <Link href="/contact">Contact</Link>
+                    </div>
+                </nav>
+            
 
             <main className={styles['main-content']}>
                 <div className={styles['intro-text']}>

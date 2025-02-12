@@ -7,12 +7,22 @@
         "start": "node app.js"
     },
     "dependencies": {
+        "@radix-ui/react-slot": "^1.1.2",
         "@supabase/supabase-js": "latest",
+        "@tabler/icons-react": "^3.30.0",
         "body-parser": "latest",
+        "class-variance-authority": "^0.7.1",
+        "clsx": "^2.1.1",
         "cors": "latest",
         "dotenv": "^16.4.7",
         "express": "latest",
+        "framer-motion": "^12.4.2",
         "jsonwebtoken": "latest",
-        "openai": "latest"
+        "motion": "^12.4.2",
+        "next": "^15.1.7",
+        "openai": "latest",
+        "react": "^19.0.0",
+        "react-dom": "^19.0.0",
+        "tailwind-merge": "^3.0.1"
     }
 }

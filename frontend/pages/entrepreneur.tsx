@@ -14,6 +14,8 @@ import {
 } from '@fortawesome/free-brands-svg-icons';
 import { faRss } from '@fortawesome/free-solid-svg-icons';
 import MarqueeDemo from '@/components/marquee-demo';
+import  { Sidebar, SidebarBody, SidebarLink } from '@/components/magicui/sidebar';
+import { IconHome, IconUser, IconSettings, IconLogout } from '@tabler/icons-react';
 
 const EntrepreneurProfile = () => {
   return (
@@ -49,6 +51,9 @@ const EntrepreneurProfile = () => {
 
       {/* Profile Section */}
       <main className={styles.main}>
+
+        {/* Sidebar */}
+
         <div className={styles.profileSection}>
           <div className={styles.profileImage}>
               <img src="/Images/sample.jpeg" alt="Profile" title="Change your Avatar"/>

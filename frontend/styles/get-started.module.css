@@ -1,10 +1,13 @@
 .bodyContainer {
-    background-color: #ffffff;
     min-height: 100vh;
     display: flex;
     flex-direction: column;
+    background-color: #ffffff;
+    color: #000000;
 }
 
+
+  
 .navContainer {
     padding: 1.5rem 4rem;
     display: flex;
@@ -14,16 +17,28 @@
 }
 
 .logo {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
     font-size: 1.5rem;
     font-weight: bold;
-    color:#ffffff;
+}
+
+.logo a {
+    color: #fff;
+    text-decoration: none;
+}
+
+.logoImage {
+    width: 35px;
+    height: 35px;
+    object-fit: contain;
 }
 
 .nav-links {
     display: flex;
     gap: 2rem;
     font-weight: bold;
-    color:#ffffff;
 }
 
 .nav-links a, .nav-links:visited {
@@ -32,12 +47,12 @@
     text-decoration: none;
 }
 
-.nav-links:hover {
+.nav-links a:hover {
     background-color: transparent;
     text-decoration: underline;
 }
 
-.nav-links:active {
+.nav-links a:active {
     background-color: transparent;
     text-decoration: none;
 }
