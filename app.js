@@ -5,6 +5,9 @@ const bodyParser = require('body-parser');
 const http = require('http'); // Required for WebSocket
 const { Server } = require('socket.io'); // Import Socket.io
 
+//"npm install express socket.io cors dotenv pg" this may need to be installed for websocket dependencies
+
+
 // Import Routes
 const userRoutes = require('./backend/routes/userRoutes');
 const ideaRoutes = require('./backend/routes/ideaRoutes');
