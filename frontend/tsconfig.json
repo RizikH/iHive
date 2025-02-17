@@ -25,6 +25,10 @@
     ]
   },
   "include": [
+
+    "next-env.d.ts",
+    "**/*.ts",
+    "**/*.tsx",
     "**/*.ts",
     "**/*.tsx",
     "next-env.d.ts",

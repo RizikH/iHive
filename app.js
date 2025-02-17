@@ -9,6 +9,7 @@ const { createClient } = require('@supabase/supabase-js');
 // Import Routes
 const userRoutes = require('./backend/routes/userRoutes');
 const ideaRoutes = require('./backend/routes/ideaRoutes');
+const tagRoutes = require('./backend/routes/tagRoutes');
 
 const app = express();
 const server = http.createServer(app);
@@ -55,6 +56,7 @@ io.on("connection", (socket) => {
 // API Routes
 app.use('/api/users', userRoutes);
 app.use('/api/ideas', ideaRoutes);
+app.use("/api/tags",tagRoutes);
 
 app.get("/", (req, res) => {
     res.send("Hello and welcome to iHive.");

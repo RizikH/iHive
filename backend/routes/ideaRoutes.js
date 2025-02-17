@@ -17,4 +17,7 @@ router.put('/:id', ideaController.updateIdea);
 // Delete an idea by ID
 router.delete('/:id', ideaController.deleteIdea);
 
+// Search for ideas With similar Title or exact
+router.get('/search/:title', ideaController.searchName);
+
 module.exports = router;

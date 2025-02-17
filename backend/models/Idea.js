@@ -3,11 +3,14 @@ const supabase = require("../config/db");
 // ✅ Get all ideas
 const getAllIdeas = async () => {
     const { data, error } = await supabase
-        .from("ideas")
-        .select("*")
+        .from('ideas')
+        .select('*, idea_tags(*, tags(*))')
         .order("created_at", { ascending: false });
 
-    if (error) throw error;
+    if (error) {
+        console.error('Error fetching data:', error);
+        return null;
+    }
     return data;
 };
 
@@ -61,10 +64,22 @@ const deleteIdea = async (id) => {
     return data;
 };
 
+const searchName = async (name) => {
+    const { data, error } = await supabase
+        .from("ideas") // Correctly close the parentheses here
+        .select("*")
+        .ilike("title", `%${name}%`) // Ensure to include '%' at both ends for a proper search
+        .order("created_at", { ascending: false });
+
+    if (error) throw error;
+    return data;
+};
+
 module.exports = {
     getAllIdeas,
     getIdeaById,
     createIdea,
     updateIdea,
-    deleteIdea
+    deleteIdea,
+    searchName,
 };
