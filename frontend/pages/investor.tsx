@@ -14,7 +14,7 @@ const InvestorPage = () => {
     useEffect(() => {
         const fetchIdeas = async () => {
             try {
-                const response = await fetch('http://localhost:5432/api/ideas');  
+                const response = await fetch('http://localhost:5432/api/ideas');
                 if (!response.ok) throw new Error('Failed to fetch ideas');
                 const data = await response.json();
                 setIdeas(data);  // Store ideas in state
@@ -64,9 +64,12 @@ const InvestorPage = () => {
                             <h3>{idea.title}</h3>
                             <p>{idea.description}</p>
                             <div className={styles.tags}>
-                                {idea.tags?.split(',').map((tag, index) => (
-                                    <span key={index}>#{tag.trim()}</span>
-                                )) || <span>#NoTags</span>}
+                                {idea.idea_tags.length > 0
+                                    ? idea.idea_tags.map((tagObj, index) => (
+                                        <span key={index}>#{tagObj.tags?.name}</span>
+                                    ))
+                                    : <span>#NoTags</span>
+                                }
                             </div>
                             <div className={styles.fundingProgress}>
                                 <div

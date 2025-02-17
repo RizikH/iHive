@@ -1,22 +1,17 @@
 const supabase = require("../config/db");
 
-const getAllIdeas = async () => {
+const getTagsByIdea = async (idea_id) => {
     const { data, error } = await supabase
-        .from('ideas')
-        .select('*, idea_tags(*, tags(*))');
-        
+        .rpc('get_tags_for_idea', { idea_id }); // Ensure 'idea_id' matches the function parameter
+
     if (error) {
         console.error('Error fetching data:', error);
         return null;
     }
+    console.log("Data = ", data);
     return data;
 };
 
-const getTagsByIdea = async () => {
-    const { data, error } = await supabase
-        .from('tags')
-        .select('*, ')
-
+module.exports = {
+    getTagsByIdea
 };
-
-module.exports = { getAllIdeas };
