@@ -111,6 +111,12 @@ const InvestorPage = () => {
                                 ) : (
                                     <span>#NoTags</span>
                                 )}
+                                {idea.idea_tags.length > 0
+                                    ? idea.idea_tags.map((tagObj, index) => (
+                                        <span key={index}>#{tagObj.tags?.name}</span>
+                                    ))
+                                    : <span>#NoTags</span>
+                                }
                             </div>
                             <div className={styles.fundingProgress}>
                                 <div

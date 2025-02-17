@@ -1,15 +1,19 @@
 const Tags = require("../models/Tags");
 
-
-const getAllIdeas = async (req, res) => {
+// get /api/tags/idea/:id
+const getTagsByIdea = async (req, res) => {
     try {
-        const ideas = await Tags.getAllIdeas();
-        res.json(ideas);
+        const tags = await Tags.getTagsByIdea(req.params.id);
+        if (tags) {
+            res.json(tags);
+        } else {
+            res.status(404).json({ message: 'Tags not found' });
+        }
     } catch (error) {
         res.status(500).json({ error: error.message });
     }
 };
 
 module.exports = {
-    getAllIdeas
+    getTagsByIdea
 }

@@ -2,8 +2,8 @@ const express = require('express');
 const router = express.Router();
 const tagController = require('../controllers/tagController');
 
-// Get all ideas
-router.get('/all', tagController.getAllIdeas);
+
+router.get("/idea/:id", tagController.getTagsByIdea);
 
 
 module.exports = router;
