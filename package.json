@@ -2,7 +2,6 @@
     "name": "backend",
     "version": "1.0.0",
     "private": true,
-    "type": "module",
     "scripts": {
         "dev": "nodemon app.js",
         "start": "node app.js"
@@ -10,11 +9,13 @@
     "dependencies": {
         "@supabase/supabase-js": "latest",
         "body-parser": "latest",
-        "cors": "latest",
+        "cors": "^2.8.5",
         "dotenv": "^16.4.7",
-        "express": "latest",
+        "express": "^4.21.2",
         "jsonwebtoken": "latest",
-        "openai": "^4.85.1"
+        "openai": "^4.85.1",
+        "pg": "^8.13.3",
+        "socket.io": "^4.8.1"
     },
     "devDependencies": {
         "autoprefixer": "^10.4.20",
