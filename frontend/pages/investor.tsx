@@ -21,12 +21,15 @@ const InvestorPage = () => {
         name: string;
     }
 
+
+
     const [ideas, setIdeas] = useState<Idea[]>([]);
     const [tags, setTags] = useState<Tag[]>([]);
     const [loadingIdeas, setLoadingIdeas] = useState(true);
     const [loadingTags, setLoadingTags] = useState(true);
     const [errorIdeas, setErrorIdeas] = useState<string | null>(null);
     const [errorTags, setErrorTags] = useState<string | null>(null);
+    const [searchTerm, setSearchTerm] = useState('');
 
     useEffect(() => {
         const fetchIdeas = async () => {
@@ -55,16 +58,42 @@ const InvestorPage = () => {
             }
         };
 
+        const fetchSearch = async () => {
+            try {
+                const response = await fetch('http://localhost:5432/api/search');
+                if (!response.ok) throw new Error('Failed to fetch search');
+                const data = await response.json();
+                setTags(data);
+            } catch (err: any) {
+                setErrorTags(err.message);
+            } finally {
+                setLoadingTags(false);
+            }
+        }
+
         fetchIdeas();
         fetchTags();
+        fetchSearch();
     }, []);
+
+    const handleSearch = async () => {
+        if (!searchTerm) return;
+        try {
+            const response = await fetch(`http://localhost:5432/api/ideas/search/${searchTerm}`);
+            if (!response.ok) throw new Error('Failed to fetch search results');
+            const data = await response.json();
+            setIdeas(data);
+        } catch (err: any) {
+            setErrorIdeas(err.message);
+        }
+    };
 
     // Helper function to get tag names for an idea
     const getIdeaTags = (idea: Idea): string[] => {
         return idea.tags_name
             ? idea.tags_name
-                  .map((tag) => tags.find((t) => t.id === tag.tag_id)?.name)
-                  .filter(Boolean) as string[]
+                .map((tag) => tags.find((t) => t.id === tag.tag_id)?.name)
+                .filter(Boolean) as string[]
             : [];
     };
 
@@ -90,7 +119,26 @@ const InvestorPage = () => {
                     <Link href="#setting">Settings</Link>
                     <Link href="#get-started">Signout</Link>
                 </div>
+                <div className={styles.searchContainer}>
+                    <input
+                        type="text"
+                        className={styles.searchInput}
+                        placeholder="Search ideas..."
+                        value={searchTerm}
+                        onChange={(e) => setSearchTerm(e.target.value)}
+                    />
+                    <button onClick={handleSearch} className={styles.searchButton}>Search</button>
+                    <div className={styles.advancedDropdown}>
+                        <button className={styles.dropdownButton}>Advanced</button>
+                        <div className={styles.dropdownContent}>
+                            <a href="#">Category</a>
+                            <a href="#">Funding Progress</a>
+                            <a href="#">Tags</a>
+                        </div>
+                    </div>
+                </div>
             </nav>
+
 
             <main className={styles.pageContainer}>
                 {/* Left Side: Posts Grid */}
