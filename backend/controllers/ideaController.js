@@ -62,10 +62,24 @@ const deleteIdea = async (req, res) => {
     }
 };
 
+const searchName = async (req, res) => {
+    try {
+        const ideasFound = await Idea.searchName(req.params.title);
+        if (ideasFound) {
+            res.json({ ideasFound });
+        } else {
+            res.status(404).json({ message: 'No ideas present under that title!' });
+        }
+    } catch (error) {
+        res.status(500).json({ error: error.message });
+    }
+}
+
 module.exports = {
     getAllIdeas,
     createIdea,
     getIdeaById,
     updateIdea,
-    deleteIdea
+    deleteIdea,
+    searchName
 };

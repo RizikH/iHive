@@ -64,10 +64,22 @@ const deleteIdea = async (id) => {
     return data;
 };
 
+const searchName = async (name) => {
+    const { data, error } = await supabase
+        .from("ideas") // Correctly close the parentheses here
+        .select("*")
+        .ilike("title", `%${name}%`) // Ensure to include '%' at both ends for a proper search
+        .order("created_at", { ascending: false });
+
+    if (error) throw error;
+    return data;
+};
+
 module.exports = {
     getAllIdeas,
     getIdeaById,
     createIdea,
     updateIdea,
-    deleteIdea
+    deleteIdea,
+    searchName,
 };
