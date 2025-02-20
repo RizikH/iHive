@@ -1,88 +1,164 @@
-import styles from '@/styles/repo.module.css'
-import Image from 'next/image'
-import Link from 'next/link'
-import MarqueeDemo from '@/components/marquee-demo'  /* MagicUI - Floating Cards */
+import React from 'react';
+import Head from 'next/head';
+import Link from 'next/link';
+import Image from 'next/image';
+import styles from '../styles/repository.module.css';
+import '../styles/globals.css';
+import { FiCopy, FiDownload, FiUpload, FiEdit, FiCheck } from 'react-icons/fi';
 
-export default function Repository() {
+const Repository = () => {
+  const [isEditing, setIsEditing] = React.useState(false);
+
+  const handleKeyDown = (e: React.KeyboardEvent) => {
+    if (isEditing) {
+      if (e.key === 'Enter') {
+        if (e.shiftKey) {
+          // Allow Shift+Enter for newline
+          return;
+        } else {
+          // Regular Enter triggers save
+          e.preventDefault();
+          handleEdit();
+        }
+      }
+    }
+  };
+
+  const handleCopy = () => {
+    const content = document.querySelector(`.${styles.docBody}`)?.textContent;
+    if (content) {
+      navigator.clipboard.writeText(content)
+        .then(() => alert('Content copied to clipboard!'))
+        .catch(err => console.error('Failed to copy:', err));
+    }
+  };
+
+  const handleUpload = () => {
+    alert('Only accept txt files')
+    const input = document.createElement('input');
+    input.type = 'file';
+    input.accept = '.txt';  // Only accept txt files
+    
+    input.onchange = (e) => {
+      const file = (e.target as HTMLInputElement).files?.[0];
+      if (file) {
+        const reader = new FileReader();
+        reader.onload = (e) => {
+          const content = e.target?.result;
+          const docBody = document.querySelector(`.${styles.docBody}`) as HTMLElement;
+          if (docBody && typeof content === 'string') {
+            docBody.innerHTML = content.split('\n').map(line => 
+              `<p>${line}</p>`
+            ).join('');
+          }
+        };
+        reader.readAsText(file);
+      }
+    };
+    input.click();
+  };
+
+  const handleDownload = () => {
+    const content = document.querySelector(`.${styles.docBody}`)?.textContent;
+    if (content) {
+      const blob = new Blob([content], { type: 'text/plain' });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = 'document.txt';
+      a.click();
+      URL.revokeObjectURL(url);
+    }
+  };
+
+  const handleEdit = () => {
+    const docBody = document.querySelector(`.${styles.docBody}`) as HTMLElement;
+    if (docBody) {
+      setIsEditing(!isEditing);
+      docBody.setAttribute('contenteditable', (!isEditing).toString());
+      docBody.focus();
+    }
+  };
+
   return (
-    <div className={styles.container}>
-      <header className={styles.header}>
-        <div className={styles.brand}>
-          <Link href="/">iHive</Link>
-        </div>
-        <div className={styles.toolbox}>
-          <div className={styles.searchTool}>
-            <svg width="18" height="18" viewBox="0 0 24 24">
-              <circle cx="11" cy="11" r="8"/>
-              <line x1="21" y1="21" x2="16.65" y2="16.65"/>
-            </svg>
-          </div>
-          <div className={styles.searchTool}>Search</div>
-        </div>
-        <nav className={styles.nav}>
-          <Link href="/repository">Repository</Link>
-          <Link href="/entrepreneur">Profile</Link>
-          <Link href="/get-started">Sign Out</Link>
-        </nav>
-      </header>
+  <>
+  <Head>
+    <meta charSet='UTF-8' />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Entrepreneur Repository</title>
+    <link rel="icon" href="/Images/iHive.png" />
+  </Head>
 
-      <main className={styles.main}>
+  <div className={styles.pageContainer}>
+    <nav className={styles.navContainer}>
+      <div className={styles.logo}>
+        <Image 
+          src="/Images/iHive.png"
+          alt="Logo"
+          title="Home"
+          width={35}
+          height={35}
+          className={styles.logoImage}
+        />
+        <Link href="/">iHive</Link>
+      </div>
+      <div className={styles['nav-links']}>
+        <Link href="/entrepreneur">Profile</Link>
+        <Link href="/setting">Setting</Link>
+        <Link href="/sponsor">Your Sponsors</Link>
+        <Link href="/get-started">Sign Out</Link>
+      </div>
+    </nav>
 
-        <div className={styles.marquee}>
-          <h1>Marquee Demo</h1>
-          <MarqueeDemo />
-        </div>
-
-        <div className={styles.timelineContainer}>
-          <div className={styles.timelineIcon}>
-            <Image 
-              src="/Images/iHive.png"
-              alt="Logo"
-              width={80}
-              height={80}
-            />
-          </div>
+    <main className={styles.mainContent}>
+      {/* SideBar | FileTree */}
+      <div className={styles.sideBar}>
+        <h2>File Tree</h2>
+        <div className={styles.fileTree}>
           
-          <div className={styles.timelineLine}></div>
-          
-          <div className={styles.githubLink}>
-            <Link href="https://github.com">
-              <svg width="24" height="24" viewBox="0 0 24 24">
-                {/* GitHub icon path */}
-              </svg>
-            </Link>
+          <div className="flex flex-col items-center justify-between p-24">
+            {/* <FileTreeDemo> */}
           </div>
 
-          <div className={styles.description}>
-            This is a quote. Briefly describe the repositories.
-          </div>
+        </div>
+      </div>
 
-          <div className={styles.timelineSection}>
-            <h2>Repositories</h2>
-            <div className={styles.card}>
-              <ul>
-                <li><strong>Repo 1</strong> - description...</li>
-                <li><strong>Repo 2</strong> - description...</li>
-                <li><strong>Repo 3</strong> - description...</li>
-                <li><strong>Repo 4</strong> - description...</li>
-              </ul>
-            </div>
-          </div>
-
-          <div className={styles.acknowledgementSection}>
-            <h2>Acknowledgements</h2>
-            <div className={styles.card}>
-              <ul>
-
-                <li>Acknowledgement</li>
-                <li>Acknowledgement</li>
-                {/* Add more items */}
-              </ul>
-
-            </div>
+      {/* Document Content */}
+      <div className={styles.docSpace}>
+        <div className={styles.docHeader}>
+          <h2>Main Content</h2>
+          <div className={styles.docDock}>
+            <button className={styles.dockButton} title="Copy" onClick={handleCopy}>
+              <span><FiCopy /></span>
+            </button>
+            <button className={styles.dockButton} title="Upload" onClick={handleUpload}>
+              <span><FiUpload /></span>
+            </button>
+            <button className={styles.dockButton} title="Download" onClick={handleDownload}>
+              <span><FiDownload /></span>
+            </button>
+            <button className={styles.dockButton} title={isEditing ? "Commit" : "Edit"} onClick={handleEdit}>
+              <span>{isEditing ? <FiCheck /> : <FiEdit />}</span>
+            </button>
           </div>
         </div>
-      </main>
-    </div>
-  )
+        <div className={styles.docContent}>
+          <div className={styles.docBody} onKeyDown={handleKeyDown}>
+            <p>input here...</p>
+          </div>
+        </div>
+      </div>
+    </main>
+
+    <footer className={styles.footer}>
+      <p>
+      © 2025 iHive · Entrepreneur | <Link href="/terms" target='_blank'>Terms</Link> | <Link href="/Privacy" target='_blank'>Privacy</Link>
+      </p>
+    </footer>
+    
+  </div>
+  </>
+  );
 }
+
+export default Repository;
