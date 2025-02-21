@@ -2,28 +2,20 @@ import React from 'react';
 import Head from 'next/head';
 import Link from 'next/link';
 import Image from 'next/image';
-import styles from '../styles/entrepreneur-profile.module.css';
+import styles from '../styles/sponsors.module.css';
 import '../styles/globals.css';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { config } from '@fortawesome/fontawesome-svg-core';
 import '@fortawesome/fontawesome-svg-core/styles.css';
-import { 
-  faGithub,
-  faLinkedin,
-  faXTwitter,
-} from '@fortawesome/free-brands-svg-icons';
-import { faRss } from '@fortawesome/free-solid-svg-icons';
+import AvatarCirclesDemo from '@/components/avatar-circles-demo';
 import MarqueeDemo from '@/components/marquee-demo';
-import  { Sidebar, SidebarBody, SidebarLink } from '@/components/magicui/sidebar';
-import { IconHome, IconUser, IconSettings, IconLogout } from '@tabler/icons-react';
 
-const EntrepreneurProfile = () => {
+const Sponsors = () => {
   return (
     <>
     <Head>
         <meta charSet="UTF-8" />
         <meta name="viewport" content="width=device-width, initial-scale=1.0;" />
-        <title>Entrepreneur Profile</title>
+        <title>iHive | Your Sponsors</title>
         <link rel="icon" href="/Images/iHive.png" />
     </Head>
 
@@ -44,14 +36,13 @@ const EntrepreneurProfile = () => {
         <div className={styles['nav-links']}>
           <Link href="/repository">Repository</Link>
           <Link href="/setting">Setting</Link>
-          <Link href="/sponsors">Your Sponsors</Link>
+          <Link href="/entrepreneur">Profile</Link>
           <Link href="/get-started">Sign Out</Link>
         </div>
       </nav>
 
-      {/* Profile Section */}
-      <main className={styles.main}>
 
+      <main className={styles.main}>
         {/* Sidebar */}
 
         <div className={styles.profileSection}>
@@ -59,31 +50,19 @@ const EntrepreneurProfile = () => {
               <img src="/Images/sample.jpeg" alt="Profile" title="Change your Avatar"/>
           </div>
           
-          <h1 className={styles.name}>Yixi Xie</h1>
-          <div className={styles.titles}>
-            <p>Job Title</p>
-            <p>Skills</p>
-          </div>
+          <h1 className={styles.rank}>Sponsors Rank? maybe</h1>
 
-          {/* Social Links */}
-          <div className={styles.socialLinks}>
-            <Link href="https://github.com" className={styles.socialIcon} title="GitHub">
-              <FontAwesomeIcon icon={faGithub} />
-            </Link>
-            <Link href="https://linkedin.com" className={styles.socialIcon} title="Linkedin">
-              <FontAwesomeIcon icon={faLinkedin} />
-            </Link>
-            <Link href="https://twitter.com" className={styles.socialIcon} title="X">
-              <FontAwesomeIcon icon={faXTwitter} />
-            </Link>
+          {/* Your Sponsors */}
+          <div className={styles.avatarCircles}>
+            <AvatarCirclesDemo />
           </div>
         </div>
 
         {/* Repo-Cards */}
-        <div className={styles.marquee}>
-          <h2 className={styles.marqueeTitle}>Preview Repositories</h2>
-          <div className={styles.marqueeContainer}>
-            <MarqueeDemo />
+        <div className={styles.graph}>
+          <h2 className={styles.graphTitle}>Your Sponsors Graph</h2>
+          <div className={styles.graphContainer}>
+            <p>Graph here.</p>
           </div>
         </div>
       </main>
@@ -99,4 +78,4 @@ const EntrepreneurProfile = () => {
   );
 }
 
-export default EntrepreneurProfile;
+export default Sponsors;
