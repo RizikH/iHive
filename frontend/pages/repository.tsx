@@ -127,7 +127,7 @@ const Repository = () => {
       <div className={styles['nav-links']}>
         <Link href="/entrepreneur">Profile</Link>
         <Link href="/setting">Setting</Link>
-        <Link href="/sponsor">Your Sponsors</Link>
+        <Link href="/sponsors">Your Sponsors</Link>
         <Link href="/get-started">Sign Out</Link>
       </div>
     </nav>
