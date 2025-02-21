@@ -4,7 +4,7 @@ import Link from 'next/link';
 import Image from 'next/image';
 import styles from '../styles/repository.module.css';
 import '../styles/globals.css';
-import { FiCopy, FiDownload, FiUpload, FiEdit, FiCheck } from 'react-icons/fi';
+import { FiCopy, FiDownload, FiUpload, FiEdit, FiCheck, FiPlus, FiMinus, FiBold, FiItalic, FiUnderline } from 'react-icons/fi';
 
 const Repository = () => {
   const [isEditing, setIsEditing] = React.useState(false);
@@ -80,6 +80,26 @@ const Repository = () => {
     }
   };
 
+  const handleIncreaseFont = () => {
+    const docBody = document.querySelector(`.${styles.docBody}`) as HTMLElement;
+    if (docBody) {
+      const currentSize = parseInt(window.getComputedStyle(docBody).fontSize);
+      docBody.style.fontSize = `${currentSize + 2}px`;
+    }
+  };
+
+  const handleDecreaseFont = () => {
+    const docBody = document.querySelector(`.${styles.docBody}`) as HTMLElement;
+    if (docBody) {
+      const currentSize = parseInt(window.getComputedStyle(docBody).fontSize);
+      docBody.style.fontSize = `${currentSize - 2}px`;
+    }
+  };
+
+  const handleStyle = (command: string) => {
+    document.execCommand(command, false);
+  };
+
   return (
   <>
   <Head>
@@ -128,6 +148,24 @@ const Repository = () => {
         <div className={styles.docHeader}>
           <h2>Main Content</h2>
           <div className={styles.docDock}>
+            <button className={styles.dockButton} title="Increase Font-Size" onClick={handleIncreaseFont}>
+              <span><FiPlus /></span>
+            </button>
+            <button className={styles.dockButton} title="Decrease Font-Size" onClick={handleDecreaseFont}>
+              <span><FiMinus /></span>
+            </button>
+            <button className={styles.dockButton} title="Bold" onClick={() => handleStyle('bold')}>
+              <span><FiBold /></span>
+            </button>
+            <button className={styles.dockButton} title="Italic" onClick={() => handleStyle('italic')}>
+              <span><FiItalic /></span>
+            </button>
+            <button className={styles.dockButton} title="Underline" onClick={() => handleStyle('underline')}>
+              <span><FiUnderline /></span>
+            </button>
+
+            <div className={styles.divider}></div>
+
             <button className={styles.dockButton} title="Copy" onClick={handleCopy}>
               <span><FiCopy /></span>
             </button>
