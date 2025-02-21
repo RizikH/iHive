@@ -2,6 +2,7 @@ import React, { useEffect, useState } from 'react';
 import Link from 'next/link';
 import styles from '../styles/investor.module.css';
 import '../styles/globals.css';
+import Image from "next/image";
 
 const InvestorPage = () => {
     const [ideas, setIdeas] = useState([]);  // State to hold ideas
@@ -84,7 +85,7 @@ const InvestorPage = () => {
                     <h2>Investor Profile</h2>
                     <div className={styles.profileContent}>
                         <div className={styles['profile-image']} title="Change Your Avatar">
-                            <img
+                            <image
                                 src="/Images/investor-avatar.png"
                                 alt="Investor Avatar"
                                 className={styles.avatar}
