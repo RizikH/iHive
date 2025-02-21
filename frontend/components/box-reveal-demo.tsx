@@ -1,8 +1,12 @@
 import Link from 'next/link';
 import { Button } from "@/components/ui/button";
 import { BoxReveal } from "@/components/magicui/box-reveal";
+import { AuthForm } from "@/components/auth-form";
+import { useState } from "react";
 
 export function BoxRevealDemo() {
+  const [showAuthForm, setShowAuthForm] = useState(false);
+
   return (
     <div className="size-full max-w-lg items-center justify-center overflow-hidden pt-8">
       <BoxReveal boxColor={"#5046e6"} duration={0.5}>
@@ -14,7 +18,9 @@ export function BoxRevealDemo() {
       <BoxReveal boxColor={"#5046e6"} duration={0.5}>
         <h2 className="mt-[.5rem] text-[1rem]">
           Welcome to the iHive.{" "}
-          <span className="text-[#5046e6]">Get Started</span>
+          <Link href="/">
+            <span className="text-[#5046e6]">Get Started</span>
+          </Link>
         </h2>
       </BoxReveal>
 
@@ -28,10 +34,24 @@ export function BoxRevealDemo() {
       </BoxReveal>
 
       <BoxReveal boxColor={"#5046e6"} duration={0.5}>
-        <Link href="/">
-          <Button className="mt-[1.6rem] bg-[#5046e6]">Join Now</Button>
-        </Link>
+        <Button 
+          className="mt-[1.6rem] bg-[#5046e6]"
+          onClick={() => setShowAuthForm(true)}
+        >
+          Join Now
+        </Button>
       </BoxReveal>
+
+      {showAuthForm && (
+        <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50 z-50">
+          <div className="relative">
+            <AuthForm 
+              initialView="login"
+              onClose={() => setShowAuthForm(false)}
+            />
+          </div>
+        </div>
+      )}
     </div>
   );
 }
