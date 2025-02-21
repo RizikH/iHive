@@ -4,6 +4,7 @@ import Link from 'next/link';
 import Image from 'next/image';
 import styles from '../styles/repository.module.css';
 import '../styles/globals.css';
+import FileTreeDemo from '@/components/file-tree-demo';
 import { FiCopy, FiDownload, FiUpload, FiEdit, FiCheck, FiPlus, FiMinus, FiBold, FiItalic, FiUnderline } from 'react-icons/fi';
 
 const Repository = () => {
@@ -135,11 +136,7 @@ const Repository = () => {
       <div className={styles.sideBar}>
         <h2>File Tree</h2>
         <div className={styles.fileTree}>
-          
-          <div className="flex flex-col items-center justify-between p-24">
-            {/* <FileTreeDemo> */}
-          </div>
-
+          <FileTreeDemo />
         </div>
       </div>
 
