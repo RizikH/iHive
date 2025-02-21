@@ -15,18 +15,6 @@ const getAllIdeas = async () => {
     return data;
 };
 
-// ✅ Get an idea by ID
-const getIdeaById = async (id) => {
-    const { data, error } = await supabase
-        .from("ideas")
-        .select("*")
-        .eq("id", id)
-        .single();
-
-    if (error) throw error;
-    return data;
-};
-
 // ✅ Create a new idea
 const createIdea = async (ideaData) => {
     const { data, error } = await supabase
@@ -68,7 +56,7 @@ const deleteIdea = async (id) => {
     return data;
 };
 
-const searchName = async (name) => {
+const getIdeasByTitle = async (name) => {
     const { data, error } = await supabase
         .from("ideas")
         .select("*")
@@ -79,11 +67,24 @@ const searchName = async (name) => {
     return data;
 };
 
+
+// ✅ Get an idea by ID
+const getIdeaById = async (id) => {
+    const { data, error } = await supabase
+        .from("ideas")
+        .select("*")
+        .eq("id", id)
+
+    if (error) throw error;
+    return data;
+};
+
+
 module.exports = {
     getAllIdeas,
-    getIdeaById,
     createIdea,
     updateIdea,
     deleteIdea,
-    searchName,
+    getIdeaById,
+    getIdeasByTitle
 };
