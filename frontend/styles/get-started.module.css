@@ -61,8 +61,15 @@
     flex: 1;
     display: flex;
     align-items: center;
-    padding: 4rem;
-    gap: 4rem;
+    justify-content: center;
+    padding: 2rem 6rem;
+    gap: 6rem;
+    margin-top: -4rem;
+}
+
+.main-content > div {
+    flex: 1;
+    max-width: 500px;
 }
 
 .intro-text {
@@ -93,11 +100,42 @@
 }
 
 .ihive-icon {
-    flex: 1;
-    text-align: right;
+    display: flex;
+    justify-content: center;
+    align-items: center;
 }
 
 .ihive-icon img {
-    max-width: 100%;
-    height: auto;
+    width: 400px;
+    height: 400px;
+    animation: float 3s ease-in-out infinite;
+    filter: drop-shadow(0 10px 15px rgba(0, 0, 0, 0.1));
+}
+
+@keyframes float {
+    0%, 100% {
+        transform: translateY(0);
+    }
+    50% {
+        transform: translateY(-20px);
+    }
+}
+
+/* Responsive design */
+@media (max-width: 768px) {
+    .main-content {
+        flex-direction: column;
+        padding: 1rem 2rem;
+        gap: 2rem;
+        margin-top: -2rem;
+    }
+
+    .main-content > div {
+        max-width: 100%;
+    }
+
+    .ihive-icon img {
+        width: 250px;
+        height: 250px;
+    }
 }

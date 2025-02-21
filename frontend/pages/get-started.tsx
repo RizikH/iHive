@@ -4,7 +4,7 @@ import Image from 'next/image';
 import Link from 'next/link';
 import styles from '../styles/get-started.module.css';
 import '../styles/globals.css';
-import BoxRevealDemo from '@/components/box-reveal-demo'
+import { BoxRevealDemo } from '@/components/box-reveal-demo';
 
 const GetStarted: React.FC = () => {
     return (
@@ -16,9 +16,6 @@ const GetStarted: React.FC = () => {
                 <title>iHive</title>
                 <link rel="icon" href="/Images/iHive.png" />
             </Head>
-
-            
-
             
                 <nav className={styles.navContainer}>
                     <div className={styles.logo}>
@@ -32,33 +29,11 @@ const GetStarted: React.FC = () => {
                     />
                     <Link href="/">iHive</Link>
                     </div>
-                    <div className={styles['nav-links']}>
-                        <Link href="/about">About</Link>
-                        <Link href="/community">Community</Link>
-                        <Link href="/contact">Contact</Link>
-                    </div>
+                    
                 </nav>
-            
 
             <main className={styles['main-content']}>
-                <div className={styles['intro-text']}>
-                    <h1>
-                        WELCOME TO<br />
-                        THE IHIVE.<br />
-                        GET STARTED.
-                    </h1>
-                    <p>
-                        Connect, collaborate, and create in our digital repo-system.<br />
-                        Join the community of investor and entrepreneur.
-                    </p>
-                    <Link 
-                        href="/" 
-                        className={styles['cta-button']} 
-                        title="login/signup"
-                    >
-                        Get Started
-                    </Link>
-                </div>
+                <BoxRevealDemo />
                 <div className={styles['ihive-icon']}>
                     <Image 
                         src="/Images/iHive.png" 
