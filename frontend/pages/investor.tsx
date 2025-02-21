@@ -4,20 +4,32 @@ import styles from '../styles/investor.module.css';
 import '../styles/globals.css';
 import Image from "next/image";
 
-const InvestorPage = () => {
-    const [ideas, setIdeas] = useState([]);  // State to hold ideas
-    const [loading, setLoading] = useState(true);  // Loading state
-    const [error, setError] = useState(null);      // Error state
+interface Idea {
+    id: number;
+    title: string;
+    description: string;
+    funding_progress?: number;
+    idea_tags: { tags?: { name?: string } }[];
+}
+
+const InvestorPage: React.FC = () => {
+    const [ideas, setIdeas] = useState<Idea[]>([]);
+    const [loading, setLoading] = useState(true);
+    const [error, setError] = useState<string | null>(null);
 
     useEffect(() => {
         const fetchIdeas = async () => {
             try {
-                const response = await fetch('http://localhost:5432/api/ideas');
+                const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/ideas`);
                 if (!response.ok) throw new Error('Failed to fetch ideas');
-                const data = await response.json();
-                setIdeas(data);  // Store ideas in state
+                const data: Idea[] = await response.json();
+                setIdeas(data);
             } catch (err) {
-                setError(err.message);
+                if (err instanceof Error) {
+                    setError(err.message);
+                } else {
+                    setError("An unknown error occurred");
+                }
             } finally {
                 setLoading(false);
             }
@@ -28,19 +40,6 @@ const InvestorPage = () => {
 
     return (
         <>
-            {/* <Head>
-                <meta charSet="UTF-8" />
-                <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-                <meta name="Author" content="Yixi Xie" />
-                <meta name="Description" content="Investor profile page." />
-                <title>Investor Profile</title>
-                <link
-                    rel="stylesheet"
-                    href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.7.2/css/all.min.css"
-                />
-                <link rel="icon" href="/Images/iHive.png" />
-            </Head> */}
-
             <nav className={styles.navbar}>
                 <div className={styles.logo}>iHive - Investor</div>
                 <div className={styles['nav-links']}>
@@ -64,7 +63,7 @@ const InvestorPage = () => {
                             <div className={styles.tags}>
                                 {idea.idea_tags.length > 0
                                     ? idea.idea_tags.map((tagObj, index) => (
-                                        <span key={index}>#{tagObj.tags?.name}</span>
+                                        <span key={index}>#{tagObj.tags?.name || "NoTag"}</span>
                                     ))
                                     : <span>#NoTags</span>
                                 }
@@ -89,6 +88,8 @@ const InvestorPage = () => {
                                 src="/Images/investor-avatar.png"
                                 alt="Investor Avatar"
                                 className={styles.avatar}
+                                width={100}
+                                height={100}
                             />
                         </div>
                         <h1 title="Investor Name">Investor Name</h1>
