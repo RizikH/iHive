@@ -1,7 +1,7 @@
 import React from "react";
 import Head from "next/head";
 import Link from "next/link";
-import styles from "../styles/entrepreneur-profile.module.css"; // ✅ Fixed Import Path
+import "../styles/entrepreneur-profile.module.css"; // ✅ Fixed Import Path
 import "../styles/globals.css"; // ✅ Fixed Import Path
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faGithub, faTwitter, faLinkedin } from "@fortawesome/free-brands-svg-icons";

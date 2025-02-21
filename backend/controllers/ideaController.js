@@ -28,19 +28,6 @@ const createIdea = async (req, res) => {
     }
 };
 
-// GET /api/ideas/:id
-const getIdeaById = async (req, res) => {
-    try {
-        const idea = await Idea.getIdeaById(req.params.id);
-        if (idea) {
-            res.json(idea);
-        } else {
-            res.status(404).json({ message: 'Idea not found' });
-        }
-    } catch (error) {
-        res.status(500).json({ error: error.message });
-    }
-};
 
 // PUT /api/ideas/:id
 const updateIdea = async (req, res) => {
@@ -70,9 +57,9 @@ const deleteIdea = async (req, res) => {
     }
 };
 
-const searchName = async (req, res) => {
+const getIdeasByTitle = async (req, res) => {
     try {
-        const ideasFound = await Idea.searchName(req.params.title);
+        const ideasFound = await Idea.getIdeasByTitle(req.params.title);
         if (ideasFound) {
             res.json({ ideasFound });
         } else {
@@ -83,11 +70,25 @@ const searchName = async (req, res) => {
     }
 }
 
+
+// GET /api/ideas/:id
+const getIdeaById = async (req, res) => {
+    try {
+        const idea = await Idea.getIdeaById(req.params.id);
+        if (idea) {
+            res.json(idea);
+        } else {
+            res.status(404).json({ message: 'Idea not found' });
+        }
+    } catch (error) {
+        res.status(500).json({ error: error.message });
+    }
+};
 module.exports = {
     getAllIdeas,
     createIdea,
     getIdeaById,
     updateIdea,
     deleteIdea,
-    searchName
+    getIdeasByTitle
 };
