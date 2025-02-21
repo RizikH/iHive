@@ -1,9 +1,8 @@
 import React from "react";
 import Head from "next/head";
-import Image from "next/image";
 import Link from "next/link";
-import styles from "@/app/styles/entrepreneur-profile.module.css"; // ✅ Fixed Import Path
-import "@/app/styles/globals.css"; // ✅ Fixed Import Path
+import styles from "@/styles/entrepreneur-profile.module.css"; // ✅ Fixed Import Path
+import "@/styles/globals.css"; // ✅ Fixed Import Path
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faGithub, faTwitter, faLinkedin } from "@fortawesome/free-brands-svg-icons";
 
@@ -30,9 +29,15 @@ const EntrepreneurProfile: React.FC = () => {
         <div className={styles["profile-content"]}>
           <h1 title="Username">UserName</h1>
           <div className={styles["social-links"]}>
-            <a href="https://github.com/yourusername"><FontAwesomeIcon icon={faGithub} /></a>
-            <a href="https://twitter.com/yourusername"><FontAwesomeIcon icon={faTwitter} /></a>
-            <a href="https://linkedin.com/in/yourusername"><FontAwesomeIcon icon={faLinkedin} /></a>
+            <a href="https://github.com/yourusername" target="_blank" rel="noopener noreferrer">
+              <FontAwesomeIcon icon={faGithub} />
+            </a>
+            <a href="https://twitter.com/yourusername" target="_blank" rel="noopener noreferrer">
+              <FontAwesomeIcon icon={faTwitter} />
+            </a>
+            <a href="https://linkedin.com/in/yourusername" target="_blank" rel="noopener noreferrer">
+              <FontAwesomeIcon icon={faLinkedin} />
+            </a>
           </div>
         </div>
       </main>

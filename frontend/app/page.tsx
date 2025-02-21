@@ -1,7 +1,8 @@
 "use client";
+
 import Link from "next/link";
-import styles from "@/app/styles/home.module.css"; // ✅ Fixed Path
-import "@/app/styles/globals.css"; // ✅ Fixed Path
+import styles from "@/styles/home.module.css"; // ✅ Fixed Import Path
+import "@/styles/globals.css"; // ✅ Fixed Import Path
 import React from "react";
 
 export default function Home() {

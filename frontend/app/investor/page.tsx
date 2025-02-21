@@ -2,8 +2,8 @@
 
 import React, { useEffect, useState } from "react";
 import Link from "next/link";
-import styles from "@/app/styles/investor.module.css";
-import "@/app/styles/globals.css";
+import styles from "@/styles/investor.module.css"; // ✅ Fixed Import Path
+import "@/styles/globals.css"; // ✅ Fixed Import Path
 import Image from "next/image";
 
 interface Idea {
@@ -22,7 +22,7 @@ const InvestorPage: React.FC = () => {
   useEffect(() => {
     const fetchIdeas = async () => {
       try {
-        const response = await fetch(`http://localhost:5432/api/ideas`);
+        const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/ideas`);
         if (!response.ok) throw new Error("Failed to fetch ideas");
         const data: Idea[] = await response.json();
         setIdeas(data);
@@ -39,7 +39,6 @@ const InvestorPage: React.FC = () => {
 
   return (
     <>
-      {/* Navigation Bar */}
       <nav className={styles.navbar}>
         <div className={styles.logo}>iHive - Investor</div>
         <div className={styles["nav-links"]}>
@@ -49,9 +48,7 @@ const InvestorPage: React.FC = () => {
         </div>
       </nav>
 
-      {/* Main Content */}
       <main className={styles.pageContainer}>
-        {/* Left Side: Posts Grid */}
         <div className={styles.postsGrid}>
           {loading && <p>Loading ideas...</p>}
           {error && <p>Error: {error}</p>}
@@ -69,40 +66,14 @@ const InvestorPage: React.FC = () => {
                   : <span>#NoTags</span>
                 }
               </div>
-              <div className={styles.fundingProgress}>
-                <div
-                  className={styles.fundingBar}
-                  style={{ width: `${idea.funding_progress || 0}%` }}
-                ></div>
-              </div>
               <button className={styles.investButton}>💰 Invest</button>
             </div>
           ))}
         </div>
 
-        {/* Right Side: Profile Content */}
         <div className={styles.profile}>
           <h2>Investor Profile</h2>
-          <div className={styles.profileContent}>
-            <div className={styles["profile-image"]} title="Change Your Avatar">
-              <Image
-                src="/investor-avatar.png" // ✅ Make sure this file is inside `public/`
-                alt="Investor Avatar"
-                className={styles.avatar}
-                width={100}
-                height={100}
-                priority
-              />
-            </div>
-            <h1 title="Investor Name">Investor Name</h1>
-
-            {/* Investor Stats */}
-            <div className={styles["investor-stats"]}>
-              <p>Investments: <strong>$50,000</strong></p>
-              <p>Projects Followed: <strong>12</strong></p>
-              <p>Investment Return: <strong>18%</strong></p>
-            </div>
-          </div>
+          <Image src="/investor-avatar.png" alt="Investor Avatar" width={100} height={100} priority />
         </div>
       </main>
     </>
