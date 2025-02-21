@@ -1,4 +1,5 @@
 const supabase = require("../config/db");
+const openAI = require("../services/chatgptService");
 
 // ✅ Get all ideas
 const getAllIdeas = async () => {
@@ -66,9 +67,9 @@ const deleteIdea = async (id) => {
 
 const searchName = async (name) => {
     const { data, error } = await supabase
-        .from("ideas") // Correctly close the parentheses here
+        .from("ideas")
         .select("*")
-        .ilike("title", `%${name}%`) // Ensure to include '%' at both ends for a proper search
+        .ilike("title", `%${name}%`)
         .order("created_at", { ascending: false });
 
     if (error) throw error;

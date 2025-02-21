@@ -12,6 +12,12 @@ const getAllIdeas = async (req, res) => {
 
 // POST /api/ideas
 const createIdea = async (req, res) => {
+    const idea = {
+        title: "Smart Inventory Management",
+        description: "An AI-powered tool for real-time inventory tracking and optimization.",
+        user_id: "1"
+      };
+    
     try {
         const newIdea = await Idea.createIdea(req.body);
         res.status(201).json(newIdea);

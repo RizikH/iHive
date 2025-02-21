@@ -5,14 +5,24 @@ dotenv.config();
 
 const apiKey = process.env.OPENAI_API_KEY;
 
-const openai = new OpenAI(apiKey);
+const openai = new OpenAI({apiKey: apiKey});
 
-const completion = openai.chat.completions.create({
-  model: "gpt-4o-mini",
-  store: true,
-  messages: [
-    {"role": "user", "content": "write a haiku"}, // This is where you can change the prompt from write a haiku to get the tags.
-  ],
-});
+export async function generateTags(title, description) {
+  try {
+    const prompt = `Generate 5 relevant tags for the following idea:\nTitle: ${title}\nDescription: ${description}\nTags:`;
 
-completion.then((result) => console.log(result.choices[0].message));
+    const completion = await openai.chat.completions.create({
+      model: "gpt-4o-mini",
+      messages: [{ role: "user", content: prompt }],
+    });
+
+    return completion.choices[0].message.content.trim().split(",").map(tag => tag.trim());
+  } catch (error) {
+    console.error("Error generating tags:", error);
+    return [];
+  }
+}
+
+module.exports = {
+  generateTags
+}
