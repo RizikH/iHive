@@ -2,10 +2,10 @@ import React from 'react';
 import Head from 'next/head';
 import Image from 'next/image';
 import Link from 'next/link';
-import styles from '../styles/get-started.module.css';
-import '../styles/globals.css';
+import styles from '@/app/styles/get-started.module.css';
+import '@/app/styles/globals.css';
 
-const HomePage: React.FC = () => {
+const GetStartedPage: React.FC = () => {
     return (
         <>
             <Head>
@@ -13,16 +13,16 @@ const HomePage: React.FC = () => {
                 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
                 <meta name="Author" content="Yixi Xie" />
                 <meta name="Description" content="Main profile page." />
-                <title>iHive</title>
+                <title>iHive - Get Started</title>
                 <link rel="icon" href="/Images/iHive.png" />
             </Head>
 
             <nav className={styles.nav}>
                 <div className={styles.logo}>iHive</div>
                 <div className={styles['nav-links']}>
-                    <Link href="/#about">About</Link>
-                    <Link href="/#features">Features</Link>
-                    <Link href="/#contact">Contact</Link>
+                    <Link href="/get-started#about"><span>About</span></Link>
+                    <Link href="/get-started#features"><span>Features</span></Link>
+                    <Link href="/get-started#contact"><span>Contact</span></Link>
                 </div>
             </nav>
 
@@ -37,7 +37,7 @@ const HomePage: React.FC = () => {
                         Connect, collaborate, and create in our digital repo-system.
                         Join the community of investors and entrepreneurs.
                     </p>
-                    <Link href="/" title="Login/Signup Page">
+                    <Link href="/get-started" title="Login/Signup Page">
                         <span className={styles['cta-button']}>Get Started</span>
                     </Link>
                 </div>
@@ -55,4 +55,4 @@ const HomePage: React.FC = () => {
     );
 };
 
-export default HomePage;
+export default GetStartedPage;

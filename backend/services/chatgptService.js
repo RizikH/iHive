@@ -23,6 +23,4 @@ export async function generateTags(title, description) {
   }
 }
 
-module.exports = {
-  generateTags
-}
+export default generateTags;
