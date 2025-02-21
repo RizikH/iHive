@@ -1,3 +1,4 @@
+/* Navbar styling */
 .navbar {
     display: flex;
     justify-content: space-between;
@@ -19,6 +20,69 @@
 
 .nav-links a:hover {
     color: var(--hover-color);
+}
+
+/* Search Bar and Advanced Dropdown */
+.searchContainer {
+    position: absolute;
+    left: 50%;
+    transform: translateX(-50%);
+    display: flex;
+    align-items: center;
+}
+
+.searchInput {
+    padding: 0.5rem;
+    font-size: 1rem;
+    border-radius: 4px;
+    border: 1px solid #ccc;
+    margin-right: 1rem;
+}
+
+.advancedDropdown {
+    position: relative;
+}
+
+.dropdownButton {
+    padding: 0.5rem 1rem;
+    background-color: #0069d9;
+    color: white;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 1rem;
+}
+
+.dropdownButton:hover {
+    background-color: #0056b3;
+}
+
+.dropdownContent {
+    display: none;
+    position: absolute;
+    background-color: white;
+    min-width: 160px;
+    box-shadow: 0 8px 16px rgba(0, 0, 0, 0.2);
+    z-index: 1;
+    border-radius: 4px;
+    top: 100%;
+    right: 0;
+    margin-top: 8px;
+}
+
+.dropdownContent a {
+    padding: 12px 16px;
+    text-decoration: none;
+    display: block;
+    color: #333;
+}
+
+.dropdownContent a:hover {
+    background-color: #ddd;
+}
+
+.advancedDropdown:hover .dropdownContent {
+    display: block;
 }
 
 /* Container for the two-column layout */
@@ -54,8 +118,6 @@
 }
 
 .postCard p {
-    font-size: 14px;
-    color: #666;
     font-size: 14px;
     color: #666;
     display: flex;
