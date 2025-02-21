@@ -7,7 +7,7 @@ import styles from "../styles/investor.module.css";
 import "../styles/globals.css";
 import Image from "next/image";
 
-const API_URL = process.env.NEXT_PUBLIC_API_URL || "https://ihive.vercel.app/api";
+const API_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:5432/api";
 
 interface Idea {
     id: number;
@@ -54,7 +54,7 @@ const InvestorPage = () => {
     const handleSearch = async () => {
         if (!searchTerm) return;
         try {
-            const response = await fetch(`${API_URL}/ideas/search/${searchTerm}`);
+            const response = await fetch(`${API_URL}/ideas/search/title/${searchTerm}`);
 
             if (!response.ok) throw new Error('Failed to fetch search results');
             const data = await response.json();
