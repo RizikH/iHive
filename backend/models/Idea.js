@@ -36,6 +36,9 @@ const createIdea = async (ideaData) => {
         .single();
 
     if (error) throw error;
+
+    // Generate tags using GPT
+    const tags = await openAI.generateTags(data.title, data.description);
     return data;
 };
 

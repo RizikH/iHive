@@ -1,4 +1,5 @@
 const Idea = require('../models/Idea');
+const chatgptService = require("../services/chatgptService");
 
 // GET /api/ideas
 const getAllIdeas = async (req, res) => {
@@ -20,6 +21,7 @@ const createIdea = async (req, res) => {
     
     try {
         const newIdea = await Idea.createIdea(req.body);
+
         res.status(201).json(newIdea);
     } catch (error) {
         res.status(400).json({ error: error.message });

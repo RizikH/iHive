@@ -1,10 +1,7 @@
 import React, { useEffect, useState } from 'react';
-import Head from 'next/head';
 import Link from 'next/link';
 import styles from '../styles/investor.module.css';
 import '../styles/globals.css';
-import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { faGithub, faTwitter, faLinkedin } from '@fortawesome/free-brands-svg-icons';
 
 const InvestorPage = () => {
     const [ideas, setIdeas] = useState([]);  // State to hold ideas

@@ -1,6 +1,3 @@
-# Ignore environment variables
-.env
-
 # Ignore all .zip files
 *.zip
 
@@ -48,3 +45,4 @@ generated/
 # Ignore Git configuration files
 .gitconfig
 .vercel
+.env
