@@ -80,7 +80,7 @@ const InvestorPage = () => {
     const handleSearch = async () => {
         if (!searchTerm) return;
         try {
-            const response = await fetch(`http://localhost:5432/api/ideas/search/${searchTerm}`);
+            const response = await fetch(`http://localhost:5432/api/ideas/search/title/${searchTerm}`);
             if (!response.ok) throw new Error('Failed to fetch search results');
             const data = await response.json();
             setIdeas(data);
