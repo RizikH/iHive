@@ -5,7 +5,7 @@ import Link from 'next/link';
 import styles from '../styles/get-started.module.css';
 import '../styles/globals.css';
 
-const GetStarted: React.FC = () => {
+const HomePage: React.FC = () => {
     return (
         <>
             <Head>
@@ -20,9 +20,9 @@ const GetStarted: React.FC = () => {
             <nav className={styles.nav}>
                 <div className={styles.logo}>iHive</div>
                 <div className={styles['nav-links']}>
-                    <Link href="#about">About</Link>
-                    <Link href="#features">Features</Link>
-                    <Link href="#contact">Contact</Link>
+                    <Link href="/#about">About</Link>
+                    <Link href="/#features">Features</Link>
+                    <Link href="/#contact">Contact</Link>
                 </div>
             </nav>
 
@@ -35,22 +35,18 @@ const GetStarted: React.FC = () => {
                     </h1>
                     <p>
                         Connect, collaborate, and create in our digital repo-system.
-                        Join the community of investor and entrepreneur.
+                        Join the community of investors and entrepreneurs.
                     </p>
-                    <Link 
-                        href="#get-started" 
-                        className={styles['cta-button']} 
-                        title="login/signup page"
-                    >
-                        Get Started
+                    <Link href="/" title="Login/Signup Page">
+                        <span className={styles['cta-button']}>Get Started</span>
                     </Link>
                 </div>
                 <div className={styles['ihive-icon']}>
                     <Image 
                         src="/Images/iHive.png" 
-                        alt="iHive"
-                        width={300}  // Adjust
-                        height={300} // Adjust
+                        alt="iHive Logo"
+                        width={300}
+                        height={300}
                         priority
                     />
                 </div>
@@ -59,4 +55,4 @@ const GetStarted: React.FC = () => {
     );
 };
 
-export default GetStarted;
+export default HomePage;

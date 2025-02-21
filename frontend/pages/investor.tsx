@@ -25,6 +25,7 @@ const InvestorPage: React.FC = () => {
                 const data: Idea[] = await response.json();
                 setIdeas(data);
             } catch (err) {
+                console.error("Error fetching ideas:", err);
                 if (err instanceof Error) {
                     setError(err.message);
                 } else {
@@ -35,7 +36,7 @@ const InvestorPage: React.FC = () => {
             }
         };
 
-        fetchIdeas();
+        fetchIdeas().catch((error) => console.error("Unexpected API error:", error));
     }, []);
 
     return (
@@ -43,9 +44,9 @@ const InvestorPage: React.FC = () => {
             <nav className={styles.navbar}>
                 <div className={styles.logo}>iHive - Investor</div>
                 <div className={styles['nav-links']}>
-                    <Link href="#investments">Investments</Link>
-                    <Link href="#setting">Settings</Link>
-                    <Link href="#get-started">Signout</Link>
+                    <Link href="/#investments"><span>Investments</span></Link>
+                    <Link href="/#settings"><span>Settings</span></Link>
+                    <Link href="/"><span>Sign Out</span></Link>
                 </div>
             </nav>
 
@@ -90,6 +91,7 @@ const InvestorPage: React.FC = () => {
                                 className={styles.avatar}
                                 width={100}
                                 height={100}
+                                priority
                             />
                         </div>
                         <h1 title="Investor Name">Investor Name</h1>
