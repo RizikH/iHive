@@ -115,7 +115,7 @@ const InvestorPage = () => {
                     <div className={styles.profileContent}>
                         <div className={styles['profile-image']} title="Change Your Avatar">
                             <Image
-                                src="/Images/investor-avatar.png"
+                                src="/Images/Yixi.jpeg"
                                 alt="Investor Avatar"
                                 className={styles.avatar}
                                 width={100}
