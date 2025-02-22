@@ -15,17 +15,11 @@ interface Idea {
     description: string;
     category?: string;
     funding_progress?: number;
-    tags_name?: { id: number; tag_id: number }[]; 
-}
-
-interface Tag {
-    id: number;
-    name: string;
+    tags_name?: { id: number; tag_id: number }[];
 }
 
 const InvestorPage = () => {
     const [ideas, setIdeas] = useState<Idea[]>([]);
-    const [tags, setTags] = useState<Tag[]>([]);
     const [loadingIdeas, setLoadingIdeas] = useState(true);
     const [errorIdeas, setErrorIdeas] = useState<string | null>(null);
     const [searchTerm, setSearchTerm] = useState('');
@@ -51,22 +45,32 @@ const InvestorPage = () => {
         fetchIdeas();
     }, []);
 
-    const handleSearch = async () => {
-        if (!searchTerm) return;
-        try {
-            const response = await fetch(`${API_URL}/ideas/search/title/${searchTerm}`);
-
-            if (!response.ok) throw new Error('Failed to fetch search results');
-            const data = await response.json();
-            setIdeas(data);
-        } catch (err: unknown) {
-            if (err instanceof Error) {
-                setErrorIdeas(err.message);
-            } else {
-                setErrorIdeas("An unknown error occurred.");
+    useEffect(() => {
+        const fetchSearchedIdeas = async () => {
+            if (searchTerm === '') {
+                // If the search term is empty, show all ideas again
+                const response = await fetch(`${API_URL}/ideas`);
+                const data = await response.json();
+                setIdeas(data);
+                return;
             }
-        }
-    };
+
+            try {
+                const response = await fetch(`${API_URL}/ideas/search/title/${searchTerm}`);
+                if (!response.ok) throw new Error('Failed to fetch search results');
+                const data = await response.json();
+                setIdeas(data.ideasFound);
+            } catch (err: unknown) {
+                if (err instanceof Error) {
+                    setErrorIdeas(err.message);
+                } else {
+                    setErrorIdeas("An unknown error occurred.");
+                }
+            }
+        };
+
+        fetchSearchedIdeas();
+    }, [searchTerm]);
 
     return (
         <>
@@ -91,7 +95,7 @@ const InvestorPage = () => {
                         value={searchTerm}
                         onChange={(e) => setSearchTerm(e.target.value)}
                     />
-                    <button onClick={handleSearch} className={styles.searchButton}>Search</button>
+                    <button onClick={() => {}} className={styles.searchButton}>Search</button>
                 </div>
             </nav>
 
@@ -101,8 +105,8 @@ const InvestorPage = () => {
                     {errorIdeas && <p>Error: {errorIdeas}</p>}
                     {!loadingIdeas && !errorIdeas && ideas.length === 0 && <p>No ideas found.</p>}
 
-                    {ideas.map((idea) => (
-                        <div className={styles.postCard} key={idea.id}>
+                    {Object.values(ideas).map((idea, index) => (
+                        <div className={styles.postCard} key={idea.id || index}>
                             <h3>{idea.title}</h3>
                             <p>{idea.description}</p>
                             <button className={styles.investButton}>💰 Invest</button>

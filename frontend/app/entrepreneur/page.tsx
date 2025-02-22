@@ -2,11 +2,7 @@ import React from "react";
 import Head from "next/head";
 import Link from "next/link";
 import styles from "../styles/entrepreneur-profile.module.css";
-<<<<<<< HEAD
 import "../styles/globals.css";
-=======
-import "../styles/globals.css"; // ✅ Fixed Import Path
->>>>>>> 1b1ca75 (Modified the pages)
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faGithub, faTwitter, faLinkedin } from "@fortawesome/free-brands-svg-icons";
 
