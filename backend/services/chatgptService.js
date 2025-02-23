@@ -11,7 +11,7 @@ const openai = new OpenAI({apiKey: apiKey});
 
 export async function generateTags(title, description) {
   try {
-    const prompt = `Generate 5 relevant tags for the following idea:\nTitle: ${title}\nDescription: ${description}\nTags:`;
+    const prompt = `Generate 5 relevant one word tags for the following idea:\nTitle: ${title}\nDescription: ${description}\nTags:`;
 
     const completion = await openai.chat.completions.create({
       model: "gpt-4o-mini",

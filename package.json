@@ -7,7 +7,7 @@
         "start": "node app.js"
     },
     "dependencies": {
-        "@supabase/supabase-js": "latest",
+        "@supabase/supabase-js": "^2.48.1",
         "body-parser": "latest",
         "cors": "^2.8.5",
         "dotenv": "^16.4.7",
@@ -16,7 +16,8 @@
         "nodemon": "^3.1.9",
         "openai": "^4.85.1",
         "pg": "^8.13.3",
-        "socket.io": "^4.8.1"
+        "socket.io": "^4.8.1",
+        "supabase": "^2.12.1"
     },
     "devDependencies": {
         "autoprefixer": "^10.4.20",
