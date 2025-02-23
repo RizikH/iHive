@@ -2,7 +2,7 @@ import React from "react";
 import Head from "next/head";
 import Image from "next/image";
 import Link from "next/link";
-import styles from "@/styles/get-started.module.css"; // ✅ Fixed Import Path
+import styles from "./get-started.module.css"; // ✅ Fixed Import Path
 import "@/styles/globals.css"; // ✅ Fixed Import Path
 import { BoxRevealDemo } from '@/components/box-reveal-demo';
 
