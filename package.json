@@ -19,7 +19,7 @@
         "framer-motion": "^12.4.2",
         "jsonwebtoken": "latest",
         "motion": "^12.4.2",
-        "next": "^15.1.7",
+        "next": "latest",
         "openai": "latest",
         "react": "^19.0.0",
         "react-dom": "^19.0.0",
