@@ -1,12 +1,3 @@
-<<<<<<< HEAD
-const express = require("express");
-const router = express.Router();
-const controler = require("../controllers/ideaController");
-
-
-
-module.exports = router;
-=======
 const express = require('express');
 const router = express.Router();
 const ideaController = require('../controllers/ideaController');
@@ -29,4 +20,3 @@ router.get('/search/id/:id', ideaController.getIdeaById);
 
 
 module.exports = router;
->>>>>>> ad799857b41ed223965f1f08d12ef6e74912981f

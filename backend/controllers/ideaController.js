@@ -102,9 +102,9 @@ const deleteIdea = async (req, res) => {
 };
 
 // GET /api/ideas/search/:name
-const searchName = async (req, res) => {
+const getIdeasByTitle = async (req, res) => {
     try {
-        const ideas = await Idea.searchByName(req.params.name);
+        const ideas = await Idea.getIdeasByTitle(req.params.name);
         res.json(ideas);
     } catch (error) {
         res.status(500).json({ error: error.message });
@@ -117,5 +117,5 @@ module.exports = {
     createIdea, 
     updateIdea, 
     deleteIdea, 
-    searchName 
+    getIdeasByTitle 
 };

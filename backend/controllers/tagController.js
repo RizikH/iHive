@@ -14,6 +14,8 @@ const getTagsByIdea = async (req, res) => {
     }
 };
 
+// post /api/tags/idea
+
 module.exports = {
     getTagsByIdea
 }
