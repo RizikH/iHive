@@ -1,32 +1,31 @@
-'use client';
-import Link from 'next/link';
-import styles from '../styles/home.module.css';
-import '../styles/globals.css';
+"use client";
+
+import Link from "next/link";
+import styles from ".//styles/home.module.css"; // ✅ Fixed Import Path
+import ".//styles/globals.css"; // ✅ Fixed Import Path
 import React from "react";
 
 export default function Home() {
   return (
     <div className={styles.container}>
-
       {/* Navigation Bar */}
       <nav className={styles.navbar}>
         <div className={styles.logo}>iHive - Home</div>
-        <div className={styles['nav-links']}>
-          <Link href="#investments">Investments</Link>
-          <Link href="#setting">Settings</Link>
-          <Link href="get-started">Signout</Link>
+        <div className={styles["nav-links"]}>
+          <Link href="/investments"><span>Investments</span></Link>
+          <Link href="/settings"><span>Settings</span></Link>
+          <Link href="/get-started"><span>Sign Out</span></Link>
         </div>
       </nav>
 
       {/* Split Layout */}
       <div className={styles.splitContainer}>
-
         {/* Entrepreneur Side */}
         <section className={styles.entrepreneurSide}>
           <h1>For Entrepreneurs</h1>
           <p>🚀 Launch your startup and find investors.</p>
           <Link href="/entrepreneur">
-            <button className={styles.entrepreneurButton}>Explore Entrepreneurs</button>
+            <span className={styles.entrepreneurButton}>Explore Entrepreneurs</span>
           </Link>
 
           <div className={styles.featuredProjects}>
@@ -47,7 +46,7 @@ export default function Home() {
           <h1>For Investors</h1>
           <p>💰 Discover innovative startups to invest in.</p>
           <Link href="/investor">
-            <button className={styles.investorButton}>Explore Investor</button>
+            <span className={styles.investorButton}>Explore Investors</span>
           </Link>
 
           <div className={styles.featuredInvestments}>
@@ -62,7 +61,6 @@ export default function Home() {
             </article>
           </div>
         </section>
-
       </div>
     </div>
   );

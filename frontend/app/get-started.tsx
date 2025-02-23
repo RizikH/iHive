@@ -1,12 +1,12 @@
-import React from 'react';
-import Head from 'next/head';
-import Image from 'next/image';
-import Link from 'next/link';
-import styles from '../styles/get-started.module.css';
-import '../styles/globals.css';
+import React from "react";
+import Head from "next/head";
+import Image from "next/image";
+import Link from "next/link";
+import styles from "@/styles/get-started.module.css"; // ✅ Fixed Import Path
+import "@/styles/globals.css"; // ✅ Fixed Import Path
 import { BoxRevealDemo } from '@/components/box-reveal-demo';
 
-const GetStarted: React.FC = () => {
+const GetStartedPage: React.FC = () => {
     return (
         <div className={styles.bodyContainer}>
             <Head>
@@ -48,4 +48,4 @@ const GetStarted: React.FC = () => {
     );
 };
 
-export default GetStarted;
+export default GetStartedPage;

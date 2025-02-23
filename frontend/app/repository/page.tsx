@@ -1,3 +1,5 @@
+"use client";
+
 import React from 'react';
 import Head from 'next/head';
 import Link from 'next/link';
@@ -5,7 +7,6 @@ import Image from 'next/image';
 import styles from '../styles/repository.module.css';
 import '../styles/globals.css';
 import FileTreeDemo from '@/components/file-tree-demo';
-import AvatarCirclesDemo from '@/components/avatar-circles-demo';
 import { FiCopy, FiDownload, FiUpload, FiEdit, FiCheck, FiPlus, FiMinus, FiBold, FiItalic, FiUnderline } from 'react-icons/fi';
 
 const Repository = () => {
