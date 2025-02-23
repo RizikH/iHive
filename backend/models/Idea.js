@@ -56,11 +56,11 @@ const deleteIdea = async (id) => {
     return data;
 };
 
-const getIdeasByTitle = async (name) => {
+const getIdeasByTitle = async (title) => {
     const { data, error } = await supabase
         .from("ideas")
         .select("*")
-        .ilike("title", `%${name}%`)
+        .ilike("title", `%${title}%`)
         .order("created_at", { ascending: false });
 
     if (error) throw error;
