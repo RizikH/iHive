@@ -1,4 +1,4 @@
-"use client";
+"use client"
 
 import React, { useEffect, useState } from "react";
 import Head from 'next/head';
@@ -16,6 +16,7 @@ interface Idea {
     category?: string;
     funding_progress?: number;
     tags_name?: { id: number; tag_id: number }[];
+    price?: number; // Assuming you have a price property
 }
 
 const InvestorPage = () => {
@@ -23,6 +24,9 @@ const InvestorPage = () => {
     const [loadingIdeas, setLoadingIdeas] = useState(true);
     const [errorIdeas, setErrorIdeas] = useState<string | null>(null);
     const [searchTerm, setSearchTerm] = useState('');
+    const [tagsFilter, setTagsFilter] = useState<string[]>([]); // State for tags filter
+    const [priceRange, setPriceRange] = useState<number[]>([0, 10000]); // Price range filter (min, max)
+    const [showFilterPopup, setShowFilterPopup] = useState(false); // Toggle the filter popup
 
     useEffect(() => {
         const fetchIdeas = async () => {
@@ -48,7 +52,6 @@ const InvestorPage = () => {
     useEffect(() => {
         const fetchSearchedIdeas = async () => {
             if (searchTerm === '') {
-                // If the search term is empty, show all ideas again
                 const response = await fetch(`${API_URL}/ideas`);
                 const data = await response.json();
                 setIdeas(data);
@@ -72,6 +75,30 @@ const InvestorPage = () => {
         fetchSearchedIdeas();
     }, [searchTerm]);
 
+    const handleAddTag = (tag: string) => {
+        setTagsFilter((prevTags) => [...prevTags, tag]);
+    };
+
+    const handleRemoveTag = (tag: string) => {
+        setTagsFilter((prevTags) => prevTags.filter((t) => t !== tag));
+    };
+
+    const handleApplyFilters = () => {
+        // Implement filtering logic here
+        const filteredIdeas = ideas.filter((idea) => {
+            const matchesTags = tagsFilter.every((tag) =>
+                idea.tags_name?.some((t) => t.tag_id === tag)
+            );
+            const matchesPrice =
+                idea.price && idea.price >= priceRange[0] && idea.price <= priceRange[1];
+
+            return matchesTags && matchesPrice;
+        });
+
+        setIdeas(filteredIdeas);
+        setShowFilterPopup(false); // Close popup after applying filters
+    };
+
     return (
         <>
             <Head>
@@ -86,6 +113,15 @@ const InvestorPage = () => {
                     <Link href="#investments">Investments</Link>
                     <Link href="#setting">Settings</Link>
                     <Link href="#get-started">Signout</Link>
+                    <Link href="/investor-profile">
+                        <Image
+                            src="/Images/Yixi.jpeg"
+                            alt="Investor Profile"
+                            width={40}
+                            height={40}
+                            className={styles.avatarIcon}
+                        />
+                    </Link>
                 </div>
                 <div className={styles.searchContainer}>
                     <input
@@ -95,9 +131,71 @@ const InvestorPage = () => {
                         value={searchTerm}
                         onChange={(e) => setSearchTerm(e.target.value)}
                     />
-                    <button onClick={() => {}} className={styles.searchButton}>Search</button>
+                    <button className={styles.searchButton}>Search</button>
+
+                    {/* Filter Button */}
+                    <button className={styles.filterButton} onClick={() => setShowFilterPopup(true)}>
+                        Filter
+                    </button>
                 </div>
             </nav>
+
+            {/* Filter Popup */}
+            {showFilterPopup && (
+                <div className={styles.filterPopup}>
+                    <div className={styles.filterContent}>
+                        <h3>Filter Ideas</h3>
+
+                        {/* Tags Filter */}
+                        <div>
+                            <input
+                                type="text"
+                                placeholder="Add a tag"
+                                onKeyDown={(e) => {
+                                    if (e.key === 'Enter' && e.currentTarget.value) {
+                                        handleAddTag(e.currentTarget.value);
+                                        e.currentTarget.value = ''; // Reset the input
+                                    }
+                                }}
+                            />
+                            <div>
+                                {tagsFilter.map((tag, index) => (
+                                    <span key={index} className={styles.tag}>
+                                        {tag} <button onClick={() => handleRemoveTag(tag)}>x</button>
+                                    </span>
+                                ))}
+                            </div>
+                        </div>
+
+                        {/* Price Range Filter */}
+                        <div>
+                            <label>Price Range:</label>
+                            <input
+                                type="range"
+                                min="0"
+                                max="10000"
+                                step="100"
+                                value={priceRange[0]}
+                                onChange={(e) => setPriceRange([+e.target.value, priceRange[1]])}
+                            />
+                            <input
+                                type="range"
+                                min="0"
+                                max="10000"
+                                step="100"
+                                value={priceRange[1]}
+                                onChange={(e) => setPriceRange([priceRange[0], +e.target.value])}
+                            />
+                            <p>Price: {priceRange[0]} - {priceRange[1]}</p>
+                        </div>
+
+                        {/* Apply Filters Button */}
+                        <button className={styles.applyFiltersButton} onClick={handleApplyFilters}>
+                            Apply Filters
+                        </button>
+                    </div>
+                </div>
+            )}
 
             <main className={styles.pageContainer}>
                 <div className={styles.postsGrid}>
@@ -112,22 +210,6 @@ const InvestorPage = () => {
                             <button className={styles.investButton}>💰 Invest</button>
                         </div>
                     ))}
-                </div>
-
-                <div className={styles.profile}>
-                    <h2>Investor Profile</h2>
-                    <div className={styles.profileContent}>
-                        <div className={styles['profile-image']} title="Change Your Avatar">
-                            <Image
-                                src="/Images/Yixi.jpeg"
-                                alt="Investor Avatar"
-                                className={styles.avatar}
-                                width={100}
-                                height={100}
-                            />
-                        </div>
-                        <h1>Investor Name</h1>
-                    </div>
                 </div>
             </main>
         </>
