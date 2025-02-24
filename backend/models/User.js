@@ -1,6 +1,5 @@
 const supabase = require("../config/db");
 
-// ✅ Get all users
 const getAllUsers = async () => {
     const { data, error } = await supabase
         .from("users")
@@ -11,7 +10,6 @@ const getAllUsers = async () => {
     return data;
 };
 
-// ✅ Get a user by ID
 const getUserById = async (id) => {
     const { data, error } = await supabase
         .from("users")
@@ -23,19 +21,13 @@ const getUserById = async (id) => {
     return data;
 };
 
-// ✅ Create a new user with Supabase Auth
 const createUser = async (username, email, password, bio) => {
-    // Step 1: Sign up user using Supabase Auth
-    const { data: authData, error: authError } = await supabase.auth.signUp({
-        email,
-        password,
-    });
+    const { data: authData, error: authError } = await supabase.auth.signUp({ email, password });
 
     if (authError) throw new Error(authError.message);
 
-    const userId = authData.user.id; // Get the Supabase Auth user ID
+    const userId = authData.user.id;
 
-    // Step 2: Store additional user details in the database
     const { data, error } = await supabase
         .from("users")
         .insert([{ id: userId, username, email, bio }])
@@ -46,7 +38,6 @@ const createUser = async (username, email, password, bio) => {
     return data;
 };
 
-// ✅ Update a user (only profile details, not password)
 const updateUser = async (id, username, email, bio) => {
     const { data, error } = await supabase
         .from("users")
@@ -59,14 +50,10 @@ const updateUser = async (id, username, email, bio) => {
     return data;
 };
 
-// ✅ Delete a user (from both Supabase Auth & database)
 const deleteUser = async (id) => {
-    // Step 1: Remove from Supabase Auth
     const { error: authError } = await supabase.auth.admin.deleteUser(id);
-
     if (authError) throw new Error(authError.message);
 
-    // Step 2: Remove from `users` table
     const { data, error } = await supabase
         .from("users")
         .delete()

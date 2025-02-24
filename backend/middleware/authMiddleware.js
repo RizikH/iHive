@@ -12,7 +12,7 @@ const authMiddleware = async (req, res, next) => {
         const { data, error } = await supabase.auth.getUser(token.replace("Bearer ", ""));
 
         if (error || !data || !data.user) {
-            return res.status(401).jssson({ message: "Invalid or expired token.", error });
+            return res.status(401).json({ message: "Invalid or expired token.", error });
         }
 
         // Attach authenticated user to request
