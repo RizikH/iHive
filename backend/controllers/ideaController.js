@@ -84,7 +84,7 @@ const deleteIdea = async (req, res) => {
 // ✅ GET /api/ideas/search?title=...
 const searchIdeasByTitle = async (req, res) => {
     try {
-        const { title } = req.query;
+        const { title } = req.params;
         if (!title) {
             return res.status(400).json({ error: "Title parameter is required for search." });
         }
