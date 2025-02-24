@@ -1,13 +1,25 @@
 "use client";
 
 import React, { useEffect, useState } from "react";
-import Head from 'next/head';
-import Link from 'next/link';
+import Head from "next/head";
+import Link from "next/link";
 import styles from "../styles/investor.module.css";
 import "../styles/globals.css";
 import Image from "next/image";
 
-const API_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:5432/api";
+const API_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:5000/api";
+
+interface Tag {
+    id: number;
+    name: string;
+}
+
+interface IdeaTag {
+    id: number;
+    tag_id: number;
+    idea_id: number;
+    tags: Tag;
+}
 
 interface Idea {
     id: number;
@@ -15,7 +27,7 @@ interface Idea {
     description: string;
     category?: string;
     funding_progress?: number;
-    idea_tags?: { id: number; name: string }[];
+    idea_tags?: IdeaTag[];
     price?: number;
 }
 
@@ -23,7 +35,7 @@ const InvestorPage = () => {
     const [ideas, setIdeas] = useState<Idea[]>([]);
     const [loadingIdeas, setLoadingIdeas] = useState(true);
     const [errorIdeas, setErrorIdeas] = useState<string | null>(null);
-    const [searchTerm, setSearchTerm] = useState('');
+    const [searchTerm, setSearchTerm] = useState("");
     const [tagsFilter, setTagsFilter] = useState<string[]>([]);
     const [priceRange, setPriceRange] = useState<number[]>([0, 10000]);
     const [showFilterPopup, setShowFilterPopup] = useState(false);
@@ -32,10 +44,9 @@ const InvestorPage = () => {
         const fetchIdeas = async () => {
             try {
                 const response = await fetch(`${API_URL}/ideas`);
-                if (!response.ok) throw new Error('Failed to fetch ideas');
+                if (!response.ok) throw new Error("Failed to fetch ideas");
                 const data = await response.json();
-                console.log(data);
-                setIdeas(data || []); // Ensure data is always an array
+                setIdeas(data || []);
             } catch (err: unknown) {
                 setErrorIdeas(err instanceof Error ? err.message : "An unknown error occurred.");
             } finally {
@@ -48,7 +59,7 @@ const InvestorPage = () => {
 
     useEffect(() => {
         const fetchSearchedIdeas = async () => {
-            if (searchTerm === '') {
+            if (searchTerm === "") {
                 const response = await fetch(`${API_URL}/ideas`);
                 const data = await response.json();
                 setIdeas(data || []);
@@ -57,7 +68,7 @@ const InvestorPage = () => {
 
             try {
                 const response = await fetch(`${API_URL}/ideas/search/title/${searchTerm}`);
-                if (!response.ok) throw new Error('Failed to fetch search results');
+                if (!response.ok) throw new Error("Failed to fetch search results");
                 const data = await response.json();
                 setIdeas(data || []);
             } catch (err: unknown) {
@@ -81,9 +92,10 @@ const InvestorPage = () => {
     const handleApplyFilters = () => {
         const filteredIdeas = ideas.filter((idea) => {
             const matchesTags = tagsFilter.every((tag) =>
-                idea.idea_tags?.some((t) => t.name === (tag)) // Convert tag to number
+                idea.idea_tags?.some((t) => t.tags.name === tag)
             );
-            const matchesPrice = idea.price !== undefined &&
+            const matchesPrice =
+                idea.price !== undefined &&
                 idea.price >= priceRange[0] &&
                 idea.price <= priceRange[1];
 
@@ -114,7 +126,7 @@ const InvestorPage = () => {
                     />
                     <Link href="/">iHive-Investors</Link>
                 </div>
-                <div className={styles['nav-links']}>
+                <div className={styles["nav-links"]}>
                     <Link href="#investments">Investments</Link>
                     <Link href="#setting">Settings</Link>
                     <Link href="#get-started">Signout</Link>
@@ -144,6 +156,7 @@ const InvestorPage = () => {
                     </button>
                 </div>
             </nav>
+
             {showFilterPopup && (
                 <div className={styles.filterPopup}>
                     <div className={styles.filterContent}>
@@ -153,9 +166,9 @@ const InvestorPage = () => {
                                 type="text"
                                 placeholder="Add a tag"
                                 onKeyDown={(e) => {
-                                    if (e.key === 'Enter' && e.currentTarget.value.trim()) {
+                                    if (e.key === "Enter" && e.currentTarget.value.trim()) {
                                         handleAddTag(e.currentTarget.value.trim());
-                                        e.currentTarget.value = '';
+                                        e.currentTarget.value = "";
                                     }
                                 }}
                             />
@@ -193,6 +206,7 @@ const InvestorPage = () => {
                     </div>
                 </div>
             )}
+
             {/* Main Content */}
             <main className={styles.pageContainer}>
                 <div className={styles.postsGrid}>
@@ -200,26 +214,26 @@ const InvestorPage = () => {
                     {errorIdeas && <p>Error: {errorIdeas}</p>}
                     {!loadingIdeas && !errorIdeas && ideas?.length === 0 && <p>No ideas found.</p>}
 
-                    {ideas.map((idea, index) => (
-                        <div className={styles.postCard} key={idea.id || index}>
+                    {ideas.map((idea) => (
+                        <div className={styles.postCard} key={idea.id}>
                             <h3>{idea.title}</h3>
                             <p>{idea.description}</p>
                             <p>{idea.category}</p>
                             <p>
-                                {Array.isArray(idea?.idea_tags) && idea.idea_tags.length > 0
-                                    ? idea.idea_tags.map((tag) => tag.name).join(", ")  // Join all tag names if there are multiple tags
+                                {idea.idea_tags && idea.idea_tags.length > 0
+                                    ? idea.idea_tags.map(tag => tag.tags.name).join(", ")
                                     : "No tags available"}
                             </p>
-
                             <button className={styles.investButton}>💰 Invest</button>
                         </div>
                     ))}
                 </div>
             </main>
+
             {/* Footer */}
             <footer className={styles.footer}>
                 <p>
-                    © 2025 iHive · Entrepreneur | <Link href="/terms" target='_blank'>Terms</Link> | <Link href="/Privacy" target='_blank'>Privacy</Link>
+                    © 2025 iHive · Entrepreneur | <Link href="/terms">Terms</Link> | <Link href="/Privacy">Privacy</Link>
                 </p>
             </footer>
         </>

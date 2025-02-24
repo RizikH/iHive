@@ -6,23 +6,19 @@ const avatars = [
     profileUrl: "#",
   },
   {
-    imageUrl: "/Images/sample.jpeg",
+    imageUrl: "https://avatars.githubusercontent.com/u/59442788",
     profileUrl: "#",
   },
   {
-    imageUrl: "/Images/sample.jpeg",
+    imageUrl: "https://avatars.githubusercontent.com/u/106103625",
     profileUrl: "#",
   },
   {
-    imageUrl: "/Images/sample.jpeg",
+    imageUrl: "https://avatars.githubusercontent.com/u/59228569",
     profileUrl: "#",
   },
   {
-    imageUrl: "/Images/sample.jpeg",
-    profileUrl: "#",
-  },
-  {
-    imageUrl: "/Images/sample.jpeg",
+    imageUrl: "https://avatars.githubusercontent.com/u/89768406",
     profileUrl: "#",
   },
 ]

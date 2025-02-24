@@ -2,8 +2,8 @@ import React from "react";
 import Head from "next/head";
 import Image from "next/image";
 import Link from "next/link";
-import styles from "./get-started.module.css"; // ✅ Fixed Import Path
-import "@/styles/globals.css"; // ✅ Fixed Import Path
+import styles from "../styles/get-started.module.css"; 
+import "../styles/globals.css"; 
 import { BoxRevealDemo } from '@/components/box-reveal-demo';
 
 const GetStartedPage: React.FC = () => {
@@ -38,8 +38,8 @@ const GetStartedPage: React.FC = () => {
                     <Image 
                         src="/Images/iHive.png" 
                         alt="iHive"
-                        width={300}  // Adjust
-                        height={300} // Adjust
+                        width={300}
+                        height={300}
                         priority
                     />
                 </div>

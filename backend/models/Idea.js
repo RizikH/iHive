@@ -1,21 +1,19 @@
 const supabase = require("../config/db");
 const openAI = require("../services/chatgptService");
 
-// ✅ Get all ideas
 const getAllIdeas = async () => {
     const { data, error } = await supabase
-        .from('ideas')
-        .select('*, idea_tags(*, tags(*))')
+        .from("ideas")
+        .select("*, idea_tags(*, tags(*))")
         .order("created_at", { ascending: false });
 
     if (error) {
-        console.error('Error fetching data:', error);
+        console.error("Error fetching ideas:", error);
         return null;
     }
     return data;
 };
 
-// ✅ Create a new idea
 const createIdea = async (ideaData) => {
     const { data, error } = await supabase
         .from("ideas")
@@ -25,12 +23,39 @@ const createIdea = async (ideaData) => {
 
     if (error) throw error;
 
-    // Generate tags using GPT
-    const tags = await openAI.generateTags(data.title, data.description);
+    // Generate tags using OpenAI
+    const generatedTags = await openAI.generateTags(data.title, data.description);
+
+    // Insert tags into the `tags` table and link them
+    const insertedTags = [];
+    for (const tagName of generatedTags) {
+        let { data: existingTag, error: tagError } = await supabase
+            .from("tags")
+            .select("*")
+            .eq("name", tagName)
+            .single();
+
+        if (!existingTag) {
+            ({ data: existingTag, error: tagError } = await supabase
+                .from("tags")
+                .insert({ name: tagName })
+                .select()
+                .single());
+        }
+
+        if (tagError) console.error("Error inserting tag:", tagError);
+
+        if (existingTag) {
+            await supabase
+                .from("idea_tags")
+                .insert({ idea_id: data.id, tag_id: existingTag.id });
+            insertedTags.push(existingTag);
+        }
+    }
+
     return data;
 };
 
-// ✅ Update an idea
 const updateIdea = async (id, ideaData) => {
     const { data, error } = await supabase
         .from("ideas")
@@ -43,13 +68,24 @@ const updateIdea = async (id, ideaData) => {
     return data;
 };
 
-// ✅ Delete an idea
 const deleteIdea = async (id) => {
+    await supabase.from("idea_tags").delete().eq("idea_id", id);
     const { data, error } = await supabase
         .from("ideas")
         .delete()
         .eq("id", id)
         .select()
+        .single();
+
+    if (error) throw error;
+    return data;
+};
+
+const getIdeaById = async (id) => {
+    const { data, error } = await supabase
+        .from("ideas")
+        .select("*")
+        .eq("id", id)
         .single();
 
     if (error) throw error;
@@ -67,24 +103,11 @@ const getIdeasByTitle = async (title) => {
     return data;
 };
 
-
-// ✅ Get an idea by ID
-const getIdeaById = async (id) => {
-    const { data, error } = await supabase
-        .from("ideas")
-        .select("*")
-        .eq("id", id)
-
-    if (error) throw error;
-    return data;
-};
-
-
 module.exports = {
     getAllIdeas,
     createIdea,
     updateIdea,
     deleteIdea,
     getIdeaById,
-    getIdeasByTitle
+    getIdeasByTitle,
 };

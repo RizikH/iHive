@@ -5,16 +5,13 @@ import Image from 'next/image';
 import styles from '../styles/entrepreneur-profile.module.css';
 import '../styles/globals.css';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { config } from '@fortawesome/fontawesome-svg-core';
 import '@fortawesome/fontawesome-svg-core/styles.css';
 import { 
   faGithub,
   faLinkedin,
   faXTwitter,
 } from '@fortawesome/free-brands-svg-icons';
-import { faRss } from '@fortawesome/free-solid-svg-icons';
 import MarqueeDemo from '@/components/marquee-demo';
-import { IconHome, IconUser, IconSettings, IconLogout } from '@tabler/icons-react';
 
 const EntrepreneurProfile = () => {
   return (
