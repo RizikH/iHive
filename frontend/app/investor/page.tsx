@@ -102,7 +102,9 @@ const InvestorPage = () => {
             </Head>
 
             <nav className={styles.navbar}>
-                <div className={styles.logo}>iHive - Investor</div>
+                <div className={styles.logo}>
+                    <Link href="/">iHive - Investor</Link>
+                </div>
                 <div className={styles['nav-links']}>
                     <Link href="#investments">Investments</Link>
                     <Link href="#setting">Settings</Link>
