@@ -1,4 +1,4 @@
-"use client"
+"use client";
 
 import React, { useEffect, useState } from "react";
 import Head from 'next/head';
@@ -16,7 +16,7 @@ interface Idea {
     category?: string;
     funding_progress?: number;
     tags_name?: { id: number; tag_id: number }[];
-    price?: number; // Assuming you have a price property
+    price?: number;
 }
 
 const InvestorPage = () => {
@@ -24,9 +24,9 @@ const InvestorPage = () => {
     const [loadingIdeas, setLoadingIdeas] = useState(true);
     const [errorIdeas, setErrorIdeas] = useState<string | null>(null);
     const [searchTerm, setSearchTerm] = useState('');
-    const [tagsFilter, setTagsFilter] = useState<string[]>([]); // State for tags filter
-    const [priceRange, setPriceRange] = useState<number[]>([0, 10000]); // Price range filter (min, max)
-    const [showFilterPopup, setShowFilterPopup] = useState(false); // Toggle the filter popup
+    const [tagsFilter, setTagsFilter] = useState<string[]>([]);
+    const [priceRange, setPriceRange] = useState<number[]>([0, 10000]);
+    const [showFilterPopup, setShowFilterPopup] = useState(false);
 
     useEffect(() => {
         const fetchIdeas = async () => {
@@ -34,13 +34,9 @@ const InvestorPage = () => {
                 const response = await fetch(`${API_URL}/ideas`);
                 if (!response.ok) throw new Error('Failed to fetch ideas');
                 const data = await response.json();
-                setIdeas(data);
+                setIdeas(data || []); // Ensure data is always an array
             } catch (err: unknown) {
-                if (err instanceof Error) {
-                    setErrorIdeas(err.message);
-                } else {
-                    setErrorIdeas("An unknown error occurred.");
-                }
+                setErrorIdeas(err instanceof Error ? err.message : "An unknown error occurred.");
             } finally {
                 setLoadingIdeas(false);
             }
@@ -54,7 +50,7 @@ const InvestorPage = () => {
             if (searchTerm === '') {
                 const response = await fetch(`${API_URL}/ideas`);
                 const data = await response.json();
-                setIdeas(data);
+                setIdeas(data || []);
                 return;
             }
 
@@ -62,13 +58,9 @@ const InvestorPage = () => {
                 const response = await fetch(`${API_URL}/ideas/search/title/${searchTerm}`);
                 if (!response.ok) throw new Error('Failed to fetch search results');
                 const data = await response.json();
-                setIdeas(data.ideasFound);
+                setIdeas(data || []);
             } catch (err: unknown) {
-                if (err instanceof Error) {
-                    setErrorIdeas(err.message);
-                } else {
-                    setErrorIdeas("An unknown error occurred.");
-                }
+                setErrorIdeas(err instanceof Error ? err.message : "An unknown error occurred.");
             }
         };
 
@@ -76,7 +68,9 @@ const InvestorPage = () => {
     }, [searchTerm]);
 
     const handleAddTag = (tag: string) => {
-        setTagsFilter((prevTags) => [...prevTags, tag]);
+        if (!tagsFilter.includes(tag)) {
+            setTagsFilter((prevTags) => [...prevTags, tag]);
+        }
     };
 
     const handleRemoveTag = (tag: string) => {
@@ -84,19 +78,19 @@ const InvestorPage = () => {
     };
 
     const handleApplyFilters = () => {
-        // Implement filtering logic here
         const filteredIdeas = ideas.filter((idea) => {
             const matchesTags = tagsFilter.every((tag) =>
-                idea.tags_name?.some((t) => t.tag_id === tag)
+                idea.tags_name?.some((t) => t.tag_id === Number(tag)) // Convert tag to number
             );
-            const matchesPrice =
-                idea.price && idea.price >= priceRange[0] && idea.price <= priceRange[1];
+            const matchesPrice = idea.price !== undefined &&
+                idea.price >= priceRange[0] &&
+                idea.price <= priceRange[1];
 
             return matchesTags && matchesPrice;
         });
 
         setIdeas(filteredIdeas);
-        setShowFilterPopup(false); // Close popup after applying filters
+        setShowFilterPopup(false);
     };
 
     return (
@@ -108,7 +102,9 @@ const InvestorPage = () => {
             </Head>
 
             <nav className={styles.navbar}>
-                <div className={styles.logo}>iHive - Investor</div>
+                <div className={styles.logo}>
+                    <Link href="/">iHive - Investor</Link>
+                </div>
                 <div className={styles['nav-links']}>
                     <Link href="#investments">Investments</Link>
                     <Link href="#setting">Settings</Link>
@@ -132,29 +128,25 @@ const InvestorPage = () => {
                         onChange={(e) => setSearchTerm(e.target.value)}
                     />
                     <button className={styles.searchButton}>Search</button>
-
-                    {/* Filter Button */}
                     <button className={styles.filterButton} onClick={() => setShowFilterPopup(true)}>
                         Filter
                     </button>
                 </div>
             </nav>
 
-            {/* Filter Popup */}
             {showFilterPopup && (
                 <div className={styles.filterPopup}>
                     <div className={styles.filterContent}>
                         <h3>Filter Ideas</h3>
 
-                        {/* Tags Filter */}
                         <div>
                             <input
                                 type="text"
                                 placeholder="Add a tag"
                                 onKeyDown={(e) => {
-                                    if (e.key === 'Enter' && e.currentTarget.value) {
-                                        handleAddTag(e.currentTarget.value);
-                                        e.currentTarget.value = ''; // Reset the input
+                                    if (e.key === 'Enter' && e.currentTarget.value.trim()) {
+                                        handleAddTag(e.currentTarget.value.trim());
+                                        e.currentTarget.value = '';
                                     }
                                 }}
                             />
@@ -167,7 +159,6 @@ const InvestorPage = () => {
                             </div>
                         </div>
 
-                        {/* Price Range Filter */}
                         <div>
                             <label>Price Range:</label>
                             <input
@@ -189,7 +180,6 @@ const InvestorPage = () => {
                             <p>Price: {priceRange[0]} - {priceRange[1]}</p>
                         </div>
 
-                        {/* Apply Filters Button */}
                         <button className={styles.applyFiltersButton} onClick={handleApplyFilters}>
                             Apply Filters
                         </button>
@@ -201,9 +191,9 @@ const InvestorPage = () => {
                 <div className={styles.postsGrid}>
                     {loadingIdeas && <p>Loading ideas...</p>}
                     {errorIdeas && <p>Error: {errorIdeas}</p>}
-                    {!loadingIdeas && !errorIdeas && ideas.length === 0 && <p>No ideas found.</p>}
+                    {!loadingIdeas && !errorIdeas && ideas?.length === 0 && <p>No ideas found.</p>}
 
-                    {Object.values(ideas).map((idea, index) => (
+                    {ideas.map((idea, index) => (
                         <div className={styles.postCard} key={idea.id || index}>
                             <h3>{idea.title}</h3>
                             <p>{idea.description}</p>

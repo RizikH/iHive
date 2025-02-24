@@ -11,6 +11,16 @@
     font-size: 1.2rem;
 }
 
+.nav-links {
+    display: flex;
+    align-items: center; /* Aligns items vertically */
+    gap: 10px; /* Adjust spacing between items */
+}
+
+.avatarIcon {
+    border-radius: 50%; /* Makes the image circular if needed */
+}
+
 .nav-links a {
     color: var(--link-color);
     text-decoration: none;
