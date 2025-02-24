@@ -15,7 +15,7 @@ interface Idea {
     description: string;
     category?: string;
     funding_progress?: number;
-    tags_name?: { id: number; tag_id: number }[];
+    idea_tags?: { id: number; name: string }[];
     price?: number;
 }
 
@@ -34,6 +34,7 @@ const InvestorPage = () => {
                 const response = await fetch(`${API_URL}/ideas`);
                 if (!response.ok) throw new Error('Failed to fetch ideas');
                 const data = await response.json();
+                console.log(data);
                 setIdeas(data || []); // Ensure data is always an array
             } catch (err: unknown) {
                 setErrorIdeas(err instanceof Error ? err.message : "An unknown error occurred.");
@@ -80,7 +81,7 @@ const InvestorPage = () => {
     const handleApplyFilters = () => {
         const filteredIdeas = ideas.filter((idea) => {
             const matchesTags = tagsFilter.every((tag) =>
-                idea.tags_name?.some((t) => t.tag_id === Number(tag)) // Convert tag to number
+                idea.idea_tags?.some((t) => t.name === (tag)) // Convert tag to number
             );
             const matchesPrice = idea.price !== undefined &&
                 idea.price >= priceRange[0] &&
@@ -205,10 +206,11 @@ const InvestorPage = () => {
                             <p>{idea.description}</p>
                             <p>{idea.category}</p>
                             <p>
-                                {Array.isArray(idea?.tags_name) && idea?.tags_name.length > 0
-                                    ? idea.tags_name.join(", ")
+                                {Array.isArray(idea?.idea_tags) && idea.idea_tags.length > 0
+                                    ? idea.idea_tags.map((tag) => tag.name).join(", ")  // Join all tag names if there are multiple tags
                                     : "No tags available"}
                             </p>
+
                             <button className={styles.investButton}>💰 Invest</button>
                         </div>
                     ))}
