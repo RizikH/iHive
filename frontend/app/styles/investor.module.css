@@ -21,21 +21,21 @@
 }
 
 .logoImage {
-    width: 35px;
-    height: 35px;
+    width: 30px;
+    height: 30px;
     object-fit: contain;
 }
 
 .nav-links {
     display: flex;
     align-items: center;
-    /* Aligns items vertically */
-    gap: 10px;
-    /* Adjust spacing between items */
+    gap: 30px;
+
 }
 
 .avatarIcon {
     border-radius: 50%;
+    margin-left: 20px;
     /* Makes the image circular if needed */
 }
 

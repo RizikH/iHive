@@ -7,28 +7,62 @@
     color: #212529;
 }
 
-/* Navbar */
-.navbar {
+/* Navbar styling */
+.navContainer {
+    padding: 1.5rem 4rem;
     display: flex;
     justify-content: space-between;
-    padding: 1rem 2rem;
     align-items: center;
+    background-color: #1a1a1a;
 }
 
 .logo {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    font-size: 1.5rem;
     font-weight: bold;
-    font-size: 1.2rem;
 }
 
-.nav-links a {
-    color: var(--link-color);
+.logo a {
+    color: #fff;
     text-decoration: none;
-    margin-left: 2rem;
-    transition: color 0.3s ease;
+}
+
+.logoImage {
+    width: 35px;
+    height: 35px;
+    object-fit: contain;
+}
+
+.nav-links {
+    display: flex;
+    align-items: center;
+    /* Aligns items vertically */
+    gap: 10px;
+    /* Adjust spacing between items */
+}
+
+.avatarIcon {
+    border-radius: 50%;
+    /* Makes the image circular if needed */
+}
+
+.nav-links a,
+.nav-links:visited {
+    color: #ccc;
+    background-color: transparent;
+    text-decoration: none;
 }
 
 .nav-links a:hover {
-    color: var(--hover-color);
+    background-color: transparent;
+    text-decoration: underline;
+}
+
+.nav-links a:active {
+    background-color: transparent;
+    text-decoration: none;
 }
 
 /* Split Layout */

@@ -205,9 +205,9 @@ const InvestorPage = () => {
                             <p>{idea.description}</p>
                             <p>{idea.category}</p>
                             <p>
-                                {Array.isArray(idea.tags_name)
+                                {Array.isArray(idea?.tags_name) && idea?.tags_name.length > 0
                                     ? idea.tags_name.join(", ")
-                                    : idea.tags_name}
+                                    : "No tags available"}
                             </p>
                             <button className={styles.investButton}>💰 Invest</button>
                         </div>
