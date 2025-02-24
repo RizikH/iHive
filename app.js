@@ -1,12 +1,8 @@
 require('dotenv').config();
 const express = require('express');
 const cors = require('cors');
-const bodyParser = require('body-parser');
 const http = require('http'); // Required for WebSocket
 const { Server } = require('socket.io'); // Import Socket.io
-
-//"npm install express socket.io cors dotenv pg" this may need to be installed for websocket dependencies
-
 
 // Import Routes
 const userRoutes = require('./backend/routes/userRoutes');
@@ -15,17 +11,17 @@ const tagRoutes = require('./backend/routes/tagRoutes');
 
 const app = express();
 const server = http.createServer(app); // Create HTTP server for WebSockets
-const io = new Server(server, {
-    cors: {
-        origin: "*", // Allow all origins (Change this in production)
-        methods: ["GET", "POST"]
-    }
-});
+
+// CORS Configuration (Restrict in Production)
+const corsOptions = {
+    origin: process.env.CLIENT_URL || "http://localhost:3000",
+    methods: ["GET", "POST"]
+};
+app.use(cors(corsOptions));
 
 // Middleware
-app.use(cors());
-app.use(express.json());
-app.use(express.urlencoded({ extended: true }));
+app.use(express.json()); // Handles JSON requests
+app.use(express.urlencoded({ extended: true })); // Handles URL-encoded data
 
 // API Routes
 app.use('/api/users', userRoutes);
@@ -37,13 +33,24 @@ app.get("/", (req, res) => {
 });
 
 // WebSocket Chat Feature
+const io = new Server(server, {
+    cors: corsOptions
+});
+
 io.on("connection", (socket) => {
     console.log(`🔌 New client connected: ${socket.id}`);
 
-    // Listening for chat messages
+    // Handle chat messages
     socket.on("chatMessage", (messageData) => {
-        console.log("📩 Message received:", messageData);
-        io.emit("chatMessage", messageData); // Broadcast message to all connected clients
+        if (process.env.NODE_ENV !== "production") {
+            console.log("📩 Message received:", messageData);
+        }
+        io.emit("chatMessage", messageData);
+    });
+
+    // Handle WebSocket errors
+    socket.on("error", (err) => {
+        console.error(`⚠️ WebSocket error: ${err.message}`);
     });
 
     // Handle user disconnect
@@ -56,7 +63,7 @@ io.on("connection", (socket) => {
 const errorHandler = require('./backend/middleware/errorHandler');
 app.use(errorHandler);
 
-const PORT = process.env.PORT || 5432;
+const PORT = process.env.PORT || 5432; // Keeping the port as 5432
 server.listen(PORT, () => {
     console.log(`🚀 Server running on port ${PORT}`);
 });

@@ -2,28 +2,23 @@
     "name": "backend",
     "version": "1.0.0",
     "private": true,
+    "type": "commonjs",
     "scripts": {
-        "dev": "nodemon app.js",
-        "start": "node app.js"
+      "dev": "nodemon app.js",
+      "start": "node app.js"
     },
     "dependencies": {
-        "@radix-ui/react-slot": "^1.1.2",
-        "@supabase/supabase-js": "latest",
-        "@tabler/icons-react": "^3.30.0",
-        "body-parser": "latest",
-        "class-variance-authority": "^0.7.1",
-        "clsx": "^2.1.1",
-        "cors": "latest",
-        "dotenv": "^16.4.7",
-        "express": "latest",
-        "framer-motion": "^12.4.2",
-        "jsonwebtoken": "latest",
-        "motion": "^12.4.2",
-        "next": "latest",
-        "openai": "latest",
-        "react": "^19.0.0",
-        "react-dom": "^19.0.0",
-        "react-icons": "^5.5.0",
-        "tailwind-merge": "^3.0.1"
+      "@supabase/supabase-js": "^2.39.3",
+      "body-parser": "^1.20.2",
+      "cors": "^2.8.5",
+      "dotenv": "^16.4.7",
+      "express": "^4.18.2",
+      "jsonwebtoken": "^9.0.2",
+      "openai": "^4.28.0",
+      "socket.io": "^4.8.1"
+    },
+    "devDependencies": {
+      "nodemon": "^3.0.1"
     }
-}
+  }
+  

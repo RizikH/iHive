@@ -1,4 +1,5 @@
 const Tags = require("../models/Tags");
+const Idea = require("../models/Idea.js");
 
 // get /api/tags/idea/:id
 const getTagsByIdea = async (req, res) => {
@@ -15,7 +16,13 @@ const getTagsByIdea = async (req, res) => {
 };
 
 // post /api/tags/idea
-
+const createTagsForIdea = async (req, res) => {
+    try {
+        const idea = await Idea.getIdeaById(req.params.id);
+    } catch (error) {
+        
+    }
+}
 module.exports = {
     getTagsByIdea
 }
