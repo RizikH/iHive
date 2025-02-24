@@ -23,15 +23,26 @@ const createIdea = async (ideaData) => {
 
     if (error) throw error;
 
+    // Generate tags using OpenAI
     const generatedTags = await openAI.generateTags(data.title, data.description);
 
+    // Insert tags into the `tags` table and link them
     const insertedTags = [];
     for (const tagName of generatedTags) {
-        const { data: existingTag, error: tagError } = await supabase
+        let { data: existingTag, error: tagError } = await supabase
             .from("tags")
-            .insert({ name: tagName })
-            .select()
+            .select("*")
+            .eq("name", tagName)
             .single();
+
+        if (!existingTag) {
+            ({ data: existingTag, error: tagError } = await supabase
+                .from("tags")
+                .insert({ name: tagName })
+                .select()
+                .single());
+        }
+
         if (tagError) console.error("Error inserting tag:", tagError);
 
         if (existingTag) {
@@ -58,6 +69,7 @@ const updateIdea = async (id, ideaData) => {
 };
 
 const deleteIdea = async (id) => {
+    await supabase.from("idea_tags").delete().eq("idea_id", id);
     const { data, error } = await supabase
         .from("ideas")
         .delete()
@@ -97,5 +109,5 @@ module.exports = {
     updateIdea,
     deleteIdea,
     getIdeaById,
-    getIdeasByTitle
+    getIdeasByTitle,
 };
