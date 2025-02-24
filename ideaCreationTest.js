@@ -1,53 +1,73 @@
-const User = require("./backend/models/User"); // Import User model
-const supabase = require("./backend/config/db"); // Import Supabase client
+const supabase = require("./backend/config/db");
+const openAI = require("./backend/services/chatgptService");
 
-const createNewIdea = async () => {
-    const userId = "2625c67a-06c1-462c-8f92-6703f38e092e"; // Manually provided user ID
-
+const generateAndLinkTagsForIdeas = async () => {
     try {
-        // Step 1: Fetch the user object
-        const user = await User.getUserById(userId);
-        if (!user) {
-            throw new Error("User not found.");
+        console.log("🚀 Fetching all existing ideas...");
+        const { data: ideas, error: fetchError } = await supabase.from("ideas").select("*");
+
+        if (fetchError) {
+            throw new Error(`Failed to fetch ideas: ${fetchError.message}`);
         }
 
-        // Step 2: Get the user's Supabase Auth session
-        const { data: sessionData, error: sessionError } = await supabase.auth.getSession();
-        if (sessionError || !sessionData || !sessionData.session) {
-            throw new Error("❌ No active Supabase session found. Please log in.");
+        if (!ideas || ideas.length === 0) {
+            console.log("⚠️ No ideas found in the database.");
+            return;
         }
 
-        // Step 3: Extract the Supabase Auth token
-        const authToken = sessionData.session.access_token;
+        console.log(`✅ Found ${ideas.length} ideas. Generating tags...`);
 
-        // Step 4: Construct the idea object
-        const newIdea = {
-            title: "AI-Powered Idea Repository",
-            description: "An online GitHub-inspired repo for innovators and investors. Like a virtual Shark Tank.",
-            category: "AI-Powered"
-        };
+        for (const idea of ideas) {
+            console.log(`🏷 Generating tags for "${idea.title}"...`);
+            const generatedTags = await openAI.generateTags(idea.title, idea.description);
 
-        // Step 5: Send the API request with Supabase Auth token
-        const response = await fetch("http://localhost:5000/api/ideas/", {
-            method: "POST",
-            headers: {
-                "Content-Type": "application/json",
-                "Authorization": `Bearer ${authToken}` // Pass Supabase token for authentication
-            },
-            body: JSON.stringify(newIdea)
-        });
+            if (!generatedTags || generatedTags.length === 0) {
+                console.log(`⚠️ No tags generated for "${idea.title}".`);
+                continue;
+            }
 
-        if (!response.ok) {
-            const errorData = await response.json();
-            throw new Error(errorData.error || `Failed to create idea. Status: ${response.status}`);
+            for (const tagName of generatedTags) {
+                // Check if the tag already exists in the database
+                let { data: existingTag, error: tagError } = await supabase
+                    .from("tags")
+                    .select("*")
+                    .eq("name", tagName)
+                    .single();
+
+                if (!existingTag) {
+                    // Insert the new tag if it does not exist
+                    ({ data: existingTag, error: tagError } = await supabase
+                        .from("tags")
+                        .insert({ name: tagName })
+                        .select()
+                        .single());
+                }
+
+                if (tagError) {
+                    console.error("❌ Error inserting tag:", tagError.message);
+                    continue;
+                }
+
+                if (existingTag) {
+                    // Link the tag to the idea in `idea_tags`
+                    const { error: linkError } = await supabase
+                        .from("idea_tags")
+                        .insert({ idea_id: idea.id, tag_id: existingTag.id });
+
+                    if (linkError) {
+                        console.error(`❌ Failed to link tag "${tagName}" to "${idea.title}":`, linkError.message);
+                    } else {
+                        console.log(`✅ Tag "${tagName}" linked to "${idea.title}".`);
+                    }
+                }
+            }
         }
 
-        const data = await response.json();
-        console.log("✅ Idea created successfully:", data);
+        console.log("🎉 Tag generation and linking completed for all ideas!");
     } catch (error) {
-        console.error("❌ Error creating idea:", error.message);
+        console.error("❌ Error generating and linking tags:", error.message);
     }
 };
 
-// Run test
-createNewIdea();
+// Run the function
+generateAndLinkTagsForIdeas();
