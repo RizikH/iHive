@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { FiMail, FiLock, FiUser, FiX } from "react-icons/fi";
-import styles from "@/styles/auth-form.module.css";
+import styles from "@/app/styles/auth-form.module.css";
 
 interface AuthFormProps {
   initialView?: 'login' | 'register';
