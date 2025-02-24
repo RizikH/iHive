@@ -101,7 +101,7 @@ const deleteIdea = async (req, res) => {
     }
 };
 
-// GET /api/ideas/search/:name
+// GET /api/ideas/search/:title
 const getIdeasByTitle = async (req, res) => {
     try {
         const ideas = await Idea.getIdeasByTitle(req.params.title);

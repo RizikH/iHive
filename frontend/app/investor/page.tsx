@@ -54,11 +54,11 @@ const InvestorPage = () => {
                 return;
             }
 
-            try {
+            try {s
                 const response = await fetch(`${API_URL}/ideas/search/title/${searchTerm}`);
                 if (!response.ok) throw new Error('Failed to fetch search results');
                 const data = await response.json();
-                setIdeas(data.ideasFound || []);
+                setIdeas(data || []);
             } catch (err: unknown) {
                 setErrorIdeas(err instanceof Error ? err.message : "An unknown error occurred.");
             }

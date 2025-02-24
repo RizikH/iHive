@@ -1,6 +1,7 @@
 const User = require("../models/User");
+const supabase = require("../config/db");
 
-// GET /api/users/all
+// ✅ GET /api/users/all
 const getUsers = async (req, res) => {
     try {
         const users = await User.getAllUsers();
@@ -10,7 +11,7 @@ const getUsers = async (req, res) => {
     }
 };
 
-// GET /api/users/get/:id
+// ✅ GET /api/users/get/:id
 const getUser = async (req, res) => {
     try {
         const user = await User.getUserById(req.params.id);
@@ -24,18 +25,42 @@ const getUser = async (req, res) => {
     }
 };
 
-// POST /api/users/new
+// ✅ POST /api/users/register (User Registration)
 const addUser = async (req, res) => {
     try {
         const { username, email, password, bio } = req.body;
-        const newUser = await User.createUser(username, email, password, bio);
+
+        // Register user in Supabase Auth
+        const { data, error } = await supabase.auth.signUp({ email, password });
+
+        if (error) throw new Error(error.message);
+
+        const userId = data.user.id; // Supabase Auth user ID
+
+        // Store additional user info in the database
+        const newUser = await User.createUser(userId, username, email, bio);
         res.status(201).json(newUser);
     } catch (error) {
         res.status(500).json({ error: error.message });
     }
 };
 
-// PUT /api/users/update/:id
+// ✅ POST /api/users/login (User Login)
+const loginUser = async (req, res) => {
+    try {
+        const { email, password } = req.body;
+
+        const { data, error } = await supabase.auth.signInWithPassword({ email, password });
+
+        if (error) throw new Error(error.message);
+
+        res.json({ token: data.session.access_token, user: data.user });
+    } catch (error) {
+        res.status(401).json({ error: error.message });
+    }
+};
+
+// ✅ PUT /api/users/update/:id
 const updateUser = async (req, res) => {
     try {
         const { username, email, bio } = req.body;
@@ -46,15 +71,16 @@ const updateUser = async (req, res) => {
     }
 };
 
-// DELETE /api/users/delete/:id
+// ✅ DELETE /api/users/delete/:id
 const deleteUser = async (req, res) => {
     try {
+        // Remove from Supabase Auth
+        const { error: authError } = await supabase.auth.admin.deleteUser(req.params.id);
+        if (authError) throw new Error(authError.message);
+
+        // Remove from database
         const deletedUser = await User.deleteUser(req.params.id);
-        if (deletedUser) {
-            res.json({ message: "User deleted successfully" });
-        } else {
-            res.status(404).json({ message: "User not found" });
-        }
+        res.json({ message: "User deleted successfully", deletedUser });
     } catch (error) {
         res.status(500).json({ error: error.message });
     }
@@ -64,6 +90,7 @@ module.exports = {
     getUsers,
     getUser,
     addUser,
+    loginUser,
     updateUser,
     deleteUser
 };

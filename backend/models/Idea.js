@@ -1,5 +1,6 @@
 const supabase = require("../config/db");
 const openAI = require("../services/chatgptService");
+const tags = require("./Tags");
 
 // ✅ Get all ideas
 const getAllIdeas = async () => {
@@ -27,6 +28,7 @@ const createIdea = async (ideaData) => {
 
     // Generate tags using GPT
     const tags = await openAI.generateTags(data.title, data.description);
+
     return data;
 };
 
