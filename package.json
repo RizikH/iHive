@@ -24,6 +24,7 @@
         "react": "^19.0.0",
         "react-dom": "^19.0.0",
         "react-icons": "^5.5.0",
+        "socket.io": "^4.8.1",
         "tailwind-merge": "^3.0.1"
     }
 }

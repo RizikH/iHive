@@ -101,9 +101,17 @@ const InvestorPage = () => {
                 <link rel="icon" href="/Images/iHive.png" />
             </Head>
 
-            <nav className={styles.navbar}>
+            <nav className={styles.navContainer}>
                 <div className={styles.logo}>
-                    <Link href="/">iHive - Investor</Link>
+                    <Image
+                        src="/Images/iHive.png"
+                        alt="Logo"
+                        title="Home"
+                        width={35}
+                        height={35}
+                        className={styles.logoImage}
+                    />
+                    <Link href="/">iHive-Investors</Link>
                 </div>
                 <div className={styles['nav-links']}>
                     <Link href="#investments">Investments</Link>
@@ -119,6 +127,8 @@ const InvestorPage = () => {
                         />
                     </Link>
                 </div>
+
+                {/* Search and Filter Section */}
                 <div className={styles.searchContainer}>
                     <input
                         type="text"
@@ -133,12 +143,10 @@ const InvestorPage = () => {
                     </button>
                 </div>
             </nav>
-
             {showFilterPopup && (
                 <div className={styles.filterPopup}>
                     <div className={styles.filterContent}>
                         <h3>Filter Ideas</h3>
-
                         <div>
                             <input
                                 type="text"
@@ -158,7 +166,6 @@ const InvestorPage = () => {
                                 ))}
                             </div>
                         </div>
-
                         <div>
                             <label>Price Range:</label>
                             <input
@@ -179,14 +186,13 @@ const InvestorPage = () => {
                             />
                             <p>Price: {priceRange[0]} - {priceRange[1]}</p>
                         </div>
-
                         <button className={styles.applyFiltersButton} onClick={handleApplyFilters}>
                             Apply Filters
                         </button>
                     </div>
                 </div>
             )}
-
+            {/* Main Content */}
             <main className={styles.pageContainer}>
                 <div className={styles.postsGrid}>
                     {loadingIdeas && <p>Loading ideas...</p>}
@@ -197,11 +203,23 @@ const InvestorPage = () => {
                         <div className={styles.postCard} key={idea.id || index}>
                             <h3>{idea.title}</h3>
                             <p>{idea.description}</p>
+                            <p>{idea.category}</p>
+                            <p>
+                                {Array.isArray(idea.tags_name)
+                                    ? idea.tags_name.join(", ")
+                                    : idea.tags_name}
+                            </p>
                             <button className={styles.investButton}>💰 Invest</button>
                         </div>
                     ))}
                 </div>
             </main>
+            {/* Footer */}
+            <footer className={styles.footer}>
+                <p>
+                    © 2025 iHive · Entrepreneur | <Link href="/terms" target='_blank'>Terms</Link> | <Link href="/Privacy" target='_blank'>Privacy</Link>
+                </p>
+            </footer>
         </>
     );
 };
