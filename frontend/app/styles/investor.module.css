@@ -1,35 +1,59 @@
 /* Navbar styling */
-.navbar {
+.navContainer {
+    padding: 1.5rem 4rem;
     display: flex;
     justify-content: space-between;
-    padding: 1rem 2rem;
     align-items: center;
+    background-color: #1a1a1a;
 }
 
 .logo {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    font-size: 1.5rem;
     font-weight: bold;
-    font-size: 1.2rem;
+}
+
+.logo a {
+    color: #fff;
+    text-decoration: none;
+}
+
+.logoImage {
+    width: 30px;
+    height: 30px;
+    object-fit: contain;
 }
 
 .nav-links {
     display: flex;
-    align-items: center; /* Aligns items vertically */
-    gap: 10px; /* Adjust spacing between items */
+    align-items: center;
+    gap: 30px;
+
 }
 
 .avatarIcon {
-    border-radius: 50%; /* Makes the image circular if needed */
+    border-radius: 50%;
+    margin-left: 20px;
+    /* Makes the image circular if needed */
 }
 
-.nav-links a {
-    color: var(--link-color);
+.nav-links a,
+.nav-links:visited {
+    color: #ccc;
+    background-color: transparent;
     text-decoration: none;
-    margin-left: 2rem;
-    transition: color 0.3s ease;
 }
 
 .nav-links a:hover {
-    color: var(--hover-color);
+    background-color: transparent;
+    text-decoration: underline;
+}
+
+.nav-links a:active {
+    background-color: transparent;
+    text-decoration: none;
 }
 
 /* Search Bar and Advanced Dropdown */
@@ -100,30 +124,41 @@
     display: flex;
     justify-content: space-between;
     padding: 20px;
-    background-color: #f4f4f9;
+    background-color: #ffffff;
     min-height: 100vh;
 }
 
 /* Adjusting the posts grid to 3x3 with bigger boxes and minimal space between */
 .postsGrid {
     display: grid;
-    grid-template-columns: repeat(3, 1fr); /* Keeps the grid at 3 columns */
-    gap: 5px; /* Reducing space even further between grid items */
-    width: 100%; /* Full width of the container */
-    justify-items: center; /* Centers items horizontally */
-    align-items: start; /* Aligns items at the top of the grid cells */
-    padding: 10px; /* Adjust padding for overall spacing */
+    grid-template-columns: repeat(3, 1fr);
+    /* Keeps the grid at 3 columns */
+    gap: 5px;
+    /* Reducing space even further between grid items */
+    width: 100%;
+    /* Full width of the container */
+    justify-items: center;
+    /* Centers items horizontally */
+    align-items: start;
+    /* Aligns items at the top of the grid cells */
+    padding: 10px;
+    /* Adjust padding for overall spacing */
 }
 
 .postCard {
     background-color: #f9f9f9;
     border: 1px solid #ddd;
     border-radius: 8px;
-    padding: 25px; /* Increased padding to make the box bigger */
-    width: 100%; /* Ensures each card takes up the full width of the grid cell */
-    max-width: 500px; /* Max width to control the size */
-    box-sizing: border-box; /* Ensures proper sizing with padding */
-    height: 300px; /* Increased height for bigger boxes */
+    padding: 25px;
+    /* Increased padding to make the box bigger */
+    width: 100%;
+    /* Ensures each card takes up the full width of the grid cell */
+    max-width: 500px;
+    /* Max width to control the size */
+    box-sizing: border-box;
+    /* Ensures proper sizing with padding */
+    height: 300px;
+    /* Increased height for bigger boxes */
     display: flex;
     flex-direction: column;
     justify-content: space-between;
@@ -375,4 +410,30 @@
     padding: 2px 5px;
     cursor: pointer;
     border-radius: 50%;
+}
+
+.footer {
+    text-align: center;
+    padding: 1rem;
+    background-color: #ffffff;
+    font-size: 0.9rem;
+}
+
+.footerIcon {
+    position: relative;
+    z-index: 2;
+    background-color: transparent;
+    align-items: center;
+    justify-self: center;
+    display: flex;
+}
+
+.footer a {
+    color: #000000;
+    text-decoration: none;
+}
+
+.footer a:hover {
+    color: #1a1a1a;
+    text-decoration: underline;
 }

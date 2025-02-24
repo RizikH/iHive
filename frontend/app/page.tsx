@@ -4,17 +4,28 @@ import Link from "next/link";
 import styles from ".//styles/home.module.css"; // ✅ Fixed Import Path
 import ".//styles/globals.css"; // ✅ Fixed Import Path
 import React from "react";
+import Image from "next/image";
 
 export default function Home() {
   return (
     <div className={styles.container}>
       {/* Navigation Bar */}
-      <nav className={styles.navbar}>
-        <div className={styles.logo}>iHive - Home</div>
-        <div className={styles["nav-links"]}>
-          <Link href="/investments"><span>Investments</span></Link>
-          <Link href="/setting"><span>Settings</span></Link>
-          <Link href="/get-started"><span>Sign Out</span></Link>
+
+      <nav className={styles.navContainer}>
+        <div className={styles.logo}>
+          <Image
+            src="/Images/iHive.png"
+            alt="Logo"
+            title="Home"
+            width={35}
+            height={35}
+            className={styles.logoImage}
+          />
+          <Link href="/">iHive-Home</Link>
+        </div>
+        <div className={styles['nav-links']}>
+          <Link href="#setting">Settings</Link>
+          <Link href="#get-started">Signout</Link> 
         </div>
       </nav>
 
