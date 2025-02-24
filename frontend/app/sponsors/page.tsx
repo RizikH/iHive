@@ -1,15 +1,50 @@
+"use client"
+
 import React from 'react';
 import Head from 'next/head';
 import Link from 'next/link';
 import Image from 'next/image';
 import styles from '../styles/sponsors.module.css';
 import '../styles/globals.css';
-import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import '@fortawesome/fontawesome-svg-core/styles.css';
 import AvatarCirclesDemo from '@/components/avatar-circles-demo';
-import MarqueeDemo from '@/components/marquee-demo';
+import { Pie } from 'react-chartjs-2';
+import {
+  Chart as ChartJS, 
+  ArcElement, 
+  Tooltip, 
+  Legend
+} from 'chart.js';
+
+ChartJS.register(
+  ArcElement, Tooltip, Legend
+);
 
 const Sponsors = () => {
+
+  const chartData = {
+    labels: ['Gold Sponsors', 'Silver Sponsors', 'Bronze Sponsors'],
+    datasets: [{
+      data: [300, 200, 100],
+      backgroundColor: ['#ffd700', '#c0c0c0', '#cd7f32'],
+      borderColor: ['#fff', '#fff', '#fff'],
+      borderWidth: 2
+    }]
+  };
+
+  const options = {
+    responsive: true, 
+    plugins: {
+      legend: {
+        position: 'bottom' as const, 
+      }, 
+      title: {
+        display: true, 
+        text: 'Sponsor Distribution'
+      }
+    }
+  };
+
   return (
     <>
     <Head>
@@ -50,7 +85,7 @@ const Sponsors = () => {
               <img src="/Images/sample.jpeg" alt="Profile" title="Change your Avatar"/>
           </div>
           
-          <h1 className={styles.rank}>Sponsors Rank? maybe</h1>
+          <h1 className={styles.rank}>Sponsors rank here...?</h1>
 
           {/* Your Sponsors */}
           <div className={styles.avatarCircles}>
@@ -62,7 +97,7 @@ const Sponsors = () => {
         <div className={styles.graph}>
           <h2 className={styles.graphTitle}>Your Sponsors Graph</h2>
           <div className={styles.graphContainer}>
-            <p>Graph here.</p>
+            <Pie data={chartData} options={options} />
           </div>
         </div>
       </main>

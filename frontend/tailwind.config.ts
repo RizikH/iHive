@@ -54,7 +54,8 @@ export default {
   		},
   		animation: {
   			marquee: 'marquee var(--duration) linear infinite',
-  			'marquee-vertical': 'marquee-vertical var(--duration) linear infinite'
+  			'marquee-vertical': 'marquee-vertical var(--duration) linear infinite',
+  			rippling: 'rippling var(--duration) ease-out'
   		},
   		keyframes: {
   			marquee: {
@@ -65,6 +66,15 @@ export default {
   			'marquee-vertical': {
   				to: {
   					transform: 'translateY(calc(-50% - var(--gap)/2))'
+  				}
+  			},
+  			rippling: {
+  				'0%': {
+  					opacity: '1'
+  				},
+  				'100%': {
+  					transform: 'scale(2)',
+  					opacity: '0'
   				}
   			}
   		},

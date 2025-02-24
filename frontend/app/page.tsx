@@ -13,7 +13,7 @@ export default function Home() {
         <div className={styles.logo}>iHive - Home</div>
         <div className={styles["nav-links"]}>
           <Link href="/investments"><span>Investments</span></Link>
-          <Link href="/settings"><span>Settings</span></Link>
+          <Link href="/setting"><span>Settings</span></Link>
           <Link href="/get-started"><span>Sign Out</span></Link>
         </div>
       </nav>

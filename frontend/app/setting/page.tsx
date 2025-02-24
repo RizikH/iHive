@@ -1,3 +1,4 @@
+'use client';
 import React from 'react';
 import Head from 'next/head';
 import Link from 'next/link';
@@ -5,6 +6,11 @@ import Image from 'next/image';
 import styles from '../styles/setting.module.css';
 import '../styles/globals.css';
 import '@fortawesome/fontawesome-svg-core/styles.css';
+import { useSearchParams } from 'next/navigation';
+import BasicInfo from '@/components/basic-form';
+import SocialMedia from '@/components/social-media';
+import AccountSettings from '@/components/account-settings';
+import NotificationPreferences from '@/components/notification';
 
 const Setting = () => {
     return (
@@ -40,25 +46,58 @@ const Setting = () => {
                 </header>
 
                 <main className={styles.mainContainer}>
-
-                    {/* Sidebar - Category for setting: basic, social-media, account, .. */}
+                    {/* Sidebar - Category for setting */}
                     <div className={styles.sidebar}>
-                        
+                        <ul className={styles.sidebarList}>
+                            <li className={styles.sidebarItem}>
+                                <Link href="/setting?tab=basic" className={styles.sidebarLink}>
+                                    Basic Information
+                                </Link>
+                            </li>
+                            <li className={styles.sidebarItem}>
+                                <Link href="/setting?tab=social" className={styles.sidebarLink}>
+                                    Social Media
+                                </Link>
+                            </li>
+                            <li className={styles.sidebarItem}>
+                                <Link href="/setting?tab=account" className={styles.sidebarLink}>
+                                    Account Settings
+                                </Link>
+                            </li>
+                            <li className={styles.sidebarItem}>
+                                <Link href="/setting?tab=notification" className={styles.sidebarLink}>
+                                    Notification Preferences
+                                </Link>
+                            </li>
+                        </ul>
                     </div>
 
                     <div className={styles.divider}></div>
 
                     {/* SettingContent */}
                     <div className={styles.setting}>
-                        <h2 className={styles.settingCate}>Basic</h2>
-                        <div className={styles.settingContainer}>
-                            <p>seeting here..</p>
-                        </div>
+                        {renderSettingContent()}
                     </div>
                 </main>
             </div>
         </>
     );
 }
+
+const renderSettingContent = () => {
+    const searchParams = useSearchParams();
+    const tab = searchParams?.get('tab') || 'basic';
+
+    switch (tab) {
+        case 'social':
+            return <SocialMedia />;
+        case 'account':
+            return <AccountSettings />;
+        case 'notification':
+            return <NotificationPreferences />;
+        default:
+            return <BasicInfo />;
+    }
+};
 
 export default Setting;
