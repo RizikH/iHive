@@ -1,5 +1,5 @@
-const supabase = require("./backend/config/db");
-const openAI = require("./backend/services/chatgptService");
+const supabase = require("./config/db");
+const openAI = require("./services/chatgptService");
 
 const generateAndLinkTagsForIdeas = async () => {
     try {
