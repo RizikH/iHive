@@ -1,25 +1,59 @@
 /* Navbar styling */
-.navbar {
+.navContainer {
+    padding: 1.5rem 4rem;
     display: flex;
     justify-content: space-between;
-    padding: 1rem 2rem;
     align-items: center;
+    background-color: #1a1a1a;
 }
 
 .logo {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    font-size: 1.5rem;
     font-weight: bold;
-    font-size: 1.2rem;
 }
 
-.nav-links a {
-    color: var(--link-color);
+.logo a {
+    color: #fff;
     text-decoration: none;
-    margin-left: 2rem;
-    transition: color 0.3s ease;
+}
+
+.logoImage {
+    width: 30px;
+    height: 30px;
+    object-fit: contain;
+}
+
+.nav-links {
+    display: flex;
+    align-items: center;
+    gap: 30px;
+
+}
+
+.avatarIcon {
+    border-radius: 50%;
+    margin-left: 20px;
+    /* Makes the image circular if needed */
+}
+
+.nav-links a,
+.nav-links:visited {
+    color: #ccc;
+    background-color: transparent;
+    text-decoration: none;
 }
 
 .nav-links a:hover {
-    color: var(--hover-color);
+    background-color: transparent;
+    text-decoration: underline;
+}
+
+.nav-links a:active {
+    background-color: transparent;
+    text-decoration: none;
 }
 
 /* Search Bar and Advanced Dropdown */
@@ -90,55 +124,72 @@
     display: flex;
     justify-content: space-between;
     padding: 20px;
-    background-color: #f4f4f9;
+    background-color: #ffffff;
     min-height: 100vh;
 }
 
-/* Left Side: Grid for posts */
+/* Adjusting the posts grid to 3x3 with bigger boxes and minimal space between */
 .postsGrid {
     display: grid;
-    grid-template-columns: repeat(2, 1fr);
-    gap: 20px;
-    width: 70%;
-    padding-right: 20px;
+    grid-template-columns: repeat(3, 1fr);
+    /* Keeps the grid at 3 columns */
+    gap: 5px;
+    /* Reducing space even further between grid items */
+    width: 100%;
+    /* Full width of the container */
+    justify-items: center;
+    /* Centers items horizontally */
+    align-items: start;
+    /* Aligns items at the top of the grid cells */
+    padding: 10px;
+    /* Adjust padding for overall spacing */
 }
 
 .postCard {
-    background-color: white;
+    background-color: #f9f9f9;
+    border: 1px solid #ddd;
     border-radius: 8px;
-    padding: 20px;
-    box-shadow: 0px 4px 6px rgba(0, 0, 0, 0.1);
-    transition: transform 0.3s ease, box-shadow 0.3s ease;
-}
-
-.postCard h3 {
-    color: #333;
-    font-size: 18px;
-    margin-bottom: 10px;
-}
-
-.postCard p {
-    font-size: 14px;
-    color: #666;
+    padding: 25px;
+    /* Increased padding to make the box bigger */
+    width: 100%;
+    /* Ensures each card takes up the full width of the grid cell */
+    max-width: 500px;
+    /* Max width to control the size */
+    box-sizing: border-box;
+    /* Ensures proper sizing with padding */
+    height: 300px;
+    /* Increased height for bigger boxes */
     display: flex;
+    flex-direction: column;
     justify-content: space-between;
-    padding: 2rem;
 }
 
-.postsGrid {
-    flex: 0 0 60%;
-    display: grid;
-    grid-template-columns: repeat(2, 1fr);
-    gap: 1.5rem;
+.searchContainer {
+    display: flex;
+    justify-content: center;
+    margin: 20px 0;
 }
 
-.postCard {
-    background-color: white;
-    border-radius: 8px;
-    padding: 20px;
-    box-shadow: 0px 4px 6px rgba(0, 0, 0, 0.1);
-    transition: transform 0.3s ease, box-shadow 0.3s ease;
+.searchInput {
+    padding: 10px;
+    border-radius: 5px;
+    border: 1px solid #ddd;
+    margin-right: 10px;
 }
+
+.searchButton {
+    padding: 10px;
+    border-radius: 5px;
+    background-color: #0066cc;
+    color: white;
+    border: none;
+    cursor: pointer;
+}
+
+.searchButton:hover {
+    background-color: #005bb5;
+}
+
 
 .postCard h3 {
     color: var(--foreground);
@@ -304,3 +355,85 @@
     margin-top: 20px;
 }
 
+/* Filter Popup */
+.filterPopup {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.5);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 999;
+}
+
+.filterContent {
+    background-color: white;
+    padding: 20px;
+    border-radius: 8px;
+    width: 400px;
+    max-width: 90%;
+}
+
+.filterButton {
+    background-color: #007bff;
+    color: white;
+    border: none;
+    padding: 10px 15px;
+    cursor: pointer;
+    border-radius: 4px;
+}
+
+.applyFiltersButton {
+    background-color: #28a745;
+    color: white;
+    border: none;
+    padding: 10px 15px;
+    cursor: pointer;
+    border-radius: 4px;
+}
+
+.tag {
+    display: inline-block;
+    background-color: #f0f0f0;
+    padding: 5px;
+    margin: 5px;
+    border-radius: 4px;
+}
+
+.tag button {
+    background-color: red;
+    color: white;
+    border: none;
+    padding: 2px 5px;
+    cursor: pointer;
+    border-radius: 50%;
+}
+
+.footer {
+    text-align: center;
+    padding: 1rem;
+    background-color: #ffffff;
+    font-size: 0.9rem;
+}
+
+.footerIcon {
+    position: relative;
+    z-index: 2;
+    background-color: transparent;
+    align-items: center;
+    justify-self: center;
+    display: flex;
+}
+
+.footer a {
+    color: #000000;
+    text-decoration: none;
+}
+
+.footer a:hover {
+    color: #1a1a1a;
+    text-decoration: underline;
+}
