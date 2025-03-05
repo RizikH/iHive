@@ -23,10 +23,10 @@ ChartJS.register(
 const Sponsors = () => {
 
   const chartData = {
-    labels: ['Gold Sponsors', 'Silver Sponsors', 'Bronze Sponsors'],
+    labels: ['Gold Sponsors', 'Silver Sponsors', 'Bronze Sponsors'],  // labels for now, maybe sponsors' username
     datasets: [{
-      data: [300, 200, 100],
-      backgroundColor: ['#ffd700', '#c0c0c0', '#cd7f32'],
+      data: [300, 200, 100],  // invest amount
+      backgroundColor: ['#ffd700', '#c0c0c0', '#cd7f32'],  // make a random color for each
       borderColor: ['#fff', '#fff', '#fff'],
       borderWidth: 2
     }]

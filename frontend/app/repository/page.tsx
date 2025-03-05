@@ -181,7 +181,7 @@ const Repository = () => {
         </div>
         <div className={styles.docContent}>
           <div className={styles.docBody} onKeyDown={handleKeyDown}>
-            <p>input here...</p>
+            <p>Input here...</p>
           </div>
         </div>
       </div>
