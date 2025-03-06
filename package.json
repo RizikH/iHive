@@ -3,25 +3,31 @@
     "version": "1.0.0",
     "private": true,
     "scripts": {
-        "dev": "nodemon app.js",
-        "start": "node app.js"
+        "dev": "nodemon server.js",
+        "start": "node server.js"
     },
     "dependencies": {
-        "@supabase/supabase-js": "^2.48.1",
+        "@radix-ui/react-slot": "^1.1.2",
+        "@supabase/supabase-js": "latest",
+        "@tabler/icons-react": "^3.30.0",
         "body-parser": "latest",
-        "cors": "^2.8.5",
+        "class-variance-authority": "^0.7.1",
+        "clsx": "^2.1.1",
+        "cors": "latest",
         "dotenv": "^16.4.7",
-        "express": "^4.21.2",
+        "express": "latest",
+        "framer-motion": "^12.4.2",
         "jsonwebtoken": "latest",
-        "nodemon": "^3.1.9",
-        "openai": "^4.85.1",
-        "pg": "^8.13.3",
+        "motion": "^12.4.2",
+        "next": "latest",
+        "openai": "latest",
+        "react": "^19.0.0",
+        "react-dom": "^19.0.0",
+        "react-icons": "^5.5.0",
         "socket.io": "^4.8.1",
-        "supabase": "^2.12.1"
+        "tailwind-merge": "^3.0.1"
     },
     "devDependencies": {
-        "autoprefixer": "^10.4.20",
-        "postcss": "^8.5.1",
-        "tailwindcss": "^4.0.2"
+        "supertest": "^7.0.0"
     }
 }
