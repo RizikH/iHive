@@ -1,125 +1,147 @@
-"use client"; // ✅ Fixes hydration issues
+"use client";
 
 import React, { useEffect, useState } from "react";
-import Head from 'next/head';
-import Link from 'next/link';
+import Head from "next/head";
+import Link from "next/link";
 import styles from "../styles/investor.module.css";
 import "../styles/globals.css";
 import Image from "next/image";
 
+const API_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:5000/api";
+
+interface Tag {
+    id: number;
+    name: string;
+}
+
+interface IdeaTag {
+    id: number;
+    tag_id: number;
+    idea_id: number;
+    tags: Tag;
+}
+
+interface Idea {
+    id: number;
+    title: string;
+    description: string;
+    category?: string;
+    funding_progress?: number;
+    idea_tags?: IdeaTag[];
+    price?: number;
+}
+
 const InvestorPage = () => {
-    interface Idea {
-        id: number;
-        title: string;
-        description: string;
-        category?: string;
-        funding_progress?: number;
-        tags_name?: { id: number; tag_id: number }[]; // Association table
-    }
-
-    interface Tag {
-        id: number;
-        name: string;
-    }
-
-
-
     const [ideas, setIdeas] = useState<Idea[]>([]);
-    const [tags, setTags] = useState<Tag[]>([]);
     const [loadingIdeas, setLoadingIdeas] = useState(true);
-    const [loadingTags, setLoadingTags] = useState(true);
     const [errorIdeas, setErrorIdeas] = useState<string | null>(null);
-    const [errorTags, setErrorTags] = useState<string | null>(null);
-    const [searchTerm, setSearchTerm] = useState('');
+    const [searchTerm, setSearchTerm] = useState("");
+    const [tagsFilter, setTagsFilter] = useState<string[]>([]);
+    const [priceRange, setPriceRange] = useState<number[]>([0, 10000]);
+    const [showFilterPopup, setShowFilterPopup] = useState(false);
 
     useEffect(() => {
         const fetchIdeas = async () => {
             try {
-                const response = await fetch('http://localhost:5432/api/ideas');
-                if (!response.ok) throw new Error('Failed to fetch ideas');
+                const response = await fetch(`${API_URL}/ideas`);
+                if (!response.ok) throw new Error("Failed to fetch ideas");
                 const data = await response.json();
-                setIdeas(data);
-            } catch (err: any) {
-                setErrorIdeas(err.message);
+                setIdeas(data || []);
+            } catch (err: unknown) {
+                setErrorIdeas(err instanceof Error ? err.message : "An unknown error occurred.");
             } finally {
                 setLoadingIdeas(false);
             }
         };
 
-        const fetchTags = async () => {
-            try {
-                const response = await fetch('http://localhost:5432/api/tags');
-                if (!response.ok) throw new Error('Failed to fetch tags');
+        fetchIdeas();
+    }, []);
+
+    useEffect(() => {
+        const fetchSearchedIdeas = async () => {
+            if (searchTerm === "") {
+                const response = await fetch(`${API_URL}/ideas`);
                 const data = await response.json();
-                setTags(data);
-            } catch (err: any) {
-                setErrorTags(err.message);
-            } finally {
-                setLoadingTags(false);
+                setIdeas(data || []);
+                return;
+            }
+
+            try {
+                const response = await fetch(`${API_URL}/ideas/search/title/${searchTerm}`);
+                if (!response.ok) throw new Error("Failed to fetch search results");
+                const data = await response.json();
+                setIdeas(data || []);
+            } catch (err: unknown) {
+                setErrorIdeas(err instanceof Error ? err.message : "An unknown error occurred.");
             }
         };
 
-        const fetchSearch = async () => {
-            try {
-                const response = await fetch('http://localhost:5432/api/search');
-                if (!response.ok) throw new Error('Failed to fetch search');
-                const data = await response.json();
-                setTags(data);
-            } catch (err: any) {
-                setErrorTags(err.message);
-            } finally {
-                setLoadingTags(false);
-            }
-        }
+        fetchSearchedIdeas();
+    }, [searchTerm]);
 
-        fetchIdeas();
-        fetchTags();
-        fetchSearch();
-    }, []);
-
-    const handleSearch = async () => {
-        if (!searchTerm) return;
-        try {
-            const response = await fetch(`http://localhost:5432/api/ideas/search/${searchTerm}`);
-            if (!response.ok) throw new Error('Failed to fetch search results');
-            const data = await response.json();
-            setIdeas(data);
-        } catch (err: any) {
-            setErrorIdeas(err.message);
+    const handleAddTag = (tag: string) => {
+        if (!tagsFilter.includes(tag)) {
+            setTagsFilter((prevTags) => [...prevTags, tag]);
         }
     };
 
-    // Helper function to get tag names for an idea
-    const getIdeaTags = (idea: Idea): string[] => {
-        return idea.tags_name
-            ? idea.tags_name
-                .map((tag) => tags.find((t) => t.id === tag.tag_id)?.name)
-                .filter(Boolean) as string[]
-            : [];
+    const handleRemoveTag = (tag: string) => {
+        setTagsFilter((prevTags) => prevTags.filter((t) => t !== tag));
+    };
+
+    const handleApplyFilters = () => {
+        const filteredIdeas = ideas.filter((idea) => {
+            const matchesTags = tagsFilter.every((tag) =>
+                idea.idea_tags?.some((t) => t.tags.name === tag)
+            );
+            const matchesPrice =
+                idea.price !== undefined &&
+                idea.price >= priceRange[0] &&
+                idea.price <= priceRange[1];
+
+            return matchesTags && matchesPrice;
+        });
+
+        setIdeas(filteredIdeas);
+        setShowFilterPopup(false);
     };
 
     return (
         <>
             <Head>
-                <meta charSet="UTF-8" />
-                <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-                <meta name="Author" content="Yixi Xie" />
-                <meta name="Description" content="Investor profile page." />
                 <title>Investor Profile</title>
-                <link
-                    rel="stylesheet"
-                    href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.7.2/css/all.min.css"
-                />
+                <meta name="viewport" content="width=device-width, initial-scale=1.0" />
                 <link rel="icon" href="/Images/iHive.png" />
             </Head>
 
-            <nav className={styles.navbar}>
-                <div className={styles.logo}>iHive - Investor</div>
-                <div className={styles['nav-links']}>
+            <nav className={styles.navContainer}>
+                <div className={styles.logo}>
+                    <Image
+                        src="/Images/iHive.png"
+                        alt="Logo"
+                        title="Home"
+                        width={35}
+                        height={35}
+                        className={styles.logoImage}
+                    />
+                    <Link href="/">iHive-Investors</Link>
+                </div>
+                <div className={styles["nav-links"]}>
                     <Link href="#investments">Investments</Link>
                     <Link href="#setting">Settings</Link>
                     <Link href="#get-started">Signout</Link>
+                    <Link href="/investor-profile">
+                        <Image
+                            src="/Images/Yixi.jpeg"
+                            alt="Investor Profile"
+                            width={40}
+                            height={40}
+                            className={styles.avatarIcon}
+                        />
+                    </Link>
                 </div>
+
+                {/* Search and Filter Section */}
                 <div className={styles.searchContainer}>
                     <input
                         type="text"
@@ -128,72 +150,92 @@ const InvestorPage = () => {
                         value={searchTerm}
                         onChange={(e) => setSearchTerm(e.target.value)}
                     />
-                    <button onClick={handleSearch} className={styles.searchButton}>Search</button>
-                    <div className={styles.advancedDropdown}>
-                        <button className={styles.dropdownButton}>Advanced</button>
-                        <div className={styles.dropdownContent}>
-                            <a href="#">Category</a>
-                            <a href="#">Funding Progress</a>
-                            <a href="#">Tags</a>
-                        </div>
-                    </div>
+                    <button className={styles.searchButton}>Search</button>
+                    <button className={styles.filterButton} onClick={() => setShowFilterPopup(true)}>
+                        Filter
+                    </button>
                 </div>
             </nav>
 
+            {showFilterPopup && (
+                <div className={styles.filterPopup}>
+                    <div className={styles.filterContent}>
+                        <h3>Filter Ideas</h3>
+                        <div>
+                            <input
+                                type="text"
+                                placeholder="Add a tag"
+                                onKeyDown={(e) => {
+                                    if (e.key === "Enter" && e.currentTarget.value.trim()) {
+                                        handleAddTag(e.currentTarget.value.trim());
+                                        e.currentTarget.value = "";
+                                    }
+                                }}
+                            />
+                            <div>
+                                {tagsFilter.map((tag, index) => (
+                                    <span key={index} className={styles.tag}>
+                                        {tag} <button onClick={() => handleRemoveTag(tag)}>x</button>
+                                    </span>
+                                ))}
+                            </div>
+                        </div>
+                        <div>
+                            <label>Price Range:</label>
+                            <input
+                                type="range"
+                                min="0"
+                                max="10000"
+                                step="100"
+                                value={priceRange[0]}
+                                onChange={(e) => setPriceRange([+e.target.value, priceRange[1]])}
+                            />
+                            <input
+                                type="range"
+                                min="0"
+                                max="10000"
+                                step="100"
+                                value={priceRange[1]}
+                                onChange={(e) => setPriceRange([priceRange[0], +e.target.value])}
+                            />
+                            <p>Price: {priceRange[0]} - {priceRange[1]}</p>
+                        </div>
+                        <button className={styles.applyFiltersButton} onClick={handleApplyFilters}>
+                            Apply Filters
+                        </button>
+                    </div>
+                </div>
+            )}
 
+            {/* Main Content */}
             <main className={styles.pageContainer}>
-                {/* Left Side: Posts Grid */}
                 <div className={styles.postsGrid}>
                     {loadingIdeas && <p>Loading ideas...</p>}
                     {errorIdeas && <p>Error: {errorIdeas}</p>}
-                    {!loadingIdeas && !errorIdeas && ideas.length === 0 && <p>No ideas found.</p>}
+                    {!loadingIdeas && !errorIdeas && ideas?.length === 0 && <p>No ideas found.</p>}
 
-                    {Array.isArray(ideas) && ideas.map((idea) => (
+                    {ideas.map((idea) => (
                         <div className={styles.postCard} key={idea.id}>
                             <h3>{idea.title}</h3>
                             <p>{idea.description}</p>
-                            <div className={styles.tags}>
-                                {getIdeaTags(idea).length > 0 ? (
-                                    getIdeaTags(idea).map((tag, index) => (
-                                        <span key={index}>#{tag}</span>
-                                    ))
-                                ) : (
-                                    <span>#NoTags</span>
-                                )}
-                            </div>
-                            <div className={styles.fundingProgress}>
-                                <div
-                                    className={styles.fundingBar}
-                                    style={{ width: `${idea.funding_progress || 0}%` }}
-                                ></div>
-                            </div>
+                            <p>{idea.category}</p>
+                            <p>
+                                {idea.idea_tags && idea.idea_tags.length > 0
+                                    ? idea.idea_tags.map(tag => tag.tags.name).join(", ")
+                                    : "No tags available"}
+                            </p>
                             <button className={styles.investButton}>💰 Invest</button>
                         </div>
                     ))}
                 </div>
-
-                {/* Right Side: Profile Content with Buttons */}
-                <div className={styles.profile}>
-                    <h2>Investor Profile</h2>
-                    <div className={styles.profileContent}>
-                        <div className={styles['profile-image']} title="Change Your Avatar">
-                            <img
-                                src="/Images/investor-avatar.png"
-                                alt="Investor Avatar"
-                                className={styles.avatar}
-                            />
-                        </div>
-                        <h1 title="Investor Name">Investor Name</h1>
-
-                        {/* Investor Stats */}
-                        <div className={styles['investor-stats']}>
-                            <p>Investments: <strong>$50,000</strong></p>
-                            <p>Projects Followed: <strong>12</strong></p>
-                            <p>Investment Return: <strong>18%</strong></p>
-                        </div>
-                    </div>
-                </div>
             </main>
+
+            {/* Footer */}
+            <footer className={styles.footer}>
+                <p>
+                    © 2025 iHive · Entrepreneur | <Link href="/terms">Terms</Link> | <Link href="/Privacy">Privacy</Link>
+                </p>
+            </footer>
         </>
     );
 };

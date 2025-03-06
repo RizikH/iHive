@@ -1,0 +1,243 @@
+.pageContainer {
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    background-color: #fff;
+    color: #000;
+}
+
+.navbar {
+    padding: 1.5rem 4rem;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    background-color: #1a1a1a;
+}
+
+.logo {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    font-size: 1.5rem;
+    font-weight: bold;
+}
+
+.logo a {
+    color: #fff;
+    text-decoration: none;
+}
+
+.logoIcon {
+    width: 35px;
+    height: 35px;
+    object-fit: contain;
+}
+
+.nav-links {
+    display: flex;
+    gap: 2rem;
+    font-weight: bold;
+}
+
+.nav-links a, .nav-links:visited {
+    color: #ccc;
+    background-color: transparent;
+    text-decoration: none;
+}
+
+.nav-links a:hover {
+    text-decoration: underline;
+}
+
+.nav-links a:active {
+    text-decoration: none;
+}
+
+
+.mainContainer {
+    display: flex;
+    flex-direction: row;
+    min-height: calc(100vh - 150px);
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "Noto Sans", Helvetica, Arial, sans-serif;
+    margin: 0 auto;
+    max-width: 1280px;
+    width: 100%;
+    padding: 0 24px;
+}
+
+.sidebar {
+    width: 250px;
+    padding: 20px;
+}
+
+.sidebarList {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+}
+
+.sidebarItem {
+    margin-bottom: 10px;
+}
+
+.sidebarLink {
+    display: block;
+    padding: 10px;
+    color: #333;
+    text-decoration: none;
+    border-radius: 5px;
+    transition: background-color 0.3s;
+}
+
+.sidebarLink:hover {
+    background-color: #f0f0f0;
+}
+
+.sidebarLink.active {
+    background-color: #f6f8fa;
+    color: #24292f;
+    font-weight: 500;
+    border-left: 2px solid #0969da;
+}
+
+.setting {
+    flex: 1;
+    padding: 20px;
+}
+
+.settingCate {
+    margin-bottom: 20px;
+    font-size: 24px;
+    color: #333;
+}
+
+.settingForm {
+    width: 70%;
+    min-width: 300px;
+    max-width: 800px;
+    padding: 24px;
+    margin: 16px 0;
+    background-color: #fff;
+    border: 1px solid #d0d7de;
+    border-radius: 6px;
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+}
+
+.settingSection {
+    padding: 2rem;
+    background: white;
+    border-radius: 10px;
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+}
+
+.settingSection h2 {
+    font-size: 1.5rem;
+    color: #1a1a1a;
+    margin-bottom: 2rem;
+}
+
+.formGroup {
+    margin-bottom: 1.5rem;
+}
+
+.formGroup label {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    font-weight: 500;
+    margin-bottom: 0.5rem;
+    color: #1a1a1a;
+}
+
+.formGroup input {
+    width: 100%;
+    padding: 0.75rem;
+    border: 1px solid #e2e8f0;
+    border-radius: 6px;
+    font-size: 1rem;
+    transition: border-color 0.2s;
+}
+
+.formGroup input:focus {
+    outline: none;
+    border-color: #5046e6;
+}
+
+.textarea {
+    width: 100%;
+    padding: 0.75rem;
+    border: 1px solid #e2e8f0;
+    border-radius: 6px;
+    font-size: 1rem;
+    resize: vertical;
+    min-height: 100px;
+    transition: border-color 0.2s;
+}
+
+.textarea:focus {
+    outline: none;
+    border-color: #5046e6;
+}
+
+.saveButton {
+    width: 100%;
+    padding: 0.75rem;
+    background: #1a1a1a;
+    color: white;
+    border: none;
+    border-radius: 6px;
+    font-size: 1rem;
+    font-weight: 500;
+    cursor: pointer;
+    transition: background-color 0.2s;
+}
+
+.saveButton:hover {
+    background: #333;
+}
+
+.icon {
+    color: #1a1a1a;
+    width: 1.2rem;
+    height: 1.2rem;
+}
+
+.divider {
+    width: 1px;
+    background-color: #ddd;
+    margin: 0 20px;
+}
+
+/* Add these new styles */
+.checkboxGroup {
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
+    margin-top: 0.5rem;
+    margin-left: 1.75rem;  /* Indent checkboxes */
+}
+
+.checkboxGroup label {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    font-weight: normal;
+    cursor: pointer;
+}
+
+.checkboxGroup input[type="checkbox"] {
+    width: 1rem;
+    height: 1rem;
+    margin: 0;
+    cursor: pointer;
+    accent-color: #1a1a1a;
+}
+
+.checkboxLabel {
+    font-size: 1.1rem;
+    font-weight: 500;
+    color: #1a1a1a;
+    margin-bottom: 0.5rem;
+}

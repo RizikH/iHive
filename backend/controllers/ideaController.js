@@ -1,8 +1,7 @@
-const Idea = require('../models/Idea');
-const Tag = require('../models/Tags');
-const chatgptService = require("../services/chatgptService");
+const Idea = require("../models/Idea");
+const supabase = require("../config/db");
 
-// GET /api/ideas
+// ✅ GET /api/ideas/all
 const getAllIdeas = async (req, res) => {
     try {
         const ideas = await Idea.getAllIdeas();
@@ -12,7 +11,7 @@ const getAllIdeas = async (req, res) => {
     }
 };
 
-// GET /api/ideas/:id
+// ✅ GET /api/ideas/get/:id
 const getIdeaById = async (req, res) => {
     try {
         const idea = await Idea.getIdeaById(req.params.id);
@@ -25,97 +24,84 @@ const getIdeaById = async (req, res) => {
     }
 };
 
-// POST /api/ideas
+// ✅ POST /api/ideas/ (Create Idea)
 const createIdea = async (req, res) => {
     try {
-        const { title, description } = req.body;
+        const { title, description, category } = req.body;
+        const userId = req.user?.id; // Ensure user is authenticated
 
-        // Create the idea
-        const newIdea = await Idea.createIdea(title, description);
+        if (!title || !description || !category) {
+            return res.status(400).json({ error: "All fields (title, description, category) are required." });
+        }
 
-        // Generate tags using AI
-        const tags = await chatgptService.generateTags(title, description);
-        
-        // Process each tag: check if it exists, otherwise create it
-        const tagIds = await Promise.all(
-            tags.map(async (tagName) => {
-                let tag = await Tag.findByName(tagName);
-                if (!tag) {
-                    tag = await Tag.createTag(tagName);
-                }
-                return tag.id;
-            })
-        );
+        if (!userId) {
+            return res.status(401).json({ error: "Unauthorized: Missing user ID." });
+        }
 
-        // Associate tags with the idea
-        await Idea.addTagsToIdea(newIdea.id, tagIds);
-
-        res.status(201).json({ message: "Idea created successfully", idea: newIdea, tags });
+        const newIdea = await Idea.createIdea({ user_id: userId, title, description, category });
+        res.status(201).json({ message: "Idea created successfully!", idea: newIdea });
     } catch (error) {
+        console.error("Create Idea Error:", error.message);
         res.status(500).json({ error: error.message });
     }
 };
 
-// PUT /api/ideas/:id
+// ✅ PUT /api/ideas/update/:id
 const updateIdea = async (req, res) => {
     try {
-        const { title, description } = req.body;
-        const updatedIdea = await Idea.updateIdea(req.params.id, title, description);
+        const { title, description, category, status } = req.body;
+        const ideaId = req.params.id;
+
+        const updatedIdea = await Idea.updateIdea(ideaId, { title, description, category, status });
         if (!updatedIdea) {
-            return res.status(404).json({ message: "Idea not found" });
+            return res.status(404).json({ message: "Idea not found or update failed" });
         }
 
-        // Regenerate tags for the updated idea
-        const tags = await chatgptService.generateTags(title, description);
-        
-        // Process each tag: check if it exists, otherwise create it
-        const tagIds = await Promise.all(
-            tags.map(async (tagName) => {
-                let tag = await Tag.findByName(tagName);
-                if (!tag) {
-                    tag = await Tag.createTag(tagName);
-                }
-                return tag.id;
-            })
-        );
-
-        // Update associated tags with the idea
-        await Idea.updateTagsForIdea(updatedIdea.id, tagIds);
-
-        res.json({ message: "Idea updated successfully", idea: updatedIdea, tags });
+        res.json({ message: "Idea updated successfully!", updatedIdea });
     } catch (error) {
+        console.error("Update Idea Error:", error.message);
         res.status(500).json({ error: error.message });
     }
 };
 
-// DELETE /api/ideas/:id
+// ✅ DELETE /api/ideas/delete/:id
 const deleteIdea = async (req, res) => {
     try {
-        const deleted = await Idea.deleteIdea(req.params.id);
-        if (!deleted) {
+        const ideaId = req.params.id;
+        const deletedIdea = await Idea.deleteIdea(ideaId);
+
+        if (!deletedIdea) {
             return res.status(404).json({ message: "Idea not found" });
         }
-        res.json({ message: "Idea deleted successfully" });
+
+        res.json({ message: "Idea deleted successfully", deletedIdea });
     } catch (error) {
+        console.error("Delete Idea Error:", error.message);
         res.status(500).json({ error: error.message });
     }
 };
 
-// GET /api/ideas/search/:name
-const searchName = async (req, res) => {
+// ✅ GET /api/ideas/search?title=...
+const searchIdeasByTitle = async (req, res) => {
     try {
-        const ideas = await Idea.searchByName(req.params.name);
+        const { title } = req.params;
+        if (!title) {
+            return res.status(400).json({ error: "Title parameter is required for search." });
+        }
+
+        const ideas = await Idea.getIdeasByTitle(title);
         res.json(ideas);
     } catch (error) {
+        console.error("Search Ideas Error:", error.message);
         res.status(500).json({ error: error.message });
     }
 };
 
-module.exports = { 
-    getAllIdeas, 
-    getIdeaById, 
-    createIdea, 
-    updateIdea, 
-    deleteIdea, 
-    searchName 
+module.exports = {
+    getAllIdeas,
+    getIdeaById,
+    createIdea,
+    updateIdea,
+    deleteIdea,
+    searchIdeasByTitle
 };

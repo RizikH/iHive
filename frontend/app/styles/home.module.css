@@ -7,28 +7,62 @@
     color: #212529;
 }
 
-/* Navbar */
-.navbar {
+/* Navbar styling */
+.navContainer {
+    padding: 1.5rem 4rem;
     display: flex;
     justify-content: space-between;
-    padding: 1rem 2rem;
     align-items: center;
+    background-color: #1a1a1a;
 }
 
 .logo {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    font-size: 1.5rem;
     font-weight: bold;
-    font-size: 1.2rem;
 }
 
-.nav-links a {
-    color: var(--link-color);
+.logo a {
+    color: #fff;
     text-decoration: none;
-    margin-left: 2rem;
-    transition: color 0.3s ease;
+}
+
+.logoImage {
+    width: 35px;
+    height: 35px;
+    object-fit: contain;
+}
+
+.nav-links {
+    display: flex;
+    align-items: center;
+    /* Aligns items vertically */
+    gap: 10px;
+    /* Adjust spacing between items */
+}
+
+.avatarIcon {
+    border-radius: 50%;
+    /* Makes the image circular if needed */
+}
+
+.nav-links a,
+.nav-links:visited {
+    color: #ccc;
+    background-color: transparent;
+    text-decoration: none;
 }
 
 .nav-links a:hover {
-    color: var(--hover-color);
+    background-color: transparent;
+    text-decoration: underline;
+}
+
+.nav-links a:active {
+    background-color: transparent;
+    text-decoration: none;
 }
 
 /* Split Layout */
@@ -36,33 +70,75 @@
     display: flex;
     flex: 1;
     height: calc(100vh - 60px);
+    align-items: center; /* Ensures vertical alignment */
+    justify-content: space-evenly; /* Evenly spaces the two sides */
+    gap: 10px; /* Adjust the space between sides */
 }
 
-/* Entrepreneur & Investor Side */
+/* Entrepreneur & Investor Sections */
 .entrepreneurSide,
 .investorSide {
     flex: 1;
-    padding: 2rem;
     display: flex;
     flex-direction: column;
-    align-items: center;
-    justify-content: center;
+    align-items: center;  /* Centers items horizontally */
+    justify-content: flex-start; /* Aligns content to the top */
     text-align: center;
+    padding: 1.5rem; /* Reduced padding */
+    max-width: 500px; /* Controls the width of each side */
 }
 
-.entrepreneurSide {
-    background-color: #f8f9fa;
+/* Titles & Paragraphs */
+.entrepreneurSide h1,
+.investorSide h1 {
+    font-size: 2rem;
+    margin-bottom: 1rem;
 }
 
-.investorSide {
-    background-color: #e9ecef;
+.entrepreneurSide p,
+.investorSide p {
+    font-size: 1.1rem;
+    line-height: 1.6;
+    max-width: 400px; /* Reduced max-width for better alignment */
+    margin-bottom: 1.5rem;
+}
+
+/* Featured Projects and Investments */
+.featuredProjects,
+.featuredInvestments {
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+    align-items: center;  /* Ensures content stays centered */
+    margin-top: 2rem;
+}
+
+/* Project & Investment Cards */
+.projectCard,
+.investmentCard {
+    background: white;
+    padding: 1.5rem;
+    width: 80%;  /* Makes cards consistent */
+    max-width: 350px;  /* Prevents overly wide cards */
+    border-radius: 8px;
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.15);
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+    text-align: left; /* Keeps text aligned inside the card */
+    margin-bottom: 1rem; /* Adds spacing between cards */
+}
+
+.projectCard:hover,
+.investmentCard:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 6px 12px rgba(0, 0, 0, 0.2);
 }
 
 /* Buttons */
 .entrepreneurButton,
 .investorButton {
-    padding: 12px 24px;
+    display: inline-block;
     margin-top: 15px;
+    padding: 14px 28px;
     font-size: 1rem;
     color: white;
     border: none;
@@ -89,21 +165,4 @@
     transform: scale(1.05);
 }
 
-/* Project & Investment Cards */
-.projectCard,
-.investmentCard {
-    background: white;
-    padding: 1.5rem;
-    margin: 1rem 0;
-    width: 80%;
-    border-radius: 8px;
-    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.15);
-    transition: transform 0.2s ease, box-shadow 0.2s ease;
-}
-
-.projectCard:hover,
-.investmentCard:hover {
-    transform: translateY(-5px);
-    box-shadow: 0 6px 12px rgba(0, 0, 0, 0.2);
-}
 

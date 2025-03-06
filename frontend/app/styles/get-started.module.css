@@ -1,14 +1,44 @@
+.bodyContainer {
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    background-color: #ffffff;
+    color: #000000;
+}
+
+
+  
+.navContainer {
+    padding: 1.5rem 4rem;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    background-color: #1a1a1a;
+}
+
 .logo {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
     font-size: 1.5rem;
     font-weight: bold;
-    color:#ffffff;
+}
+
+.logo a {
+    color: #fff;
+    text-decoration: none;
+}
+
+.logoImage {
+    width: 35px;
+    height: 35px;
+    object-fit: contain;
 }
 
 .nav-links {
     display: flex;
     gap: 2rem;
     font-weight: bold;
-    color:#ffffff;
 }
 
 .nav-links a, .nav-links:visited {
@@ -17,12 +47,12 @@
     text-decoration: none;
 }
 
-.nav-links:hover {
+.nav-links a:hover {
     background-color: transparent;
     text-decoration: underline;
 }
 
-.nav-links:active {
+.nav-links a:active {
     background-color: transparent;
     text-decoration: none;
 }
@@ -31,8 +61,15 @@
     flex: 1;
     display: flex;
     align-items: center;
-    padding: 4rem;
-    gap: 4rem;
+    justify-content: center;
+    padding: 2rem 6rem;
+    gap: 6rem;
+    margin-top: -4rem;
+}
+
+.main-content > div {
+    flex: 1;
+    max-width: 500px;
 }
 
 .intro-text {
@@ -63,11 +100,42 @@
 }
 
 .ihive-icon {
-    flex: 1;
-    text-align: right;
+    display: flex;
+    justify-content: center;
+    align-items: center;
 }
 
 .ihive-icon img {
-    max-width: 100%;
-    height: auto;
+    width: 400px;
+    height: 400px;
+    animation: float 3s ease-in-out infinite;
+    filter: drop-shadow(0 10px 15px rgba(0, 0, 0, 0.1));
+}
+
+@keyframes float {
+    0%, 100% {
+        transform: translateY(0);
+    }
+    50% {
+        transform: translateY(-20px);
+    }
+}
+
+/* Responsive design */
+@media (max-width: 768px) {
+    .main-content {
+        flex-direction: column;
+        padding: 1rem 2rem;
+        gap: 2rem;
+        margin-top: -2rem;
+    }
+
+    .main-content > div {
+        max-width: 100%;
+    }
+
+    .ihive-icon img {
+        width: 250px;
+        height: 250px;
+    }
 }
