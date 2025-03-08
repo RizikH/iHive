@@ -8,6 +8,7 @@ import styles from '../styles/sponsors.module.css';
 import '../styles/globals.css';
 import '@fortawesome/fontawesome-svg-core/styles.css';
 import AvatarCirclesDemo from '@/components/avatar-circles-demo';
+import AnimatedListDemo from "@/components/animated-list-demo";
 import { Pie } from 'react-chartjs-2';
 import {
   Chart as ChartJS, 
@@ -85,11 +86,16 @@ const Sponsors = () => {
               <img src="/Images/sample.jpeg" alt="Profile" title="Change your Avatar"/>
           </div>
           
-          <h1 className={styles.rank}>Sponsors rank here...?</h1>
+          <h1 className={styles.recently}>Recent Sponsors...</h1>
 
           {/* Your Sponsors */}
           <div className={styles.avatarCircles}>
             <AvatarCirclesDemo />
+          </div>
+
+          {/* Notifications/Direct Messages */}
+          <div className={styles.notifications}>
+            <AnimatedListDemo />
           </div>
         </div>
 

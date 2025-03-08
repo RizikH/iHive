@@ -21,7 +21,6 @@ const EntrepreneurProfile = () => {
   const [currentAvatar, setCurrentAvatar] = useState('https://avatar.vercel.sh/jack');
 
   const handleAvatarChange = (newAvatarUrl: string) => {
-    // If there was a previous blob URL, revoke it
     if (currentAvatar.startsWith('blob:')) {
       URL.revokeObjectURL(currentAvatar);
     }
@@ -29,7 +28,6 @@ const EntrepreneurProfile = () => {
     setIsAvatarModalOpen(false);
   };
 
-  // Clean up on component unmount
   React.useEffect(() => {
     return () => {
       if (currentAvatar.startsWith('blob:')) {

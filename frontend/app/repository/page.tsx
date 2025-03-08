@@ -256,7 +256,7 @@ const Repository = () => {
             {!hasContent && (
               <div className={styles.placeholderContent}>
                 <h3>Welcome to iHive Editor!</h3>
-                <p>Click the Edit button or press Ctrl+E to start editing.</p>
+                <p>Click the Edit button to start editing.</p>
                 <div className={styles.shortcuts}>
                   <p>Helpful shortcuts:</p>
                   <ul>
