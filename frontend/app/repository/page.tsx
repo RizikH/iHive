@@ -13,6 +13,7 @@ const Repository = () => {
   const [isEditing, setIsEditing] = React.useState(false);
   const [currentFontSize, setCurrentFontSize] = useState<number>(16);
   const fontSizes = [8, 9, 10, 11, 12, 14, 16, 18, 20, 22, 24, 26, 28, 36, 48, 72];
+  const [hasContent, setHasContent] = useState(false);
 
   const handleKeyDown = (e: React.KeyboardEvent) => {
     if (isEditing) {
@@ -155,6 +156,11 @@ const Repository = () => {
     document.execCommand(command, false);
   };
 
+  const handleInput = (e: React.FormEvent<HTMLDivElement>) => {
+    const content = e.currentTarget.textContent || '';
+    setHasContent(content.trim() !== '');
+  };
+
   return (
   <>
   <Head>
@@ -240,12 +246,31 @@ const Repository = () => {
         </div>
         <div className={styles.docContent}>
           <div 
-            className={styles.docBody} 
+            className={`${styles.docBody} ${!hasContent ? styles.placeholder : ''}`}
             onKeyDown={handleKeyDown}
             onMouseUp={handleMouseUp}
-            style={{ fontSize: '16px' }} // Default font size
+            onInput={handleInput}
+            style={{ fontSize: '16px' }}
+            contentEditable={isEditing}
           >
-            <p>Input here...</p>
+            {!hasContent && (
+              <div className={styles.placeholderContent}>
+                <h3>Welcome to iHive Editor!</h3>
+                <p>Click the Edit button or press Ctrl+E to start editing.</p>
+                <div className={styles.shortcuts}>
+                  <p>Helpful shortcuts:</p>
+                  <ul>
+                    <li><kbd>Ctrl</kbd> + <kbd>B</kbd> - Bold text</li>
+                    <li><kbd>Ctrl</kbd> + <kbd>I</kbd> - Italic text</li>
+                    <li><kbd>Ctrl</kbd> + <kbd>U</kbd> - Underline text</li>
+                    <li><kbd>Ctrl</kbd> + <kbd>C</kbd> - Copy text</li>
+                    <li><kbd>Ctrl</kbd> + <kbd>S</kbd> - Save changes</li>
+                    <li><kbd>Shift</kbd> + <kbd>Enter</kbd> - New line</li>
+                    <li><kbd>Enter</kbd> - Save and exit edit mode</li>
+                  </ul>
+                </div>
+              </div>
+            )}
           </div>
         </div>
       </div>

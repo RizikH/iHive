@@ -126,7 +126,25 @@
 }
 
 .docBody {
-    padding: 1rem;
+    min-height: 300px;
+    padding: 20px;
+    outline: none;
+}
+
+.placeholder {
+    position: relative;
+}
+
+.placeholderText {
+    color: #999;
+    position: absolute;
+    pointer-events: none;
+    font-style: italic;
+}
+
+/* Hide placeholder when content is being edited */
+.docBody:focus .placeholderText {
+    display: none;
 }
 
 .dockButton {
@@ -149,10 +167,6 @@
 
 .dockButton:active {
     background-color: #cbd5e0;
-}
-
-.docBody {
-    padding: 2rem; 
 }
 
 /* Footer */
@@ -228,4 +242,56 @@
 
 .docBody span {
     white-space: pre-wrap;
+}
+
+.placeholderContent {
+  color: #999;
+  pointer-events: none;
+  font-size: 14px;
+  line-height: 1.6;
+}
+
+.placeholderContent h3 {
+  color: #999;
+  margin-bottom: 16px;
+  font-size: 20px;
+}
+
+.placeholderContent p {
+  margin-bottom: 12px;
+  color: #999;
+}
+
+.shortcuts {
+  margin-top: 24px;
+  padding: 16px;
+  background: rgba(0, 0, 0, 0.02);
+  border-radius: 8px;
+}
+
+.shortcuts ul {
+  list-style: none;
+  padding: 0;
+  margin: 12px 0;
+}
+
+.shortcuts li {
+  margin: 8px 0;
+  color: #999;
+}
+
+.shortcuts kbd {
+  background: #f8f9fa;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+  padding: 2px 6px;
+  font-size: 12px;
+  font-family: monospace;
+  color: #999;
+  box-shadow: 0 1px 1px rgba(0,0,0,0.1);
+  margin: 0 2px;
+}
+
+.docBody:focus .placeholderContent {
+  display: none;
 }
