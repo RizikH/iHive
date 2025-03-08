@@ -118,7 +118,7 @@ const EntrepreneurProfile = () => {
 
         {/* Repo-Cards */}
         <div className={styles.marquee}>
-          <h2 className={styles.marqueeTitle}>Preview Repositories</h2>
+          <h2 className={styles.marqueeTitle}>Popular Repositories</h2>
           <div className={styles.marqueeContainer}>
             <MarqueeDemo />
           </div>

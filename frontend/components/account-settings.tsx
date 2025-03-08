@@ -12,7 +12,7 @@ const AccountSettings = () => {
             <FiUser className={styles.icon} />
             Username
           </label>
-          <input type="text" placeholder="Change username" />
+          <input type="text" placeholder="Change username" /> 
         </div>
 
         <div className={styles.formGroup}>
