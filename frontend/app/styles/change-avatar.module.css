@@ -1,0 +1,180 @@
+.overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(0, 0, 0, 0.5);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 1000;
+  }
+  
+  .modal {
+    position: relative;
+    width: 400px;
+    background: rgba(255, 255, 255, 0.9);
+    border: 2px solid rgba(255, 255, 255, .5);
+    border-radius: 20px;
+    backdrop-filter: blur(50px);
+    box-shadow: 0 0 30px rgba(0, 0, 0, .5);
+    transform: scale(0);
+    animation: scaleUp 0.5s ease forwards;
+    overflow: hidden;
+  }
+  
+  @keyframes scaleUp {
+    to {
+      transform: scale(1);
+    }
+  }
+  
+  .header {
+    padding: 40px 40px 20px;
+    text-align: center;
+  }
+  
+  .header h2 {
+    font-size: 2em;
+    color: #1a1a1a;
+    margin: 0;
+  }
+  
+  .closeButton {
+    position: absolute;
+    top: 0;
+    right: 0;
+    width: 45px;
+    height: 45px;
+    background: #1a1a1a;
+    font-size: 2em;
+    color: #fff;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    border-bottom-left-radius: 20px;
+    cursor: pointer;
+    z-index: 1;
+    border: none;
+  }
+  
+  .content {
+    padding: 0 40px 40px;
+  }
+  
+  .currentAvatar {
+    text-align: center;
+    margin-bottom: 30px;
+  }
+  
+  .currentAvatar h3 {
+    color: #1a1a1a;
+    font-size: 1.2em;
+    margin-bottom: 15px;
+  }
+  
+  .previewImage {
+    border-radius: 50%;
+    border: 2px solid #1a1a1a;
+    padding: 3px;
+  }
+  
+  .defaultAvatars {
+    margin: 30px 0;
+  }
+  
+  .defaultAvatars h3 {
+    color: #1a1a1a;
+    font-size: 1.2em;
+    margin-bottom: 15px;
+  }
+  
+  .avatarGrid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 15px;
+    margin-top: 15px;
+  }
+  
+  .avatarOption {
+    border-radius: 50%;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    border: 2px solid transparent;
+    padding: 2px;
+  }
+  
+  .avatarOption:hover {
+    transform: scale(1.1);
+  }
+  
+  .avatarOption.selected {
+    border-color: #1a1a1a;
+    background-color: rgba(26, 26, 26, 0.1);
+  }
+  
+  .uploadAvatar {
+    width: 60px;
+    height: 60px;
+    border-radius: 50%;
+    background-color: #e0e0e0;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    border: 2px solid transparent;
+  }
+  
+  .uploadAvatar:hover {
+    background-color: #d0d0d0;
+    transform: scale(1.1);
+  }
+  
+  .uploadAvatar svg {
+    width: 24px;
+    height: 24px;
+    color: #666;
+  }
+  
+  .actions {
+    display: flex;
+    gap: 10px;
+    margin-top: 30px;
+  }
+  
+  .cancelButton, .saveButton {
+    flex: 1;
+    height: 45px;
+    border-radius: 6px;
+    cursor: pointer;
+    font-size: 1em;
+    font-weight: 500;
+    transition: all 0.3s ease;
+  }
+  
+  .cancelButton {
+    background: transparent;
+    border: 2px solid #1a1a1a;
+    color: #1a1a1a;
+  }
+  
+  .cancelButton:hover {
+    background: rgba(26, 26, 26, 0.1);
+  }
+  
+  .saveButton {
+    background: #1a1a1a;
+    color: white;
+    border: none;
+  }
+  
+  .saveButton:hover {
+    background: #333;
+  }
+  
+  .saveButton:disabled {
+    background: #999;
+    cursor: not-allowed;
+  }
