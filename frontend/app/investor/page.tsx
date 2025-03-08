@@ -7,7 +7,7 @@ import styles from "../styles/investor.module.css";
 import "../styles/globals.css";
 import Image from "next/image";
 
-const API_URL = "https://ihive.onrender.com/api" || "http://localhost:5000/api";
+const API_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:5000/api";
 
 interface Tag {
     id: number;
