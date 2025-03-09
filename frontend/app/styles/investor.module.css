@@ -1,0 +1,439 @@
+/* Navbar styling */
+.navContainer {
+    padding: 1.5rem 4rem;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    background-color: #1a1a1a;
+}
+
+.logo {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    font-size: 1.5rem;
+    font-weight: bold;
+}
+
+.logo a {
+    color: #fff;
+    text-decoration: none;
+}
+
+.logoImage {
+    width: 30px;
+    height: 30px;
+    object-fit: contain;
+}
+
+.nav-links {
+    display: flex;
+    align-items: center;
+    gap: 30px;
+
+}
+
+.avatarIcon {
+    border-radius: 50%;
+    margin-left: 20px;
+    /* Makes the image circular if needed */
+}
+
+.nav-links a,
+.nav-links:visited {
+    color: #ccc;
+    background-color: transparent;
+    text-decoration: none;
+}
+
+.nav-links a:hover {
+    background-color: transparent;
+    text-decoration: underline;
+}
+
+.nav-links a:active {
+    background-color: transparent;
+    text-decoration: none;
+}
+
+/* Search Bar and Advanced Dropdown */
+.searchContainer {
+    position: absolute;
+    left: 50%;
+    transform: translateX(-50%);
+    display: flex;
+    align-items: center;
+}
+
+.searchInput {
+    padding: 0.5rem;
+    font-size: 1rem;
+    border-radius: 4px;
+    border: 1px solid #ccc;
+    margin-right: 1rem;
+}
+
+.advancedDropdown {
+    position: relative;
+}
+
+.dropdownButton {
+    padding: 0.5rem 1rem;
+    background-color: #0069d9;
+    color: white;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 1rem;
+}
+
+.dropdownButton:hover {
+    background-color: #0056b3;
+}
+
+.dropdownContent {
+    display: none;
+    position: absolute;
+    background-color: white;
+    min-width: 160px;
+    box-shadow: 0 8px 16px rgba(0, 0, 0, 0.2);
+    z-index: 1;
+    border-radius: 4px;
+    top: 100%;
+    right: 0;
+    margin-top: 8px;
+}
+
+.dropdownContent a {
+    padding: 12px 16px;
+    text-decoration: none;
+    display: block;
+    color: #333;
+}
+
+.dropdownContent a:hover {
+    background-color: #ddd;
+}
+
+.advancedDropdown:hover .dropdownContent {
+    display: block;
+}
+
+/* Container for the two-column layout */
+.pageContainer {
+    display: flex;
+    justify-content: space-between;
+    padding: 20px;
+    background-color: #ffffff;
+    min-height: 100vh;
+}
+
+/* Adjusting the posts grid to 3x3 with bigger boxes and minimal space between */
+.postsGrid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    /* Keeps the grid at 3 columns */
+    gap: 5px;
+    /* Reducing space even further between grid items */
+    width: 100%;
+    /* Full width of the container */
+    justify-items: center;
+    /* Centers items horizontally */
+    align-items: start;
+    /* Aligns items at the top of the grid cells */
+    padding: 10px;
+    /* Adjust padding for overall spacing */
+}
+
+.postCard {
+    background-color: #f9f9f9;
+    border: 1px solid #ddd;
+    border-radius: 8px;
+    padding: 25px;
+    /* Increased padding to make the box bigger */
+    width: 100%;
+    /* Ensures each card takes up the full width of the grid cell */
+    max-width: 500px;
+    /* Max width to control the size */
+    box-sizing: border-box;
+    /* Ensures proper sizing with padding */
+    height: 300px;
+    /* Increased height for bigger boxes */
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+}
+
+.searchContainer {
+    display: flex;
+    justify-content: center;
+    margin: 20px 0;
+}
+
+.searchInput {
+    padding: 10px;
+    border-radius: 5px;
+    border: 1px solid #ddd;
+    margin-right: 10px;
+}
+
+.searchButton {
+    padding: 10px;
+    border-radius: 5px;
+    background-color: #0066cc;
+    color: white;
+    border: none;
+    cursor: pointer;
+}
+
+.searchButton:hover {
+    background-color: #005bb5;
+}
+
+
+.postCard h3 {
+    color: var(--foreground);
+    /* Use consistent foreground color */
+    font-size: 18px;
+    margin-bottom: 10px;
+}
+
+.postCard p {
+    font-size: 14px;
+    color: var(--foreground);
+    /* Same as above */
+}
+
+/* Hover effect on posts */
+.postCard:hover {
+    transform: translateY(-5px);
+    box-shadow: 0px 6px 12px rgba(0, 0, 0, 0.1);
+}
+
+/* Right Side: Profile */
+.profile {
+    width: 30%;
+    background-color: white;
+    border-radius: 8px;
+    padding: 20px;
+    box-shadow: 0px 4px 6px rgba(0, 0, 0, 0.1);
+}
+
+.profile h2 {
+    color: #333;
+    font-size: 22px;
+    margin-bottom: 15px;
+}
+
+.profileContent p {
+    color: #666;
+    font-size: 14px;
+    margin-bottom: 20px;
+}
+
+/* Buttons container */
+.buttonsContainer {
+    display: flex;
+    flex-direction: column;
+}
+
+.profileButton {
+    background-color: #ffcc00;
+    /* Yellow background for buttons */
+    color: #333;
+    border: none;
+    padding: 12px;
+    margin: 10px 0;
+    cursor: pointer;
+    font-size: 16px;
+    border-radius: 4px;
+    transition: background-color 0.3s ease, transform 0.3s ease;
+}
+
+.profileButton:hover {
+    background-color: #ffaa00;
+    /* Darker yellow for hover */
+    transform: scale(1.05);
+}
+
+.profileButton:focus {
+    outline: none;
+    transform: translateY(-5px);
+    box-shadow: 0px 6px 12px rgba(0, 0, 0, 0.1);
+}
+
+/* Right Side: Profile (Matching Entrepreneur profile style) */
+.profile {
+    flex: 0 0 35%;
+    background-color: var(--background);
+    padding: 2rem;
+    border-radius: 10px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.profileContent {
+    text-align: center;
+}
+
+.profile-image {
+    width: 150px;
+    height: 150px;
+    margin: 0 auto;
+    border-radius: 50%;
+    overflow: hidden;
+}
+
+.profile-image img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+.investor-stats {
+    margin: 1.5rem 0;
+}
+
+.buttonsContainer {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+}
+
+.profileButton {
+    padding: 0.8rem 1.5rem;
+    background-color: #0069d9;
+    color: white;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    transition: background-color 0.3s;
+}
+
+.profileButton:hover {
+    background-color: #0056b3;
+}
+
+/* Post Card Styling */
+.postCard {
+    background-color: rgb(255, 255, 255);
+    padding: 1.5rem;
+    border-radius: 8px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.fundingProgress {
+    margin-top: 10px;
+}
+
+.fundingBar {
+    width: 100%;
+    height: 10px;
+    background-color: #e0e0e0;
+}
+
+.fundingBar>div {
+    height: 100%;
+    background-color: #00c853;
+}
+
+.investButton {
+    margin-top: 1rem;
+    background-color: #0069d9;
+    color: white;
+    border: none;
+    padding: 0.6rem 1.2rem;
+    border-radius: 5px;
+    cursor: pointer;
+}
+
+.investButton:hover {
+    background-color: #0056b3;
+}
+
+.profile {
+    width: 100%;
+    margin-top: 20px;
+}
+
+/* Filter Popup */
+.filterPopup {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.5);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 999;
+}
+
+.filterContent {
+    background-color: white;
+    padding: 20px;
+    border-radius: 8px;
+    width: 400px;
+    max-width: 90%;
+}
+
+.filterButton {
+    background-color: #007bff;
+    color: white;
+    border: none;
+    padding: 10px 15px;
+    cursor: pointer;
+    border-radius: 4px;
+}
+
+.applyFiltersButton {
+    background-color: #28a745;
+    color: white;
+    border: none;
+    padding: 10px 15px;
+    cursor: pointer;
+    border-radius: 4px;
+}
+
+.tag {
+    display: inline-block;
+    background-color: #f0f0f0;
+    padding: 5px;
+    margin: 5px;
+    border-radius: 4px;
+}
+
+.tag button {
+    background-color: red;
+    color: white;
+    border: none;
+    padding: 2px 5px;
+    cursor: pointer;
+    border-radius: 50%;
+}
+
+.footer {
+    text-align: center;
+    padding: 1rem;
+    background-color: #ffffff;
+    font-size: 0.9rem;
+}
+
+.footerIcon {
+    position: relative;
+    z-index: 2;
+    background-color: transparent;
+    align-items: center;
+    justify-self: center;
+    display: flex;
+}
+
+.footer a {
+    color: #000000;
+    text-decoration: none;
+}
+
+.footer a:hover {
+    color: #1a1a1a;
+    text-decoration: underline;
+}
