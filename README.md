@@ -1,4 +1,4 @@
-![iHive Logo](frontend/public/Images/iHive.png)
+<img src='frontend/public/Images/iHive.png' alt='iHive Logo' width='100' height='100'>
 
 # iHive
 
