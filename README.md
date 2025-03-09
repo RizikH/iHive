@@ -1,6 +1,7 @@
-<img src='frontend/public/Images/iHive.png' alt='iHive Logo' width='100' height='100'>
-
-# iHive
+<p align='center'>
+  <img src='frontend/public/Images/iHive.png' alt='iHive Logo' width='50' height='50'>
+  <strong>iHive</strong>
+</p>
 
 ## 🚀 Overview
 
