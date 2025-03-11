@@ -1,4 +1,5 @@
 'use client';
+import DOMPurify from 'dompurify';
 
 import React, { useState } from 'react';
 import styles from '@/app/styles/change-avatar.module.css';
@@ -44,7 +45,8 @@ const ChangeAvatar: React.FC<ChangeAvatarProps> = ({
       try {
         // Create a URL for the uploaded file
         const imageUrl = URL.createObjectURL(file);
-        setSelectedAvatar(imageUrl);
+        const sanitizedImageUrl = DOMPurify.sanitize(imageUrl);
+        setSelectedAvatar(sanitizedImageUrl);
         
         // In a real application, you would upload the file to your server here
         // const uploadedUrl = await uploadToServer(file);
