@@ -1,16 +1,19 @@
 "use client";
 
-import React from 'react';
+import React, { useState } from 'react';
 import Head from 'next/head';
 import Link from 'next/link';
 import Image from 'next/image';
 import styles from '../styles/repository.module.css';
 import '../styles/globals.css';
 import FileTreeDemo from '@/components/file-tree-demo';
-import { FiCopy, FiDownload, FiUpload, FiEdit, FiCheck, FiPlus, FiMinus, FiBold, FiItalic, FiUnderline } from 'react-icons/fi';
+import { FiCopy, FiDownload, FiUpload, FiEdit, FiCheck, FiBold, FiItalic, FiUnderline } from 'react-icons/fi';
 
 const Repository = () => {
   const [isEditing, setIsEditing] = React.useState(false);
+  const [currentFontSize, setCurrentFontSize] = useState<number>(16);
+  const fontSizes = [8, 9, 10, 11, 12, 14, 16, 18, 20, 22, 24, 26, 28, 36, 48, 72];
+  const [hasContent, setHasContent] = useState(false);
 
   const handleKeyDown = (e: React.KeyboardEvent) => {
     if (isEditing) {
@@ -83,24 +86,79 @@ const Repository = () => {
     }
   };
 
-  const handleIncreaseFont = () => {
-    const docBody = document.querySelector(`.${styles.docBody}`) as HTMLElement;
-    if (docBody) {
-      const currentSize = parseInt(window.getComputedStyle(docBody).fontSize);
-      docBody.style.fontSize = `${currentSize + 2}px`;
+  const handleMouseUp = () => {
+    const selection = window.getSelection();
+    if (!selection || selection.rangeCount === 0) return;
+
+    const range = selection.getRangeAt(0);
+    const parentElement = range.commonAncestorContainer.parentElement;
+    
+    if (parentElement) {
+      const fontSize = window.getComputedStyle(parentElement).fontSize;
+      const size = parseInt(fontSize);
+      if (!isNaN(size)) {
+        setCurrentFontSize(size);
+      }
     }
   };
 
-  const handleDecreaseFont = () => {
-    const docBody = document.querySelector(`.${styles.docBody}`) as HTMLElement;
-    if (docBody) {
-      const currentSize = parseInt(window.getComputedStyle(docBody).fontSize);
-      docBody.style.fontSize = `${currentSize - 2}px`;
+  const handleFontSizeChange = (size: number) => {
+    const selection = window.getSelection();
+    if (!selection || selection.rangeCount === 0) return;
+
+    const range = selection.getRangeAt(0);
+    setCurrentFontSize(size); 
+
+    
+    if (range.collapsed) {
+      const span = document.createElement('span');
+      span.style.fontSize = `${size}px`;
+      
+      span.innerHTML = '&#8203;';
+      range.insertNode(span);
+      
+      
+      const newRange = document.createRange();
+      newRange.setStartAfter(span);
+      newRange.collapse(true);
+      selection.removeAllRanges();
+      selection.addRange(newRange);
+      return;
     }
+
+    // Handle selected text
+    const selectedText = range.extractContents();
+    const fragment = document.createDocumentFragment();
+
+    Array.from(selectedText.childNodes).forEach(node => {
+      if (node instanceof HTMLElement) {
+        const newSpan = document.createElement('span');
+        newSpan.innerHTML = node.innerHTML;
+        if (node.style.cssText) {
+          newSpan.style.cssText = node.style.cssText;
+        }
+        newSpan.style.fontSize = `${size}px`;
+        fragment.appendChild(newSpan);
+      } else {
+        const newSpan = document.createElement('span');
+        newSpan.style.fontSize = `${size}px`;
+        newSpan.appendChild(node.cloneNode(true));
+        fragment.appendChild(newSpan);
+      }
+    });
+
+    range.insertNode(fragment);
+    selection.removeAllRanges();
+    selection.addRange(range);
   };
 
   const handleStyle = (command: string) => {
     document.execCommand(command, false);
+  };
+
+  const handleInput = (e: React.FormEvent<HTMLDivElement>) => {
+    const content = e.currentTarget.textContent || '';
+    setHasContent(content.trim() !== '');
   };
 
   return (
@@ -147,12 +205,19 @@ const Repository = () => {
         <div className={styles.docHeader}>
           <h2>Main Content</h2>
           <div className={styles.docDock}>
-            <button className={styles.dockButton} title="Increase Font-Size" onClick={handleIncreaseFont}>
-              <span><FiPlus /></span>
-            </button>
-            <button className={styles.dockButton} title="Decrease Font-Size" onClick={handleDecreaseFont}>
-              <span><FiMinus /></span>
-            </button>
+            <select 
+              className={styles.fontSizeSelect}
+              onChange={(e) => handleFontSizeChange(Number(e.target.value))}
+              value={currentFontSize}
+              title="Font Size"
+            >
+              {fontSizes.map(size => (
+                <option key={size} value={size}>
+                  {size}
+                </option>
+              ))}
+            </select>
+
             <button className={styles.dockButton} title="Bold" onClick={() => handleStyle('bold')}>
               <span><FiBold /></span>
             </button>
@@ -180,8 +245,32 @@ const Repository = () => {
           </div>
         </div>
         <div className={styles.docContent}>
-          <div className={styles.docBody} onKeyDown={handleKeyDown}>
-            <p>input here...</p>
+          <div 
+            className={`${styles.docBody} ${!hasContent ? styles.placeholder : ''}`}
+            onKeyDown={handleKeyDown}
+            onMouseUp={handleMouseUp}
+            onInput={handleInput}
+            style={{ fontSize: '16px' }}
+            contentEditable={isEditing}
+          >
+            {!hasContent && (
+              <div className={styles.placeholderContent}>
+                <h3>Welcome to iHive Editor!</h3>
+                <p>Click the Edit button to start editing.</p>
+                <div className={styles.shortcuts}>
+                  <p>Helpful shortcuts:</p>
+                  <ul>
+                    <li><kbd>Ctrl</kbd> + <kbd>B</kbd> - Bold text</li>
+                    <li><kbd>Ctrl</kbd> + <kbd>I</kbd> - Italic text</li>
+                    <li><kbd>Ctrl</kbd> + <kbd>U</kbd> - Underline text</li>
+                    <li><kbd>Ctrl</kbd> + <kbd>C</kbd> - Copy text</li>
+                    <li><kbd>Ctrl</kbd> + <kbd>S</kbd> - Save changes</li>
+                    <li><kbd>Shift</kbd> + <kbd>Enter</kbd> - New line</li>
+                    <li><kbd>Enter</kbd> - Save and exit edit mode</li>
+                  </ul>
+                </div>
+              </div>
+            )}
           </div>
         </div>
       </div>
