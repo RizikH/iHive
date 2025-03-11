@@ -16,7 +16,7 @@ import {
 import MarqueeDemo from '@/components/marquee-demo';
 import ChangeAvatar from '@/components/change-avatar';
 
-const isValidBlobUrl = (url) => {
+const isValidBlobUrl = (url: string) => {
   return url.startsWith('blob:');
 };
 
