@@ -16,6 +16,10 @@ import {
 import MarqueeDemo from '@/components/marquee-demo';
 import ChangeAvatar from '@/components/change-avatar';
 
+const isValidBlobUrl = (url) => {
+  return url.startsWith('blob:');
+};
+
 const EntrepreneurProfile = () => {
   const [isAvatarModalOpen, setIsAvatarModalOpen] = useState(false);
   const [currentAvatar, setCurrentAvatar] = useState('https://avatar.vercel.sh/jack');
@@ -24,7 +28,11 @@ const EntrepreneurProfile = () => {
     if (currentAvatar.startsWith('blob:')) {
       URL.revokeObjectURL(currentAvatar);
     }
-    setCurrentAvatar(newAvatarUrl);
+    if (isValidBlobUrl(newAvatarUrl)) {
+      setCurrentAvatar(newAvatarUrl);
+    } else {
+      console.error('Invalid avatar URL');
+    }
     setIsAvatarModalOpen(false);
   };
 
