@@ -55,13 +55,13 @@ const Setting = () => {
                                 </Link>
                             </li>
                             <li className={styles.sidebarItem}>
-                                <Link href="/setting?tab=social" className={styles.sidebarLink}>
-                                    Social Media
+                                <Link href="/setting?tab=account" className={styles.sidebarLink}>
+                                    Account Settings
                                 </Link>
                             </li>
                             <li className={styles.sidebarItem}>
-                                <Link href="/setting?tab=account" className={styles.sidebarLink}>
-                                    Account Settings
+                                <Link href="/setting?tab=social" className={styles.sidebarLink}>
+                                    Social Media
                                 </Link>
                             </li>
                             <li className={styles.sidebarItem}>

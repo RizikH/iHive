@@ -1,6 +1,7 @@
-![iHive Logo](frontend/public/Images/iHive.png)
-
-# iHive
+<p align='center' style='display: flex; align-items: center; justify-content: center;'>
+  <img src='frontend/public/Images/iHive.png' alt='iHive Logo' width='60' height='60' style='margin-right: 10px;'>
+  <span style='font-size: 48px; font-weight: bold;'>iHive</span>
+</p>
 
 ## 🚀 Overview
 
