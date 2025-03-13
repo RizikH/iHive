@@ -14,6 +14,11 @@ const Repository = () => {
   const [currentFontSize, setCurrentFontSize] = useState<number>(16);
   const fontSizes = [8, 9, 10, 11, 12, 14, 16, 18, 20, 22, 24, 26, 28, 36, 48, 72];
   const [hasContent, setHasContent] = useState(false);
+  const [currentFileId, setCurrentFileId] = useState<string | null>(null);
+  const [fileContents, setFileContents] = useState<Record<string, string>>({});
+  const [currentFileName, setCurrentFileName] = useState<string>('Main Content');
+  const [content, setContent] = useState<string>('');
+  const placeholderText = 'Welcome to iHive Editor! Click the Edit button to start editing.';
 
   const handleKeyDown = (e: React.KeyboardEvent) => {
     if (isEditing) {
@@ -156,9 +161,62 @@ const Repository = () => {
     document.execCommand(command, false);
   };
 
+  const handleFileSelect = (fileId: string, fileContent: string, fileName: string) => {
+    setCurrentFileId(fileId);
+    setContent(fileContent);
+    setCurrentFileName(fileName);
+    setIsEditing(false);
+  };
+
+  const handleContentUpdate = (fileId: string, newContent: string) => {
+    // Update the content in the FileTreeDemo component
+    if (fileId) {
+      setFileContents(prev => ({
+        ...prev,
+        [fileId]: newContent
+      }));
+    }
+  };
+
   const handleInput = (e: React.FormEvent<HTMLDivElement>) => {
     const content = e.currentTarget.textContent || '';
     setHasContent(content.trim() !== '');
+    if (currentFileId) {
+      setFileContents(prev => ({
+        ...prev,
+        [currentFileId]: content
+      }));
+    }
+  };
+
+  const handleFileDelete = (fileId: string) => {
+    // Clear the content if the deleted file was currently selected
+    if (currentFileId === fileId) {
+      setCurrentFileId(null);
+      setHasContent(false);
+    }
+    
+    // Remove the file's content from storage
+    setFileContents(prev => {
+      const newContents = { ...prev };
+      delete newContents[fileId];
+      return newContents;
+    });
+  };
+
+  const handleEnableEdit = () => {
+    setIsEditing(true);
+    // Clear the placeholder when enabling edit
+    if (content === placeholderText) {
+      setContent('');
+    }
+  };
+
+  const handleSave = () => {
+    if (currentFileId) {
+      handleContentUpdate(currentFileId, content);
+      setIsEditing(false);
+    }
   };
 
   return (
@@ -196,14 +254,19 @@ const Repository = () => {
       <div className={styles.sideBar}>
         <h2>File Tree</h2>
         <div className={styles.fileTree}>
-          <FileTreeDemo />
+          <FileTreeDemo 
+            onFileSelect={handleFileSelect}
+            onContentUpdate={handleContentUpdate}
+            currentFileId={currentFileId}
+            onFileDelete={handleFileDelete}
+          />
         </div>
       </div>
 
       {/* Document Content */}
       <div className={styles.docSpace}>
         <div className={styles.docHeader}>
-          <h2>Main Content</h2>
+          <h2>{currentFileName}</h2>
           <div className={styles.docDock}>
             <select 
               className={styles.fontSizeSelect}
@@ -239,7 +302,7 @@ const Repository = () => {
             <button className={styles.dockButton} title="Download" onClick={handleDownload}>
               <span><FiDownload /></span>
             </button>
-            <button className={styles.dockButton} title={isEditing ? "Commit" : "Edit"} onClick={handleEdit}>
+            <button className={styles.dockButton} title={isEditing ? "Commit" : "Edit"} onClick={isEditing ? handleSave : handleEnableEdit}>
               <span>{isEditing ? <FiCheck /> : <FiEdit />}</span>
             </button>
           </div>
@@ -253,7 +316,9 @@ const Repository = () => {
             style={{ fontSize: '16px' }}
             contentEditable={isEditing}
           >
-            {!hasContent && (
+            {currentFileId && fileContents[currentFileId] ? (
+              fileContents[currentFileId]
+            ) : !hasContent && (
               <div className={styles.placeholderContent}>
                 <h3>Welcome to iHive Editor!</h3>
                 <p>Click the Edit button to start editing.</p>
