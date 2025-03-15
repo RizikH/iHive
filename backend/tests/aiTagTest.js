@@ -1,4 +1,4 @@
-import { generateTags } from "./services/chatgptService.js";
+import { generateTags } from "../services/chatgptService.js";
 
 
 // Sample idea title and description

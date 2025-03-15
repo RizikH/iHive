@@ -97,11 +97,28 @@ const searchIdeasByTitle = async (req, res) => {
     }
 };
 
+
+const advancedSearchTags = async (req, res) => {
+    try {
+        const { tags } = req.body;
+        if (!tags || !tags.length) {
+            return res.status(400).json({ error: "Tags array is required for search." });
+        }
+
+        const ideas = await Idea.advancedSearchTags(tags);
+        res.json(ideas);
+    } catch (error) {
+        console.error("Search Ideas Error:", error.message);
+        res.status(500).json({ error: error.message });
+    }
+};
+
 module.exports = {
     getAllIdeas,
     getIdeaById,
     createIdea,
     updateIdea,
     deleteIdea,
-    searchIdeasByTitle
+    searchIdeasByTitle,
+    advancedSearchTags
 };
