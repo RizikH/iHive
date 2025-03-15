@@ -55,18 +55,18 @@ export const AuthForm = ({ initialView = "login", onClose }: AuthFormProps) => {
     setError(null);
     setSuccess(null);
     setLoading(true);
-
+  
     const endpoint = isActive
-      ? "http://localhost:5000/api/users/register"
-      : "http://localhost:5000/api/users/login";
-
+      ? (process.env.NEXT_PUBLIC_API_URL ? `${process.env.NEXT_PUBLIC_API_URL}/api/users/register` : "http://localhost:5000/api/users/register")
+      : (process.env.NEXT_PUBLIC_API_URL ? `${process.env.NEXT_PUBLIC_API_URL}/api/users/login` : "http://localhost:5000/api/users/login");
+  
     // Registration requires accepting terms
     if (isActive && !formData.termsAccepted) {
       setError("You must accept the Terms & Privacy Policy.");
       setLoading(false);
       return;
     }
-
+  
     try {
       const response = await fetch(endpoint, {
         method: "POST",
@@ -77,16 +77,16 @@ export const AuthForm = ({ initialView = "login", onClose }: AuthFormProps) => {
             : { email: formData.email, password: formData.password }
         ),
       });
-
+  
       const data = await response.json();
-
+  
       if (!response.ok) throw new Error(data.error || "An error occurred");
-
+  
       setSuccess(isActive ? "Registration successful! You can now log in." : "Login successful!");
-
+  
       if (!isActive) {
         localStorage.setItem("token", data.token); // ✅ Store JWT token
-        localStorage.setItem("username", data.username); // ✅ Store usernames
+        localStorage.setItem("username", data.username); // ✅ Store username
         setTimeout(() => {
           hideForm();
           router.push("/"); // ✅ Redirect to main app page after login
