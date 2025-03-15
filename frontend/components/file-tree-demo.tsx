@@ -1,7 +1,7 @@
 import { File, Folder, Tree } from "@/components/magicui/file-tree"
 import { useState, useRef } from 'react';
 import { FileContent } from '@/components/magicui/file-tree';
-import { FiPlus, FiFolderPlus, FiTrash2, FiEdit2 } from 'react-icons/fi';
+import { FiPlus, FiTrash2, FiEdit2, FiCheck, FiX } from 'react-icons/fi';
 import styles from '@/app/styles/file-tree.module.css';
 
 interface FileTreeDemoProps {
@@ -238,13 +238,71 @@ export default function FileTreeDemo({ onFileSelect, onContentUpdate, currentFil
             onDrop={(e) => handleDrop(e, file.id)}
             className={dropTarget === file.id ? styles.dropTarget : ''}
           >
-            <div onClick={() => toggleFolder(file.id)}>
-              <Folder 
-                element={file.name}
-                value={file.id}
-                isSelect={selectedFolderId === file.id}
-                expandedItems={openFolders.has(file.id) ? [file.id] : []}
-              />
+            <div className={styles.fileItem}>
+              {editingId === file.id ? (
+                <div className={styles.renameControls}>
+                  <input
+                    type="text"
+                    value={editingName}
+                    onChange={(e) => setEditingName(e.target.value)}
+                    autoFocus
+                    onKeyDown={(e) => {
+                      if (e.key === 'Enter') handleRenameSubmit(file.id, 'folder');
+                      if (e.key === 'Escape') handleRenameCancel();
+                    }}
+                  />
+                  <div className={styles.fileActions}>
+                    <button 
+                      onClick={() => handleRenameSubmit(file.id, 'folder')}
+                      className={styles.actionButton}
+                      title="Save"
+                    >
+                      <FiCheck size={14} />
+                    </button>
+                    <button 
+                      onClick={handleRenameCancel}
+                      className={styles.actionButton}
+                      title="Cancel"
+                    >
+                      <FiX size={14} />
+                    </button>
+                  </div>
+                </div>
+              ) : (
+                <>
+                  <div onClick={() => toggleFolder(file.id)} className={styles.fileItemName}>
+                    <Folder 
+                      element={file.name}
+                      value={file.id}
+                      isSelect={selectedFolderId === file.id}
+                      expandedItems={openFolders.has(file.id) ? [file.id] : []}
+                    />
+                  </div>
+                  
+                  <div className={styles.fileActions}>
+                    <button 
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        handleRename(file.id, file.name);
+                      }}
+                      className={styles.actionButton}
+                      title="Rename"
+                    >
+                      <FiEdit2 size={14} />
+                    </button>
+                    <button 
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        handleDelete(file.id, 'folder');
+                      }}
+                      className={styles.actionButton}
+                      title="Delete"
+                    >
+                      <FiTrash2 size={14} />
+                    </button>
+                  </div>
+                </>
+              )}
             </div>
             {openFolders.has(file.id) && file.children && (
               <div style={{ marginLeft: '1rem' }}>
@@ -257,17 +315,75 @@ export default function FileTreeDemo({ onFileSelect, onContentUpdate, currentFil
         return (
           <div 
             key={file.id}
-            draggable
+            draggable={editingId !== file.id}
             onDragStart={(e) => handleDragStart(e, file.id)}
             onDragEnd={handleDragEnd}
+            className={styles.fileItem}
           >
-            <File 
-              value={file.id}
-              isSelect={currentFileId === file.id}
-              onClick={() => handleFileClick(file)}
-            >
-              {file.name}
-            </File>
+            {editingId === file.id ? (
+              <div className={styles.renameControls}>
+                <input
+                  type="text"
+                  value={editingName}
+                  onChange={(e) => setEditingName(e.target.value)}
+                  autoFocus
+                  onKeyDown={(e) => {
+                    if (e.key === 'Enter') handleRenameSubmit(file.id, 'file');
+                    if (e.key === 'Escape') handleRenameCancel();
+                  }}
+                />
+                <div className={styles.fileActions}>
+                  <button 
+                    onClick={() => handleRenameSubmit(file.id, 'file')}
+                    className={styles.actionButton}
+                    title="Save"
+                  >
+                    <FiCheck size={14} />
+                  </button>
+                  <button 
+                    onClick={handleRenameCancel}
+                    className={styles.actionButton}
+                    title="Cancel"
+                  >
+                    <FiX size={14} />
+                  </button>
+                </div>
+              </div>
+            ) : (
+              <>
+                <div className={styles.fileItemName} onClick={() => handleFileClick(file)}>
+                  <File 
+                    value={file.id}
+                    isSelect={currentFileId === file.id}
+                  >
+                    {file.name}
+                  </File>
+                </div>
+                
+                <div className={styles.fileActions}>
+                  <button 
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      handleRename(file.id, file.name);
+                    }}
+                    className={styles.actionButton}
+                    title="Rename"
+                  >
+                    <FiEdit2 size={14} />
+                  </button>
+                  <button 
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      handleDelete(file.id, 'file');
+                    }}
+                    className={styles.actionButton}
+                    title="Delete"
+                  >
+                    <FiTrash2 size={14} />
+                  </button>
+                </div>
+              </>
+            )}
           </div>
         );
       }
