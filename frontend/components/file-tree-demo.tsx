@@ -20,6 +20,7 @@ export default function FileTreeDemo({ onFileSelect, onContentUpdate, currentFil
   const [selectedFolderId, setSelectedFolderId] = useState<string | null>(null);
   const [draggedItem, setDraggedItem] = useState<string | null>(null);
   const [dropTarget, setDropTarget] = useState<string | null>(null);
+  const [openFolders, setOpenFolders] = useState<Set<string>>(new Set());
 
   const handleCreateFile = (parentId: string | null = null) => {
     const newFile: FileContent = {
@@ -150,7 +151,9 @@ export default function FileTreeDemo({ onFileSelect, onContentUpdate, currentFil
   const handleDragOver = (e: React.DragEvent, id: string) => {
     e.preventDefault();
     e.stopPropagation();
-    setDropTarget(id);
+    if (draggedItem !== id) {
+      setDropTarget(id);
+    }
   };
 
   const handleDrop = (e: React.DragEvent, targetId: string) => {
@@ -160,35 +163,42 @@ export default function FileTreeDemo({ onFileSelect, onContentUpdate, currentFil
     if (!draggedItem || draggedItem === targetId) return;
 
     setFiles(prevFiles => {
-      const moveItem = (items: FileContent[], parentId: string | null = null): FileContent[] => {
-        let draggedItemData: FileContent | null = null;
-        let newItems = items.filter(item => {
+      let draggedItemData: FileContent | null = null;
+      
+      const removeItem = (items: FileContent[]): FileContent[] => {
+        return items.filter(item => {
           if (item.id === draggedItem) {
-            draggedItemData = { ...item, parentId: parentId as string | undefined };
+            draggedItemData = { ...item };
             return false;
           }
           if (item.children) {
-            item.children = moveItem(item.children, item.id);
+            item.children = removeItem(item.children);
           }
           return true;
         });
+      };
 
-        if (targetId === parentId && draggedItemData) {
-          return [...newItems, draggedItemData];
-        }
+      let newFiles = removeItem([...prevFiles]);
 
-        return newItems.map(item => {
+      const addToFolder = (items: FileContent[]): FileContent[] => {
+        return items.map(item => {
           if (item.id === targetId && draggedItemData) {
             return {
               ...item,
-              children: [...(item.children || []), draggedItemData]
+              children: [...(item.children || []), { ...draggedItemData, parentId: targetId }]
+            };
+          }
+          if (item.children) {
+            return {
+              ...item,
+              children: addToFolder(item.children)
             };
           }
           return item;
         });
       };
 
-      return moveItem(prevFiles);
+      return addToFolder(newFiles);
     });
 
     setDraggedItem(null);
@@ -206,38 +216,39 @@ export default function FileTreeDemo({ onFileSelect, onContentUpdate, currentFil
     }
   };
 
-  const renderFileTree = (files: FileContent[]) => {
+  const toggleFolder = (folderId: string) => {
+    setOpenFolders(prev => {
+      const newSet = new Set(prev);
+      if (newSet.has(folderId)) {
+        newSet.delete(folderId);
+      } else {
+        newSet.add(folderId);
+      }
+      return newSet;
+    });
+  };
+
+  const renderFileTree = (files: FileContent[], level: number = 0) => {
     return files.map(file => {
       if (file.type === 'folder') {
         return (
           <div 
-            key={file.id} 
-            className={styles.treeItem}
+            key={file.id}
+            onDragOver={(e) => handleDragOver(e, file.id)}
+            onDrop={(e) => handleDrop(e, file.id)}
+            className={dropTarget === file.id ? styles.dropTarget : ''}
           >
-            <div className={styles.itemWrapper}>
+            <div onClick={() => toggleFolder(file.id)}>
               <Folder 
                 element={file.name}
                 value={file.id}
                 isSelect={selectedFolderId === file.id}
+                expandedItems={openFolders.has(file.id) ? [file.id] : []}
               />
-              <div className={styles.itemActions}>
-                <button
-                  className={styles.actionButton}
-                  onClick={() => handleRename(file.id, file.name)}
-                >
-                  <FiEdit2 size={14} />
-                </button>
-                <button
-                  className={styles.actionButton}
-                  onClick={() => handleDelete(file.id, 'folder')}
-                >
-                  <FiTrash2 size={14} />
-                </button>
-              </div>
             </div>
-            {file.children && file.children.length > 0 && (
-              <div className={styles.folderContent}>
-                {renderFileTree(file.children)}
+            {openFolders.has(file.id) && file.children && (
+              <div style={{ marginLeft: '1rem' }}>
+                {renderFileTree(file.children, level + 1)}
               </div>
             )}
           </div>
@@ -245,70 +256,18 @@ export default function FileTreeDemo({ onFileSelect, onContentUpdate, currentFil
       } else {
         return (
           <div 
-            key={file.id} 
-            className={styles.treeItem}
+            key={file.id}
             draggable
             onDragStart={(e) => handleDragStart(e, file.id)}
             onDragEnd={handleDragEnd}
           >
-            {editingId === file.id ? (
-              <div className={styles.renameForm} onClick={e => e.stopPropagation()}>
-                <input
-                  type="text"
-                  value={editingName}
-                  onChange={(e) => {
-                    const newValue = e.target.value;
-                    setEditingName(newValue);
-                  }}
-                  onKeyDown={(e) => {
-                    e.stopPropagation();
-                    if (e.key === 'Enter') {
-                      handleRenameSubmit(file.id, 'file');
-                    } else if (e.key === 'Escape') {
-                      handleRenameCancel();
-                    }
-                  }}
-                  autoFocus
-                  spellCheck={false}
-                />
-                <div className={styles.renameActions}>
-                  <button onClick={() => handleRenameSubmit(file.id, 'file')}>✓</button>
-                  <button onClick={handleRenameCancel}>✕</button>
-                </div>
-              </div>
-            ) : (
-              <>
-                <File 
-                  value={file.id}
-                  isSelect={currentFileId === file.id}
-                  onClick={() => handleFileClick(file)}
-                >
-                  {file.name}
-                </File>
-                <div className={styles.itemActions}>
-                  <button 
-                    className={styles.actionButton}
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      handleRename(file.id, file.name);
-                    }}
-                    title="Rename"
-                  >
-                    <FiEdit2 size={14} />
-                  </button>
-                  <button 
-                    className={styles.actionButton}
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      handleDelete(file.id, 'file');
-                    }}
-                    title="Delete"
-                  >
-                    <FiTrash2 size={14} />
-                  </button>
-                </div>
-              </>
-            )}
+            <File 
+              value={file.id}
+              isSelect={currentFileId === file.id}
+              onClick={() => handleFileClick(file)}
+            >
+              {file.name}
+            </File>
           </div>
         );
       }
