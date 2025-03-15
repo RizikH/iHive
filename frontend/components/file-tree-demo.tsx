@@ -1,5 +1,5 @@
 import { File, Folder, Tree } from "@/components/magicui/file-tree"
-import { useState, useRef } from 'react';
+import { useState, useRef, useEffect } from 'react';
 import { FileContent } from '@/components/magicui/file-tree';
 import { FiPlus, FiTrash2, FiEdit2, FiCheck, FiX } from 'react-icons/fi';
 import styles from '@/app/styles/file-tree.module.css';
@@ -21,11 +21,62 @@ export default function FileTreeDemo({ onFileSelect, onContentUpdate, currentFil
   const [draggedItem, setDraggedItem] = useState<string | null>(null);
   const [dropTarget, setDropTarget] = useState<string | null>(null);
   const [openFolders, setOpenFolders] = useState<Set<string>>(new Set());
+  const [fileContentsMap, setFileContentsMap] = useState<Record<string, string>>({});
+
+  // Listen for content updates from the parent component
+  useEffect(() => {
+    if (currentFileId) {
+      const updateFileContent = (items: FileContent[]): FileContent[] => {
+        return items.map(item => {
+          if (item.id === currentFileId) {
+            return { ...item, content: fileContentsMap[currentFileId] || item.content };
+          }
+          if (item.children) {
+            return { ...item, children: updateFileContent(item.children) };
+          }
+          return item;
+        });
+      };
+
+      setFiles(prevFiles => updateFileContent(prevFiles));
+    }
+  }, [currentFileId, fileContentsMap]);
+
+  // Update the parent component when file content changes
+  useEffect(() => {
+    const handleContentUpdates = () => {
+      const findAndUpdateContent = (items: FileContent[]) => {
+        items.forEach(item => {
+          if (item.type === 'file' && item.content !== undefined) {
+            if (fileContentsMap[item.id] !== item.content) {
+              setFileContentsMap(prev => ({
+                ...prev,
+                [item.id]: item.content || ''
+              }));
+            }
+          }
+          if (item.children) {
+            findAndUpdateContent(item.children);
+          }
+        });
+      };
+
+      findAndUpdateContent(files);
+    };
+
+    handleContentUpdates();
+  }, [files]);
 
   const handleCreateFile = (parentId: string | null = null) => {
+    if (!newFileName.trim()) {
+      alert('Please enter a file name');
+      return;
+    }
+
+    const newFileId = Date.now().toString();
     const newFile: FileContent = {
-      id: Date.now().toString(),
-      name: newFileName || 'New File',
+      id: newFileId,
+      name: newFileName.trim(),
       type: 'file',
       content: '',
       parentId: parentId || undefined
@@ -39,14 +90,24 @@ export default function FileTreeDemo({ onFileSelect, onContentUpdate, currentFil
       return prevFiles.map(item => updateFileStructure(item, parentId, newFile));
     });
 
+    // Select the newly created file
+    setTimeout(() => {
+      onFileSelect(newFileId, '', newFileName.trim());
+    }, 0);
+
     setNewFileName('');
     setIsCreatingFile(false);
   };
 
   const handleCreateFolder = (parentId: string | null = null) => {
+    if (!newFileName.trim()) {
+      alert('Please enter a folder name');
+      return;
+    }
+
     const newFolder: FileContent = {
       id: Date.now().toString(),
-      name: newFileName || 'New Folder',
+      name: newFileName.trim(),
       type: 'folder',
       content: '',
       parentId: parentId || undefined,
@@ -59,6 +120,13 @@ export default function FileTreeDemo({ onFileSelect, onContentUpdate, currentFil
       }
 
       return prevFiles.map(item => updateFileStructure(item, parentId, newFolder));
+    });
+
+    // Open the newly created folder
+    setOpenFolders(prev => {
+      const newSet = new Set(prev);
+      newSet.add(newFolder.id);
+      return newSet;
     });
 
     setNewFileName('');
@@ -110,6 +178,13 @@ export default function FileTreeDemo({ onFileSelect, onContentUpdate, currentFil
       
       return deleteFromArray(prevFiles);
     });
+
+    // Also remove from fileContentsMap
+    setFileContentsMap(prev => {
+      const newMap = { ...prev };
+      delete newMap[id];
+      return newMap;
+    });
   };
 
   const handleRename = (id: string, currentName: string) => {
@@ -133,6 +208,11 @@ export default function FileTreeDemo({ onFileSelect, onContentUpdate, currentFil
         };
         return updateFileName(prevFiles);
       });
+
+      // If the current file is being renamed, update the current file name in the parent
+      if (currentFileId === id) {
+        onFileSelect(id, fileContentsMap[id] || '', editingName.trim());
+      }
     }
     setEditingId(null);
     setEditingName('');
@@ -212,9 +292,33 @@ export default function FileTreeDemo({ onFileSelect, onContentUpdate, currentFil
 
   const handleFileClick = (file: FileContent) => {
     if (file.type === 'file') {
-      onFileSelect(file.id, file.content || '', file.name);
+      // Get the latest content from our map or use the file's content
+      const fileContent = fileContentsMap[file.id] || file.content || '';
+      onFileSelect(file.id, fileContent, file.name);
     }
   };
+
+  // Update the file content when the parent component calls onContentUpdate
+  useEffect(() => {
+    const handleExternalContentUpdate = (fileId: string, newContent: string) => {
+      setFileContentsMap(prev => ({
+        ...prev,
+        [fileId]: newContent
+      }));
+    };
+
+    // Create a proxy for onContentUpdate
+    const originalOnContentUpdate = onContentUpdate;
+    onContentUpdate = (fileId: string, newContent: string) => {
+      handleExternalContentUpdate(fileId, newContent);
+      originalOnContentUpdate(fileId, newContent);
+    };
+
+    return () => {
+      // Restore original function on cleanup
+      onContentUpdate = originalOnContentUpdate;
+    };
+  }, [onContentUpdate]);
 
   const toggleFolder = (folderId: string) => {
     setOpenFolders(prev => {

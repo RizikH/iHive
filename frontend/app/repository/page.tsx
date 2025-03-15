@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import Head from 'next/head';
 import Link from 'next/link';
 import Image from 'next/image';
@@ -20,6 +20,11 @@ const Repository = () => {
   const [content, setContent] = useState<string>('');
   const placeholderText = 'Welcome to iHive Editor! Click the Edit button to start editing.';
 
+  // Update hasContent whenever content changes
+  useEffect(() => {
+    setHasContent(content.trim() !== '');
+  }, [content]);
+
   const handleKeyDown = (e: React.KeyboardEvent) => {
     if (isEditing) {
       if (e.key === 'Enter') {
@@ -29,16 +34,15 @@ const Repository = () => {
         } else {
           // Regular Enter triggers save
           e.preventDefault();
-          handleEdit();
+          handleSave();
         }
       }
     }
   };
 
   const handleCopy = () => {
-    const content = document.querySelector(`.${styles.docBody}`)?.textContent;
     if (content) {
-      navigator.clipboard.writeText(content)
+      navigator.clipboard.writeText(content.replace(/<[^>]*>/g, ''))
         .then(() => alert('Content copied to clipboard!'))
         .catch(err => console.error('Failed to copy:', err));
     }
@@ -55,12 +59,19 @@ const Repository = () => {
       if (file) {
         const reader = new FileReader();
         reader.onload = (e) => {
-          const content = e.target?.result;
-          const docBody = document.querySelector(`.${styles.docBody}`) as HTMLElement;
-          if (docBody && typeof content === 'string') {
-            docBody.innerHTML = content.split('\n').map(line => 
-              `<p>${line}</p>`
+          const fileContent = e.target?.result;
+          if (typeof fileContent === 'string') {
+            // Format the content with paragraph tags
+            const formattedContent = fileContent.split('\n').map(line => 
+              line.trim() ? `<p>${line}</p>` : '<p><br></p>'
             ).join('');
+            
+            setContent(formattedContent);
+            
+            // Save the content to the current file if one is selected
+            if (currentFileId) {
+              handleContentUpdate(currentFileId, formattedContent);
+            }
           }
         };
         reader.readAsText(file);
@@ -70,13 +81,14 @@ const Repository = () => {
   };
 
   const handleDownload = () => {
-    const content = document.querySelector(`.${styles.docBody}`)?.textContent;
     if (content) {
-      const blob = new Blob([content], { type: 'text/plain' });
+      // Strip HTML tags for plain text download
+      const plainText = content.replace(/<[^>]*>/g, '');
+      const blob = new Blob([plainText], { type: 'text/plain' });
       const url = URL.createObjectURL(blob);
       const a = document.createElement('a');
       a.href = url;
-      a.download = 'document.txt';
+      a.download = currentFileName ? `${currentFileName}.txt` : 'document.txt';
       a.click();
       URL.revokeObjectURL(url);
     }
@@ -166,6 +178,7 @@ const Repository = () => {
     setContent(fileContent);
     setCurrentFileName(fileName);
     setIsEditing(false);
+    setHasContent(fileContent.trim() !== '');
   };
 
   const handleContentUpdate = (fileId: string, newContent: string) => {
@@ -179,13 +192,11 @@ const Repository = () => {
   };
 
   const handleInput = (e: React.FormEvent<HTMLDivElement>) => {
-    const content = e.currentTarget.textContent || '';
-    setHasContent(content.trim() !== '');
-    if (currentFileId) {
-      setFileContents(prev => ({
-        ...prev,
-        [currentFileId]: content
-      }));
+    // When in edit mode, we need to get the content from the contentEditable div
+    if (isEditing) {
+      const newContent = e.currentTarget.innerHTML || '';
+      setContent(newContent);
+      setHasContent(newContent.trim() !== '');
     }
   };
 
@@ -193,6 +204,8 @@ const Repository = () => {
     // Clear the content if the deleted file was currently selected
     if (currentFileId === fileId) {
       setCurrentFileId(null);
+      setContent('');
+      setCurrentFileName('Main Content');
       setHasContent(false);
     }
     
@@ -206,15 +219,18 @@ const Repository = () => {
 
   const handleEnableEdit = () => {
     setIsEditing(true);
-    // Clear the placeholder when enabling edit
-    if (content === placeholderText) {
-      setContent('');
-    }
   };
 
   const handleSave = () => {
     if (currentFileId) {
-      handleContentUpdate(currentFileId, content);
+      const docBody = document.querySelector(`.${styles.docBody}`) as HTMLElement;
+      if (docBody) {
+        const newContent = docBody.innerHTML;
+        setContent(newContent);
+        handleContentUpdate(currentFileId, newContent);
+        setIsEditing(false);
+      }
+    } else {
       setIsEditing(false);
     }
   };
@@ -308,35 +324,40 @@ const Repository = () => {
           </div>
         </div>
         <div className={styles.docContent}>
-          <div 
-            className={`${styles.docBody} ${!hasContent ? styles.placeholder : ''}`}
-            onKeyDown={handleKeyDown}
-            onMouseUp={handleMouseUp}
-            onInput={handleInput}
-            style={{ fontSize: '16px' }}
-            contentEditable={isEditing}
-          >
-            {currentFileId && fileContents[currentFileId] ? (
-              fileContents[currentFileId]
-            ) : !hasContent && (
-              <div className={styles.placeholderContent}>
-                <h3>Welcome to iHive Editor!</h3>
-                <p>Click the Edit button to start editing.</p>
-                <div className={styles.shortcuts}>
-                  <p>Helpful shortcuts:</p>
-                  <ul>
-                    <li><kbd>Ctrl</kbd> + <kbd>B</kbd> - Bold text</li>
-                    <li><kbd>Ctrl</kbd> + <kbd>I</kbd> - Italic text</li>
-                    <li><kbd>Ctrl</kbd> + <kbd>U</kbd> - Underline text</li>
-                    <li><kbd>Ctrl</kbd> + <kbd>C</kbd> - Copy text</li>
-                    <li><kbd>Ctrl</kbd> + <kbd>S</kbd> - Save changes</li>
-                    <li><kbd>Shift</kbd> + <kbd>Enter</kbd> - New line</li>
-                    <li><kbd>Enter</kbd> - Save and exit edit mode</li>
-                  </ul>
+          {isEditing ? (
+            <div 
+              className={`${styles.docBody} ${!hasContent ? styles.placeholder : ''}`}
+              onKeyDown={handleKeyDown}
+              onMouseUp={handleMouseUp}
+              onInput={handleInput}
+              style={{ fontSize: `${currentFontSize}px` }}
+              contentEditable={true}
+              dangerouslySetInnerHTML={{ __html: content }}
+            />
+          ) : (
+            <div className={`${styles.docBody} ${!hasContent ? styles.placeholder : ''}`}>
+              {content ? (
+                <div dangerouslySetInnerHTML={{ __html: content }} />
+              ) : (
+                <div className={styles.placeholderContent}>
+                  <h3>Welcome to iHive Editor!</h3>
+                  <p>Click the Edit button to start editing.</p>
+                  <div className={styles.shortcuts}>
+                    <p>Helpful shortcuts:</p>
+                    <ul>
+                      <li><kbd>Ctrl</kbd> + <kbd>B</kbd> - Bold text</li>
+                      <li><kbd>Ctrl</kbd> + <kbd>I</kbd> - Italic text</li>
+                      <li><kbd>Ctrl</kbd> + <kbd>U</kbd> - Underline text</li>
+                      <li><kbd>Ctrl</kbd> + <kbd>C</kbd> - Copy text</li>
+                      <li><kbd>Ctrl</kbd> + <kbd>S</kbd> - Save changes</li>
+                      <li><kbd>Shift</kbd> + <kbd>Enter</kbd> - New line</li>
+                      <li><kbd>Enter</kbd> - Save and exit edit mode</li>
+                    </ul>
+                  </div>
                 </div>
-              </div>
-            )}
-          </div>
+              )}
+            </div>
+          )}
         </div>
       </div>
     </main>
