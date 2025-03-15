@@ -143,7 +143,7 @@ const InvestorPage = () => {
                     <Link href="/">iHive-Investors</Link>
                 </div>
                 <div className={styles["nav-links"]}>
-                    <Link href="#investments">Investments</Link>
+                    <Link href="/investments">Investments</Link>
                     <Link href="#setting">Settings</Link>
                     <Link href="#get-started">Signout</Link>
                     <Link href="/investor-profile">
