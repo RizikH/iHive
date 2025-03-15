@@ -23,7 +23,7 @@ export default function FileTreeDemo({ onFileSelect, onContentUpdate, currentFil
   const [openFolders, setOpenFolders] = useState<Set<string>>(new Set());
   const [fileContentsMap, setFileContentsMap] = useState<Record<string, string>>({});
 
-  // Listen for content updates from the parent component
+
   useEffect(() => {
     if (currentFileId) {
       const updateFileContent = (items: FileContent[]): FileContent[] => {
@@ -42,7 +42,6 @@ export default function FileTreeDemo({ onFileSelect, onContentUpdate, currentFil
     }
   }, [currentFileId, fileContentsMap]);
 
-  // Update the parent component when file content changes
   useEffect(() => {
     const handleContentUpdates = () => {
       const findAndUpdateContent = (items: FileContent[]) => {
@@ -90,7 +89,7 @@ export default function FileTreeDemo({ onFileSelect, onContentUpdate, currentFil
       return prevFiles.map(item => updateFileStructure(item, parentId, newFile));
     });
 
-    // Select the newly created file
+  
     setTimeout(() => {
       onFileSelect(newFileId, '', newFileName.trim());
     }, 0);
@@ -122,7 +121,7 @@ export default function FileTreeDemo({ onFileSelect, onContentUpdate, currentFil
       return prevFiles.map(item => updateFileStructure(item, parentId, newFolder));
     });
 
-    // Open the newly created folder
+   
     setOpenFolders(prev => {
       const newSet = new Set(prev);
       newSet.add(newFolder.id);
@@ -179,7 +178,7 @@ export default function FileTreeDemo({ onFileSelect, onContentUpdate, currentFil
       return deleteFromArray(prevFiles);
     });
 
-    // Also remove from fileContentsMap
+    
     setFileContentsMap(prev => {
       const newMap = { ...prev };
       delete newMap[id];
@@ -209,7 +208,7 @@ export default function FileTreeDemo({ onFileSelect, onContentUpdate, currentFil
         return updateFileName(prevFiles);
       });
 
-      // If the current file is being renamed, update the current file name in the parent
+     
       if (currentFileId === id) {
         onFileSelect(id, fileContentsMap[id] || '', editingName.trim());
       }
@@ -292,13 +291,13 @@ export default function FileTreeDemo({ onFileSelect, onContentUpdate, currentFil
 
   const handleFileClick = (file: FileContent) => {
     if (file.type === 'file') {
-      // Get the latest content from our map or use the file's content
+      
       const fileContent = fileContentsMap[file.id] || file.content || '';
       onFileSelect(file.id, fileContent, file.name);
     }
   };
 
-  // Update the file content when the parent component calls onContentUpdate
+ 
   useEffect(() => {
     const handleExternalContentUpdate = (fileId: string, newContent: string) => {
       setFileContentsMap(prev => ({
@@ -307,7 +306,7 @@ export default function FileTreeDemo({ onFileSelect, onContentUpdate, currentFil
       }));
     };
 
-    // Create a proxy for onContentUpdate
+
     const originalOnContentUpdate = onContentUpdate;
     onContentUpdate = (fileId: string, newContent: string) => {
       handleExternalContentUpdate(fileId, newContent);
@@ -315,7 +314,7 @@ export default function FileTreeDemo({ onFileSelect, onContentUpdate, currentFil
     };
 
     return () => {
-      // Restore original function on cleanup
+  
       onContentUpdate = originalOnContentUpdate;
     };
   }, [onContentUpdate]);
