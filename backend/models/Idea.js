@@ -103,6 +103,23 @@ const getIdeasByTitle = async (title) => {
     return data;
 };
 
+const advancedSearchTags = async (tags) => {
+    const tagIds = tags.map((tag) => tag.id);
+    const { data: ideaTags, error: tagError } = await supabase
+        .from("idea_tags")
+        .select("idea_id")
+        .in("tag_id", tagIds);
+    if (tagError) throw tagError;
+    const ideaIds = ideaTags.map((ideaTag) => ideaTag.idea_id);
+    const { data: ideas, error: ideaError } = await supabase
+        .from("ideas")
+        .select("*")
+        .in("id", ideaIds)
+        .order("created_at", { ascending: false });
+    if (ideaError) throw ideaError;
+    return ideas;
+};
+
 module.exports = {
     getAllIdeas,
     createIdea,
@@ -110,4 +127,5 @@ module.exports = {
     deleteIdea,
     getIdeaById,
     getIdeasByTitle,
+    advancedSearchTags,
 };

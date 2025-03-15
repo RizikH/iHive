@@ -3,8 +3,8 @@
     "version": "1.0.0",
     "private": true,
     "scripts": {
-        "dev": "nodemon app.js",
-        "start": "node app.js"
+        "dev": "nodemon server.js",
+        "start": "node server.js"
     },
     "dependencies": {
         "@radix-ui/react-slot": "^1.1.2",
@@ -26,5 +26,8 @@
         "react-icons": "^5.5.0",
         "socket.io": "^4.8.1",
         "tailwind-merge": "^3.0.1"
+    },
+    "devDependencies": {
+        "supertest": "^7.0.0"
     }
 }

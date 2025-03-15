@@ -1,0 +1,280 @@
+.fileTreeContainer {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.fileTreeActions {
+  display: flex;
+  gap: 8px;
+  padding: 8px;
+}
+
+.fileTreeActions button {
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 0.5rem;
+  border-radius: 4px;
+  transition: background-color 0.2s;
+}
+
+.fileTreeActions button:hover {
+  background-color: rgba(0, 0, 0, 0.05);
+}
+
+.createFileForm {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  padding: 0.5rem;
+  background: white;
+  border-radius: 4px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.createFileForm input {
+  padding: 0.5rem;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+}
+
+.createFileForm button {
+  padding: 0.5rem;
+  background: #f0f0f0;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+}
+
+.createFileForm button:hover {
+  background: #e0e0e0;
+}
+
+.treeItem {
+  position: relative;
+  cursor: move;
+  display: flex;
+  align-items: center;
+  padding-right: 70px; /* Make space for action buttons */
+}
+
+.fileLabel, .folderLabel {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  width: 100%;
+  padding-right: 8px;
+}
+
+.deleteButton {
+  opacity: 0;
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 4px;
+  color: #666;
+  border-radius: 4px;
+  transition: all 0.2s ease;
+}
+
+.deleteButton:hover {
+  color: #ff4444;
+  background-color: rgba(255, 68, 68, 0.1);
+}
+
+.treeItem:hover .deleteButton {
+  opacity: 1;
+}
+
+/* Ensure delete button doesn't interfere with folder expansion */
+.folderLabel {
+  width: 100%;
+  min-width: 0;
+}
+
+/* Style for the delete confirmation dialog (optional) */
+.deleteDialog {
+  position: fixed;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  background: white;
+  padding: 20px;
+  border-radius: 8px;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+  z-index: 1000;
+}
+
+.itemActions {
+  display: flex;
+  gap: 4px;
+  opacity: 0;
+  transition: opacity 0.2s;
+  position: absolute;
+  right: 8px;
+  top: 50%;
+  transform: translateY(-50%);
+}
+
+.treeItem:hover .itemActions {
+  opacity: 1;
+}
+
+.actionButton {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 28px;
+  height: 28px;
+  padding: 0;
+  border: none;
+  border-radius: 4px;
+  background: transparent;
+  color: #666;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.actionButton:hover {
+  background: rgba(0, 0, 0, 0.05);
+  color: #333;
+}
+
+.actionButton[title*="Delete"]:hover {
+  color: #ff4444;
+  background-color: rgba(255, 68, 68, 0.1);
+}
+
+.actionButton[title*="Rename"]:hover {
+  color: #0070f3;
+  background-color: rgba(0, 112, 243, 0.1);
+}
+
+.renameForm {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 4px 8px;
+  width: 100%;
+}
+
+.renameForm input {
+  flex: 1;
+  padding: 4px 8px;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+  font-size: 14px;
+  outline: none;
+  background: white;
+}
+
+.renameForm input:focus {
+  border-color: #0070f3;
+}
+
+.renameActions {
+  display: flex;
+  gap: 4px;
+}
+
+.renameActions button {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 24px;
+  height: 24px;
+  padding: 0;
+  border: none;
+  border-radius: 4px;
+  background: transparent;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.renameActions button:first-child {
+  color: #22c55e;
+}
+
+.renameActions button:first-child:hover {
+  background: rgba(34, 197, 94, 0.1);
+}
+
+.renameActions button:last-child {
+  color: #ef4444;
+}
+
+.renameActions button:last-child:hover {
+  background: rgba(239, 68, 68, 0.1);
+}
+
+.fileLabel {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  width: 100%;
+  gap: 8px;
+}
+
+.emptyState {
+  text-align: center;
+  padding: 20px;
+  color: #666;
+  font-size: 14px;
+}
+
+.emptyState p:first-child {
+  margin-bottom: 8px;
+}
+
+.emptyState p:last-child {
+  font-size: 12px;
+  color: #999;
+}
+
+.dropTarget {
+  position: relative;
+}
+
+.dropTarget::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 112, 243, 0.1);
+  border: 2px dashed #0070f3;
+  border-radius: 4px;
+  pointer-events: none;
+}
+
+.treeItem[draggable="true"]:active {
+  opacity: 0.5;
+}
+
+/* Add visual feedback for drag operation */
+.dragging {
+  opacity: 0.5;
+}
+
+/* Highlight drop zones */
+.dropZone {
+  position: relative;
+}
+
+.dropZone::after {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 112, 243, 0.1);
+  pointer-events: none;
+}
+
+.folderContent {
+  width: 100%;
+  padding-left: 16px;
+} 

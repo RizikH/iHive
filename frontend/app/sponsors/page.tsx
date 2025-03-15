@@ -8,6 +8,7 @@ import styles from '../styles/sponsors.module.css';
 import '../styles/globals.css';
 import '@fortawesome/fontawesome-svg-core/styles.css';
 import AvatarCirclesDemo from '@/components/avatar-circles-demo';
+import AnimatedListDemo from "@/components/animated-list-demo";
 import { Pie } from 'react-chartjs-2';
 import {
   Chart as ChartJS, 
@@ -23,10 +24,10 @@ ChartJS.register(
 const Sponsors = () => {
 
   const chartData = {
-    labels: ['Gold Sponsors', 'Silver Sponsors', 'Bronze Sponsors'],
+    labels: ['Gold Sponsors', 'Silver Sponsors', 'Bronze Sponsors'],  // labels for now, maybe sponsors' username
     datasets: [{
-      data: [300, 200, 100],
-      backgroundColor: ['#ffd700', '#c0c0c0', '#cd7f32'],
+      data: [300, 200, 100],  // invest amount
+      backgroundColor: ['#ffd700', '#c0c0c0', '#cd7f32'],  // make a random color for each
       borderColor: ['#fff', '#fff', '#fff'],
       borderWidth: 2
     }]
@@ -85,11 +86,16 @@ const Sponsors = () => {
               <img src="/Images/sample.jpeg" alt="Profile" title="Change your Avatar"/>
           </div>
           
-          <h1 className={styles.rank}>Sponsors rank here...?</h1>
+          <h1 className={styles.recently}>Recent Sponsors...</h1>
 
           {/* Your Sponsors */}
           <div className={styles.avatarCircles}>
             <AvatarCirclesDemo />
+          </div>
+
+          {/* Notifications/Direct Messages */}
+          <div className={styles.notifications}>
+            <AnimatedListDemo />
           </div>
         </div>
 

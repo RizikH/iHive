@@ -117,8 +117,8 @@
     object-fit: cover;
 }
 
-.rank {
-    font-size: 2.5rem;
+.recently {
+    font-size: 1.75rem;
     font-weight: bold;
     margin: 1rem 0;
     text-align: center;

@@ -9,6 +9,15 @@ import { Button } from "@/components/ui/button"
 import { ScrollArea } from "../ui/scroll-area"
 import { cn } from "@/lib/utils"
 
+export interface FileContent {
+  id: string;
+  name: string;
+  content: string;
+  type: 'file' | 'folder';
+  parentId?: string;
+  children?: FileContent[];
+}
+
 type TreeViewElement = {
   id: string
   name: string

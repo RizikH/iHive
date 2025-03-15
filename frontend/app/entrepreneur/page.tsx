@@ -1,4 +1,7 @@
-import React from 'react';
+'use client';
+import DOMPurify from 'dompurify';
+
+import React, { useState } from 'react';
 import Head from 'next/head';
 import Link from 'next/link';
 import Image from 'next/image';
@@ -12,8 +15,37 @@ import {
   faXTwitter,
 } from '@fortawesome/free-brands-svg-icons';
 import MarqueeDemo from '@/components/marquee-demo';
+import ChangeAvatar from '@/components/change-avatar';
+
+const isValidBlobUrl = (url: string) => {
+  return url.startsWith('blob:');
+};
 
 const EntrepreneurProfile = () => {
+  const [isAvatarModalOpen, setIsAvatarModalOpen] = useState(false);
+  const [currentAvatar, setCurrentAvatar] = useState('https://avatar.vercel.sh/jack');
+
+  const handleAvatarChange = (newAvatarUrl: string) => {
+    if (currentAvatar.startsWith('blob:')) {
+      URL.revokeObjectURL(currentAvatar);
+    }
+    const sanitizedUrl = DOMPurify.sanitize(newAvatarUrl);
+    if (isValidBlobUrl(sanitizedUrl)) {
+      setCurrentAvatar(sanitizedUrl);
+    } else {
+      console.error('Invalid avatar URL');
+    }
+    setIsAvatarModalOpen(false);
+  };
+
+  React.useEffect(() => {
+    return () => {
+      if (currentAvatar.startsWith('blob:')) {
+        URL.revokeObjectURL(currentAvatar);
+      }
+    };
+  }, []);
+
   return (
     <>
     <Head>
@@ -51,11 +83,28 @@ const EntrepreneurProfile = () => {
         {/* Sidebar */}
 
         <div className={styles.profileSection}>
-          <div className={styles.profileImage}>
-              <img src="/Images/sample.jpeg" alt="Profile" title="Change your Avatar"/>
+          <div className={styles.profileImage} onClick={() => setIsAvatarModalOpen(true)}>
+            <img 
+              src={currentAvatar} 
+              alt="Avatar" 
+              title="Change your Avatar"
+              style={{
+                width: '100%',
+                height: '100%',
+                objectFit: 'cover',
+                borderRadius: '50%'
+              }}
+            />
           </div>
           
-          <h1 className={styles.name}>Yixi Xie</h1>
+          <ChangeAvatar
+            isOpen={isAvatarModalOpen}
+            onClose={() => setIsAvatarModalOpen(false)}
+            onAvatarChange={handleAvatarChange}
+            currentAvatar={currentAvatar}
+          />
+          
+          <h1 className={styles.name}>Username</h1>
           <div className={styles.titles}>
             <p>Job Title</p>
             <p>Skills</p>
@@ -77,7 +126,7 @@ const EntrepreneurProfile = () => {
 
         {/* Repo-Cards */}
         <div className={styles.marquee}>
-          <h2 className={styles.marqueeTitle}>Preview Repositories</h2>
+          <h2 className={styles.marqueeTitle}>Popular Repositories</h2>
           <div className={styles.marqueeContainer}>
             <MarqueeDemo />
           </div>

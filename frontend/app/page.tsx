@@ -25,7 +25,7 @@ export default function Home() {
         </div>
         <div className={styles['nav-links']}>
           <Link href="#setting">Settings</Link>
-          <Link href="#get-started">Signout</Link> 
+          <Link href="get-started">Signout</Link> 
         </div>
       </nav>
 

@@ -84,12 +84,28 @@ const deleteIdea = async (req, res) => {
 // ✅ GET /api/ideas/search?title=...
 const searchIdeasByTitle = async (req, res) => {
     try {
-        const { title } = req.query;
+        const { title } = req.params;
         if (!title) {
             return res.status(400).json({ error: "Title parameter is required for search." });
         }
 
         const ideas = await Idea.getIdeasByTitle(title);
+        res.json(ideas);
+    } catch (error) {
+        console.error("Search Ideas Error:", error.message);
+        res.status(500).json({ error: error.message });
+    }
+};
+
+
+const advancedSearchTags = async (req, res) => {
+    try {
+        const { tags } = req.body;
+        if (!tags || !tags.length) {
+            return res.status(400).json({ error: "Tags array is required for search." });
+        }
+
+        const ideas = await Idea.advancedSearchTags(tags);
         res.json(ideas);
     } catch (error) {
         console.error("Search Ideas Error:", error.message);
@@ -103,5 +119,6 @@ module.exports = {
     createIdea,
     updateIdea,
     deleteIdea,
-    searchIdeasByTitle
+    searchIdeasByTitle,
+    advancedSearchTags
 };
