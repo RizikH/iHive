@@ -39,6 +39,7 @@ const InvestorPage = () => {
     const [tagsFilter, setTagsFilter] = useState<string[]>([]);
     const [priceRange, setPriceRange] = useState<number[]>([0, 10000]);
     const [showFilterPopup, setShowFilterPopup] = useState(false);
+    const [allTags, setAllTags] = useState<Tag[]>([]);
 
     useEffect(() => {
         const fetchIdeas = async () => {
@@ -79,8 +80,23 @@ const InvestorPage = () => {
         fetchSearchedIdeas();
     }, [searchTerm]);
 
+    useEffect(() => {
+        const fetchAllTags = async () => {
+            try {
+                const response = await fetch(`${API_URL}/tags/all`);
+                if (!response.ok) throw new Error("Failed to fetch tags");
+                const data = await response.json();
+                setAllTags(data || []);
+            } catch (err: unknown) {
+                console.error("Error fetching tags:", err);
+            }
+        };
+
+        fetchAllTags();
+    }, []);
+
     const handleAddTag = (tag: string) => {
-        if (!tagsFilter.includes(tag)) {
+        if (!tagsFilter.includes(tag) && allTags.some((t) => t.name === tag)) {
             setTagsFilter((prevTags) => [...prevTags, tag]);
         }
     };
@@ -165,6 +181,7 @@ const InvestorPage = () => {
                             <input
                                 type="text"
                                 placeholder="Add a tag"
+                                list="tags"
                                 onKeyDown={(e) => {
                                     if (e.key === "Enter" && e.currentTarget.value.trim()) {
                                         handleAddTag(e.currentTarget.value.trim());
@@ -172,6 +189,11 @@ const InvestorPage = () => {
                                     }
                                 }}
                             />
+                            <datalist id="tags">
+                                {allTags.map((tag) => (
+                                    <option key={tag.id} value={tag.name} />
+                                ))}
+                            </datalist>
                             <div>
                                 {tagsFilter.map((tag, index) => (
                                     <span key={index} className={styles.tag}>
