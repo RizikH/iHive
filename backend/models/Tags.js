@@ -81,10 +81,21 @@ const linkTagToIdea = async (ideaID, tagID) => {
     return data;
 };
 
+const searchName = async (name) => {
+    const { data, error } = await supabase
+        .from("tags")
+        .select("*")
+        .ilike("name", `%${name}%`);
+
+    if (error) throw error;
+    return data;
+};
+
 module.exports = {
     createTagsForIdea,
     getAllTags,
     getTagById,
     deleteTag,
     linkTagToIdea,
+    searchName
 };
