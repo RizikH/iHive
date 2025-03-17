@@ -1,5 +1,5 @@
 'use client';
-import React from 'react';
+import React, { Suspense } from 'react';
 import Head from 'next/head';
 import Link from 'next/link';
 import Image from 'next/image';
@@ -74,17 +74,20 @@ const Setting = () => {
 
                     <div className={styles.divider}></div>
 
-                    {/* SettingContent */}
+                    {/* SettingContent wrapped in Suspense */}
                     <div className={styles.setting}>
-                        {renderSettingContent()}
+                        <Suspense fallback={<div>Loading settings...</div>}>
+                            <SettingContent />
+                        </Suspense>
                     </div>
                 </main>
             </div>
         </>
     );
-}
+};
 
-const renderSettingContent = () => {
+// Move the useSearchParams logic inside a separate component wrapped in Suspense
+const SettingContent = () => {
     const searchParams = useSearchParams();
     const tab = searchParams?.get('tab') || 'basic';
 

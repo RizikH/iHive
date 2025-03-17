@@ -1,4 +1,5 @@
 'use client';
+import DOMPurify from 'dompurify';
 
 import React, { useState } from 'react';
 import Head from 'next/head';
@@ -16,7 +17,7 @@ import {
 import MarqueeDemo from '@/components/marquee-demo';
 import ChangeAvatar from '@/components/change-avatar';
 
-const isValidBlobUrl = (url) => {
+const isValidBlobUrl = (url: string) => {
   return url.startsWith('blob:');
 };
 
@@ -28,8 +29,9 @@ const EntrepreneurProfile = () => {
     if (currentAvatar.startsWith('blob:')) {
       URL.revokeObjectURL(currentAvatar);
     }
-    if (isValidBlobUrl(newAvatarUrl)) {
-      setCurrentAvatar(newAvatarUrl);
+    const sanitizedUrl = DOMPurify.sanitize(newAvatarUrl);
+    if (isValidBlobUrl(sanitizedUrl)) {
+      setCurrentAvatar(sanitizedUrl);
     } else {
       console.error('Invalid avatar URL');
     }

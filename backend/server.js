@@ -12,11 +12,25 @@ const app = express();
 const server = http.createServer(app);
 
 /**
+ * 🔹 Convert allowed origins into an array, fallback to localhost
+ */
+const allowedOrigins = process.env.CLIENT_URLS
+  ? process.env.CLIENT_URLS.split(',').map(url => url.trim())
+  : ["http://localhost:3000"];
+
+/**
  * 🔹 CORS Configuration
  * Defines allowed origins and HTTP methods for cross-origin requests.
  */
 const corsOptions = {
-  origin: process.env.CLIENT_URL || "http://localhost:3000",
+  origin: function (origin, callback) {
+    if (!origin || allowedOrigins.includes(origin)) {
+      callback(null, true); // Allow request
+    } else {
+      callback(new Error(`CORS policy does not allow access from: ${origin}`));
+    }
+  },
+  credentials: true, // Required for WebSockets & cookies
   methods: ["GET", "POST", "PUT", "DELETE"]
 };
 app.use(cors(corsOptions));
