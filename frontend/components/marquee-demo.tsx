@@ -1,6 +1,70 @@
 import { cn } from "@/lib/utils"
 import { Marquee } from "@/components/magicui/marquee"
 import Link from 'next/link'
+import { useState } from 'react'
+import FileTreeDemo from '@/components/file-tree-demo'
+import { FiX } from 'react-icons/fi'
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from "../components/ui/dialog"
+import styles from '@/app/styles/repository-modal.module.css'
+
+const RepositoryModal = ({
+  isOpen,
+  onClose,
+  repoId,
+  name,
+}: {
+  isOpen: boolean;
+  onClose: () => void;
+  repoId: string;
+  name: string;
+}) => {
+  const [content, setContent] = useState<string>('');
+  const [currentFileId, setCurrentFileId] = useState<string | null>(null);
+  const [currentFileName, setCurrentFileName] = useState<string>('Main Content');
+
+  const handleFileSelect = (fileId: string, fileContent: string, fileName: string) => {
+    setCurrentFileId(fileId);
+    setContent(fileContent);
+    setCurrentFileName(fileName);
+  };
+
+  return (
+    <Dialog open={isOpen} onOpenChange={onClose}>
+      <DialogContent className={styles['modal-content']}>
+        <div className={styles['modal-container']}>
+          {/* Sidebar with FileTree */}
+          <div className={styles.sidebar}>
+            <h3 className={styles['sidebar-title']}>Files</h3>
+            <div className={styles['file-tree-container']}>
+              <FileTreeDemo
+                onFileSelect={handleFileSelect}
+                currentFileId={currentFileId}
+                onContentUpdate={() => {}}
+                onFileDelete={() => {}}
+                isPreview={true}
+              />
+            </div>
+          </div>
+          {/* Main Content Area */}
+          <div className={styles['content-area']}>
+            <div className={styles['content-header']}>
+              <h3 className={styles['content-title']}>{currentFileName}</h3>
+            </div>
+            <div className={styles['content-body']}>
+              {content ? (
+                <div dangerouslySetInnerHTML={{ __html: content }} />
+              ) : (
+                <div className={styles['content-placeholder']}>
+                  <p>Select a file from the file tree to view its contents.</p>
+                </div>
+              )}
+            </div>
+          </div>
+        </div>
+      </DialogContent>
+    </Dialog>
+  );
+};
 
 const reviews = [
   {
@@ -63,33 +127,49 @@ const ReviewCard = ({
   body: string
   repoId: string
 }) => {
+  const [isModalOpen, setIsModalOpen] = useState(false);
+
+  const handleCardClick = (e: React.MouseEvent) => {
+    e.preventDefault();
+    setIsModalOpen(true);
+  };
+
   return (
-    <Link href={`/repository/${repoId}`}>  {/* Repository Page = id */}
-      <figure
-        className={cn(
-          "relative w-64 cursor-pointer overflow-hidden rounded-xl border p-4",
-          "border-gray-200 bg-white shadow-sm hover:bg-gray-50 transition-colors",
-          "hover:shadow-md transform hover:-translate-y-1 transition-all duration-200"
-        )}
-      >
-        <div className="flex flex-row items-center gap-2">
-          <img 
-            className="rounded-full" 
-            width="32" 
-            height="32" 
-            alt="" 
-            src={img || "/placeholder.svg"} 
-          />
-          <div className="flex flex-col">
-            <figcaption className="text-sm font-medium text-gray-900">{name}</figcaption>
-            <p className="text-xs font-medium text-gray-500">{username}</p>
+    <>
+      <div onClick={handleCardClick}>
+        <figure
+          className={cn(
+            "relative w-64 cursor-pointer overflow-hidden rounded-xl border p-4",
+            "border-gray-200 bg-white shadow-sm hover:bg-gray-50 transition-colors",
+            "hover:shadow-md transform hover:-translate-y-1 transition-all duration-200"
+          )}
+        >
+          <div className="flex flex-row items-center gap-2">
+            <img 
+              className="rounded-full" 
+              width="32" 
+              height="32" 
+              alt="" 
+              src={img || "/placeholder.svg"} 
+            />
+            <div className="flex flex-col">
+              <figcaption className="text-sm font-medium text-gray-900">{name}</figcaption>
+              <p className="text-xs font-medium text-gray-500">{username}</p>
+            </div>
           </div>
-        </div>
-        <blockquote className="mt-2 text-sm text-gray-700">{body}</blockquote>
-      </figure>
-    </Link>
-  )
-}
+          <blockquote className="mt-2 text-sm text-gray-700">{body}</blockquote>
+        </figure>
+      </div>
+
+      <RepositoryModal
+        isOpen={isModalOpen}
+        onClose={() => setIsModalOpen(false)}
+        repoId={repoId}
+        name={name}
+      />
+    </>
+  );
+};
 
 export default function MarqueeDemo() {
   return (
@@ -107,5 +187,5 @@ export default function MarqueeDemo() {
       <div className="pointer-events-none absolute inset-y-0 left-0 w-1/3 bg-gradient-to-r from-gray-100"></div>
       <div className="pointer-events-none absolute inset-y-0 right-0 w-1/3 bg-gradient-to-l from-gray-100"></div>
     </div>
-  )
+  );
 }

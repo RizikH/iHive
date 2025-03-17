@@ -9,9 +9,16 @@ interface FileTreeDemoProps {
   onContentUpdate: (fileId: string, newContent: string) => void;
   currentFileId: string | null;
   onFileDelete: (fileId: string) => void;
+  isPreview?: boolean;
 }
 
-export default function FileTreeDemo({ onFileSelect, onContentUpdate, currentFileId, onFileDelete }: FileTreeDemoProps) {
+export default function FileTreeDemo({ 
+  onFileSelect, 
+  onContentUpdate, 
+  currentFileId, 
+  onFileDelete,
+  isPreview = false 
+}: FileTreeDemoProps) {
   const [files, setFiles] = useState<FileContent[]>([]);
   const [editingId, setEditingId] = useState<string | null>(null);
   const [editingName, setEditingName] = useState('');
@@ -495,22 +502,24 @@ export default function FileTreeDemo({ onFileSelect, onContentUpdate, currentFil
 
   return (
     <div className={styles.fileTreeContainer}>
-      <div className={styles.fileTreeHeader}>
-        <div className={styles.fileTreeActions}>
-          <button 
-            onClick={() => {
-              setSelectedFolderId(null);
-              setIsCreatingFile(true);
-            }} 
-            title="New"
-            className={styles.actionButton}
-          >
-            <FiPlus />
-          </button>
+      {!isPreview && (
+        <div className={styles.fileTreeHeader}>
+          <div className={styles.fileTreeActions}>
+            <button 
+              onClick={() => {
+                setSelectedFolderId(null);
+                setIsCreatingFile(true);
+              }} 
+              title="New"
+              className={styles.actionButton}
+            >
+              <FiPlus />
+            </button>
+          </div>
         </div>
-      </div>
+      )}
 
-      {isCreatingFile && (
+      {isCreatingFile && !isPreview && (
         <div className={styles.createFileForm}>
           <input
             type="text"
@@ -535,7 +544,7 @@ export default function FileTreeDemo({ onFileSelect, onContentUpdate, currentFil
         ) : (
           <div className={styles.emptyState}>
             <p>No files or folders yet</p>
-            <p>Click + to create one</p>
+            {!isPreview && <p>Click + to create one</p>}
           </div>
         )}
       </Tree>
