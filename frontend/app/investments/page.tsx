@@ -41,7 +41,7 @@ const InvestmentsTab = () => {
                         height={35}
                         className={styles.logoImage}
                     />
-                    <Link href="/">iHive-Investors</Link>
+                    <Link href="/investor">iHive-Investors</Link>
                 </div>
                 <div className={styles["nav-links"]}>
                     <Link href="/investments">Investments</Link>

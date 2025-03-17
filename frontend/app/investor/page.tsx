@@ -36,10 +36,11 @@ const InvestorPage = () => {
     const [loadingIdeas, setLoadingIdeas] = useState(true);
     const [errorIdeas, setErrorIdeas] = useState<string | null>(null);
     const [searchTerm, setSearchTerm] = useState("");
-    const [tagsFilter, setTagsFilter] = useState<string[]>([]);
+    const [tagsFilter, setTagsFilter] = useState<Tag[]>([]); // Now storing selected tags as objects
     const [priceRange, setPriceRange] = useState<number[]>([0, 10000]);
     const [showFilterPopup, setShowFilterPopup] = useState(false);
     const [allTags, setAllTags] = useState<Tag[]>([]);
+    const [filteredTags, setFilteredTags] = useState<Tag[]>([]); // Holds filtered tags based on input
 
     useEffect(() => {
         const fetchIdeas = async () => {
@@ -87,6 +88,7 @@ const InvestorPage = () => {
                 if (!response.ok) throw new Error("Failed to fetch tags");
                 const data = await response.json();
                 setAllTags(data || []);
+                setFilteredTags(data || []); // Initialize filtered tags with all tags
             } catch (err: unknown) {
                 console.error("Error fetching tags:", err);
             }
@@ -95,20 +97,35 @@ const InvestorPage = () => {
         fetchAllTags();
     }, []);
 
-    const handleAddTag = (tag: string) => {
-        if (!tagsFilter.includes(tag) && allTags.some((t) => t.name === tag)) {
+    const handleTagSearch = (e: React.ChangeEvent<HTMLInputElement>) => {
+        const searchTerm = e.target.value.trim().toLowerCase();
+        console.log("Search Term:", searchTerm);  // Debugging
+
+        if (searchTerm === "") {
+            setFilteredTags(allTags);
+        } else {
+            const matchedTags = allTags.filter(tag => tag.name.toLowerCase().includes(searchTerm));
+            console.log("Matched Tags:", matchedTags);  // Debugging
+            setFilteredTags(matchedTags);
+        }
+    };
+
+
+
+    const handleAddTag = (tag: Tag) => {
+        if (!tagsFilter.some((t) => t.id === tag.id)) {
             setTagsFilter((prevTags) => [...prevTags, tag]);
         }
     };
 
-    const handleRemoveTag = (tag: string) => {
-        setTagsFilter((prevTags) => prevTags.filter((t) => t !== tag));
+    const handleRemoveTag = (tag: Tag) => {
+        setTagsFilter((prevTags) => prevTags.filter((t) => t.id !== tag.id));
     };
 
     const handleApplyFilters = () => {
         const filteredIdeas = ideas.filter((idea) => {
             const matchesTags = tagsFilter.every((tag) =>
-                idea.idea_tags?.some((t) => t.tags.name === tag)
+                idea.idea_tags?.some((t) => t.tags.id === tag.id)
             );
             const matchesPrice =
                 idea.price !== undefined &&
@@ -157,7 +174,6 @@ const InvestorPage = () => {
                     </Link>
                 </div>
 
-                {/* Search and Filter Section */}
                 <div className={styles.searchContainer}>
                     <input
                         type="text"
@@ -180,24 +196,24 @@ const InvestorPage = () => {
                         <div>
                             <input
                                 type="text"
-                                placeholder="Add a tag"
-                                list="tags"
-                                onKeyDown={(e) => {
-                                    if (e.key === "Enter" && e.currentTarget.value.trim()) {
-                                        handleAddTag(e.currentTarget.value.trim());
-                                        e.currentTarget.value = "";
-                                    }
-                                }}
+                                placeholder="Search tags"
+                                onChange={handleTagSearch}
+                                onFocus={() => setFilteredTags(allTags)} // Ensures all tags show on focus
                             />
-                            <datalist id="tags">
-                                {allTags.map((tag) => (
-                                    <option key={tag.id} value={tag.name} />
-                                ))}
-                            </datalist>
+
+                            {filteredTags.length > 0 && (
+                                <ul className={styles.tagDropdown}>
+                                    {filteredTags.map((tag) => (
+                                        <li key={tag.id} onClick={() => handleAddTag(tag)}>
+                                            {tag.name}
+                                        </li>
+                                    ))}
+                                </ul>
+                            )}
                             <div>
-                                {tagsFilter.map((tag, index) => (
-                                    <span key={index} className={styles.tag}>
-                                        {tag} <button onClick={() => handleRemoveTag(tag)}>x</button>
+                                {tagsFilter.map((tag) => (
+                                    <span key={tag.id} className={styles.tag}>
+                                        {tag.name} <button onClick={() => handleRemoveTag(tag)}>x</button>
                                     </span>
                                 ))}
                             </div>

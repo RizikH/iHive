@@ -435,3 +435,24 @@
     color: #1a1a1a;
     text-decoration: underline;
 }
+
+.tagDropdown {
+    position: absolute;
+    background: white;
+    border: 1px solid #ccc;
+    max-height: 200px;
+    overflow-y: auto;
+    list-style: none;
+    padding: 0;
+    width: 100%;
+    z-index: 1000;
+}
+
+.tagDropdown li {
+    padding: 8px;
+    cursor: pointer;
+}
+
+.tagDropdown li:hover {
+    background-color: #f0f0f0;
+}
