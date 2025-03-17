@@ -5,6 +5,7 @@ import styles from ".//styles/home.module.css"; // ✅ Fixed Import Path
 import ".//styles/globals.css"; // ✅ Fixed Import Path
 import React from "react";
 import Image from "next/image";
+import { AuthForm } from "@/components/auth-form";
 
 export default function Home() {
   return (
@@ -23,10 +24,9 @@ export default function Home() {
           />
           <Link href="/">iHive-Home</Link>
         </div>
-        <div className={styles['nav-links']}>
-          <Link href="#setting">Settings</Link>
-          <Link href="get-started">Signout</Link> 
-        </div>
+
+        {/* Remove setting & signout here */}
+        
       </nav>
 
       {/* Split Layout */}

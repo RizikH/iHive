@@ -19,10 +19,7 @@ export function BoxRevealDemo() {
 
       <BoxReveal boxColor={"#5046e6"} duration={0.5}>
         <h2 className="mt-[.5rem] text-[1rem]">
-          Welcome to the iHive.{" "}
-          <Link href="/">
-            <span className="text-[#5046e6]">Get Started</span>
-          </Link>
+          Welcome to the iHive.
         </h2>
       </BoxReveal>
 
@@ -36,12 +33,33 @@ export function BoxRevealDemo() {
       </BoxReveal>
 
       <BoxReveal boxColor={"#5046e6"} duration={0.5}>
-        <Button 
-          className="mt-[1.6rem] bg-[#5046e6]"
-          onClick={() => setShowAuthForm(true)}
-        >
-          Join Now
-        </Button>
+        <div className="mt-[1.6rem] flex gap-4">
+          <Link href="/">
+            <Button 
+              className="bg-white text-[#5046e6] border-2 border-[#5046e6] px-8 py-2 rounded-lg 
+                transition-all duration-300 ease-in-out
+                hover:bg-[#5046e6] hover:text-white hover:shadow-lg hover:shadow-[#5046e6]/30
+                active:scale-95 active:shadow-md
+                focus:outline-none focus:ring-2 focus:ring-[#5046e6] focus:ring-offset-2
+                disabled:opacity-50 disabled:cursor-not-allowed"
+                title="Home"
+            >
+              Get Started
+            </Button>
+          </Link>
+          <Button 
+            className="bg-[#5046e6] text-white px-8 py-2 rounded-lg 
+              transition-all duration-300 ease-in-out
+              hover:bg-[#4338ca] hover:shadow-lg hover:shadow-[#5046e6]/30
+              active:scale-95 active:shadow-md
+              focus:outline-none focus:ring-2 focus:ring-[#5046e6] focus:ring-offset-2
+              disabled:opacity-50 disabled:cursor-not-allowed"
+            onClick={() => setShowAuthForm(true)}
+            title="Login/Signup"
+          >
+            Join Now
+          </Button>
+        </div>
       </BoxReveal>
 
       {showAuthForm && (
