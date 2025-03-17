@@ -95,7 +95,13 @@ const getIdeaById = async (id) => {
 const getIdeasByTitle = async (title) => {
     const { data, error } = await supabase
         .from("ideas")
-        .select("*")
+        .select(`
+            *,
+            idea_tags (
+                *,
+                tags (*)
+            )
+        `)
         .ilike("title", `%${title}%`)
         .order("created_at", { ascending: false });
 

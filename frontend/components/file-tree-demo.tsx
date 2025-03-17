@@ -1,7 +1,7 @@
 import { File, Folder, Tree } from "@/components/magicui/file-tree"
-import { useState, useRef } from 'react';
+import { useState, useRef, useEffect } from 'react';
 import { FileContent } from '@/components/magicui/file-tree';
-import { FiPlus, FiFolderPlus, FiTrash2, FiEdit2 } from 'react-icons/fi';
+import { FiPlus, FiTrash2, FiEdit2, FiCheck, FiX } from 'react-icons/fi';
 import styles from '@/app/styles/file-tree.module.css';
 
 interface FileTreeDemoProps {
@@ -9,9 +9,16 @@ interface FileTreeDemoProps {
   onContentUpdate: (fileId: string, newContent: string) => void;
   currentFileId: string | null;
   onFileDelete: (fileId: string) => void;
+  isPreview?: boolean;
 }
 
-export default function FileTreeDemo({ onFileSelect, onContentUpdate, currentFileId, onFileDelete }: FileTreeDemoProps) {
+export default function FileTreeDemo({ 
+  onFileSelect, 
+  onContentUpdate, 
+  currentFileId, 
+  onFileDelete,
+  isPreview = false 
+}: FileTreeDemoProps) {
   const [files, setFiles] = useState<FileContent[]>([]);
   const [editingId, setEditingId] = useState<string | null>(null);
   const [editingName, setEditingName] = useState('');
@@ -20,11 +27,62 @@ export default function FileTreeDemo({ onFileSelect, onContentUpdate, currentFil
   const [selectedFolderId, setSelectedFolderId] = useState<string | null>(null);
   const [draggedItem, setDraggedItem] = useState<string | null>(null);
   const [dropTarget, setDropTarget] = useState<string | null>(null);
+  const [openFolders, setOpenFolders] = useState<Set<string>>(new Set());
+  const [fileContentsMap, setFileContentsMap] = useState<Record<string, string>>({});
+
+
+  useEffect(() => {
+    if (currentFileId) {
+      const updateFileContent = (items: FileContent[]): FileContent[] => {
+        return items.map(item => {
+          if (item.id === currentFileId) {
+            return { ...item, content: fileContentsMap[currentFileId] || item.content };
+          }
+          if (item.children) {
+            return { ...item, children: updateFileContent(item.children) };
+          }
+          return item;
+        });
+      };
+
+      setFiles(prevFiles => updateFileContent(prevFiles));
+    }
+  }, [currentFileId, fileContentsMap]);
+
+  useEffect(() => {
+    const handleContentUpdates = () => {
+      const findAndUpdateContent = (items: FileContent[]) => {
+        items.forEach(item => {
+          if (item.type === 'file' && item.content !== undefined) {
+            if (fileContentsMap[item.id] !== item.content) {
+              setFileContentsMap(prev => ({
+                ...prev,
+                [item.id]: item.content || ''
+              }));
+            }
+          }
+          if (item.children) {
+            findAndUpdateContent(item.children);
+          }
+        });
+      };
+
+      findAndUpdateContent(files);
+    };
+
+    handleContentUpdates();
+  }, [files]);
 
   const handleCreateFile = (parentId: string | null = null) => {
+    if (!newFileName.trim()) {
+      alert('Please enter a file name');
+      return;
+    }
+
+    const newFileId = Date.now().toString();
     const newFile: FileContent = {
-      id: Date.now().toString(),
-      name: newFileName || 'New File',
+      id: newFileId,
+      name: newFileName.trim(),
       type: 'file',
       content: '',
       parentId: parentId || undefined
@@ -38,14 +96,24 @@ export default function FileTreeDemo({ onFileSelect, onContentUpdate, currentFil
       return prevFiles.map(item => updateFileStructure(item, parentId, newFile));
     });
 
+  
+    setTimeout(() => {
+      onFileSelect(newFileId, '', newFileName.trim());
+    }, 0);
+
     setNewFileName('');
     setIsCreatingFile(false);
   };
 
   const handleCreateFolder = (parentId: string | null = null) => {
+    if (!newFileName.trim()) {
+      alert('Please enter a folder name');
+      return;
+    }
+
     const newFolder: FileContent = {
       id: Date.now().toString(),
-      name: newFileName || 'New Folder',
+      name: newFileName.trim(),
       type: 'folder',
       content: '',
       parentId: parentId || undefined,
@@ -58,6 +126,13 @@ export default function FileTreeDemo({ onFileSelect, onContentUpdate, currentFil
       }
 
       return prevFiles.map(item => updateFileStructure(item, parentId, newFolder));
+    });
+
+   
+    setOpenFolders(prev => {
+      const newSet = new Set(prev);
+      newSet.add(newFolder.id);
+      return newSet;
     });
 
     setNewFileName('');
@@ -109,6 +184,13 @@ export default function FileTreeDemo({ onFileSelect, onContentUpdate, currentFil
       
       return deleteFromArray(prevFiles);
     });
+
+    
+    setFileContentsMap(prev => {
+      const newMap = { ...prev };
+      delete newMap[id];
+      return newMap;
+    });
   };
 
   const handleRename = (id: string, currentName: string) => {
@@ -132,6 +214,11 @@ export default function FileTreeDemo({ onFileSelect, onContentUpdate, currentFil
         };
         return updateFileName(prevFiles);
       });
+
+     
+      if (currentFileId === id) {
+        onFileSelect(id, fileContentsMap[id] || '', editingName.trim());
+      }
     }
     setEditingId(null);
     setEditingName('');
@@ -150,7 +237,9 @@ export default function FileTreeDemo({ onFileSelect, onContentUpdate, currentFil
   const handleDragOver = (e: React.DragEvent, id: string) => {
     e.preventDefault();
     e.stopPropagation();
-    setDropTarget(id);
+    if (draggedItem !== id) {
+      setDropTarget(id);
+    }
   };
 
   const handleDrop = (e: React.DragEvent, targetId: string) => {
@@ -160,35 +249,42 @@ export default function FileTreeDemo({ onFileSelect, onContentUpdate, currentFil
     if (!draggedItem || draggedItem === targetId) return;
 
     setFiles(prevFiles => {
-      const moveItem = (items: FileContent[], parentId: string | null = null): FileContent[] => {
-        let draggedItemData: FileContent | null = null;
-        let newItems = items.filter(item => {
+      let draggedItemData: FileContent | null = null;
+      
+      const removeItem = (items: FileContent[]): FileContent[] => {
+        return items.filter(item => {
           if (item.id === draggedItem) {
-            draggedItemData = { ...item, parentId: parentId as string | undefined };
+            draggedItemData = { ...item };
             return false;
           }
           if (item.children) {
-            item.children = moveItem(item.children, item.id);
+            item.children = removeItem(item.children);
           }
           return true;
         });
+      };
 
-        if (targetId === parentId && draggedItemData) {
-          return [...newItems, draggedItemData];
-        }
+      let newFiles = removeItem([...prevFiles]);
 
-        return newItems.map(item => {
+      const addToFolder = (items: FileContent[]): FileContent[] => {
+        return items.map(item => {
           if (item.id === targetId && draggedItemData) {
             return {
               ...item,
-              children: [...(item.children || []), draggedItemData]
+              children: [...(item.children || []), { ...draggedItemData, parentId: targetId }]
+            };
+          }
+          if (item.children) {
+            return {
+              ...item,
+              children: addToFolder(item.children)
             };
           }
           return item;
         });
       };
 
-      return moveItem(prevFiles);
+      return addToFolder(newFiles);
     });
 
     setDraggedItem(null);
@@ -202,42 +298,125 @@ export default function FileTreeDemo({ onFileSelect, onContentUpdate, currentFil
 
   const handleFileClick = (file: FileContent) => {
     if (file.type === 'file') {
-      onFileSelect(file.id, file.content || '', file.name);
+      
+      const fileContent = fileContentsMap[file.id] || file.content || '';
+      onFileSelect(file.id, fileContent, file.name);
     }
   };
 
-  const renderFileTree = (files: FileContent[]) => {
+ 
+  useEffect(() => {
+    const handleExternalContentUpdate = (fileId: string, newContent: string) => {
+      setFileContentsMap(prev => ({
+        ...prev,
+        [fileId]: newContent
+      }));
+    };
+
+
+    const originalOnContentUpdate = onContentUpdate;
+    onContentUpdate = (fileId: string, newContent: string) => {
+      handleExternalContentUpdate(fileId, newContent);
+      originalOnContentUpdate(fileId, newContent);
+    };
+
+    return () => {
+  
+      onContentUpdate = originalOnContentUpdate;
+    };
+  }, [onContentUpdate]);
+
+  const toggleFolder = (folderId: string) => {
+    setOpenFolders(prev => {
+      const newSet = new Set(prev);
+      if (newSet.has(folderId)) {
+        newSet.delete(folderId);
+      } else {
+        newSet.add(folderId);
+      }
+      return newSet;
+    });
+  };
+
+  const renderFileTree = (files: FileContent[], level: number = 0) => {
     return files.map(file => {
       if (file.type === 'folder') {
         return (
           <div 
-            key={file.id} 
-            className={styles.treeItem}
+            key={file.id}
+            onDragOver={(e) => handleDragOver(e, file.id)}
+            onDrop={(e) => handleDrop(e, file.id)}
+            className={dropTarget === file.id ? styles.dropTarget : ''}
           >
-            <div className={styles.itemWrapper}>
-              <Folder 
-                element={file.name}
-                value={file.id}
-                isSelect={selectedFolderId === file.id}
-              />
-              <div className={styles.itemActions}>
-                <button
-                  className={styles.actionButton}
-                  onClick={() => handleRename(file.id, file.name)}
-                >
-                  <FiEdit2 size={14} />
-                </button>
-                <button
-                  className={styles.actionButton}
-                  onClick={() => handleDelete(file.id, 'folder')}
-                >
-                  <FiTrash2 size={14} />
-                </button>
-              </div>
+            <div className={styles.fileItem}>
+              {editingId === file.id ? (
+                <div className={styles.renameControls}>
+                  <input
+                    type="text"
+                    value={editingName}
+                    onChange={(e) => setEditingName(e.target.value)}
+                    autoFocus
+                    onKeyDown={(e) => {
+                      if (e.key === 'Enter') handleRenameSubmit(file.id, 'folder');
+                      if (e.key === 'Escape') handleRenameCancel();
+                    }}
+                  />
+                  <div className={styles.fileActions}>
+                    <button 
+                      onClick={() => handleRenameSubmit(file.id, 'folder')}
+                      className={styles.actionButton}
+                      title="Save"
+                    >
+                      <FiCheck size={14} />
+                    </button>
+                    <button 
+                      onClick={handleRenameCancel}
+                      className={styles.actionButton}
+                      title="Cancel"
+                    >
+                      <FiX size={14} />
+                    </button>
+                  </div>
+                </div>
+              ) : (
+                <>
+                  <div onClick={() => toggleFolder(file.id)} className={styles.fileItemName}>
+                    <Folder 
+                      element={file.name}
+                      value={file.id}
+                      isSelect={selectedFolderId === file.id}
+                      expandedItems={openFolders.has(file.id) ? [file.id] : []}
+                    />
+                  </div>
+                  
+                  <div className={styles.fileActions}>
+                    <button 
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        handleRename(file.id, file.name);
+                      }}
+                      className={styles.actionButton}
+                      title="Rename"
+                    >
+                      <FiEdit2 size={14} />
+                    </button>
+                    <button 
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        handleDelete(file.id, 'folder');
+                      }}
+                      className={styles.actionButton}
+                      title="Delete"
+                    >
+                      <FiTrash2 size={14} />
+                    </button>
+                  </div>
+                </>
+              )}
             </div>
-            {file.children && file.children.length > 0 && (
-              <div className={styles.folderContent}>
-                {renderFileTree(file.children)}
+            {openFolders.has(file.id) && file.children && (
+              <div style={{ marginLeft: '1rem' }}>
+                {renderFileTree(file.children, level + 1)}
               </div>
             )}
           </div>
@@ -245,63 +424,69 @@ export default function FileTreeDemo({ onFileSelect, onContentUpdate, currentFil
       } else {
         return (
           <div 
-            key={file.id} 
-            className={styles.treeItem}
-            draggable
+            key={file.id}
+            draggable={editingId !== file.id}
             onDragStart={(e) => handleDragStart(e, file.id)}
             onDragEnd={handleDragEnd}
+            className={styles.fileItem}
           >
             {editingId === file.id ? (
-              <div className={styles.renameForm} onClick={e => e.stopPropagation()}>
+              <div className={styles.renameControls}>
                 <input
                   type="text"
                   value={editingName}
-                  onChange={(e) => {
-                    const newValue = e.target.value;
-                    setEditingName(newValue);
-                  }}
-                  onKeyDown={(e) => {
-                    e.stopPropagation();
-                    if (e.key === 'Enter') {
-                      handleRenameSubmit(file.id, 'file');
-                    } else if (e.key === 'Escape') {
-                      handleRenameCancel();
-                    }
-                  }}
+                  onChange={(e) => setEditingName(e.target.value)}
                   autoFocus
-                  spellCheck={false}
+                  onKeyDown={(e) => {
+                    if (e.key === 'Enter') handleRenameSubmit(file.id, 'file');
+                    if (e.key === 'Escape') handleRenameCancel();
+                  }}
                 />
-                <div className={styles.renameActions}>
-                  <button onClick={() => handleRenameSubmit(file.id, 'file')}>✓</button>
-                  <button onClick={handleRenameCancel}>✕</button>
+                <div className={styles.fileActions}>
+                  <button 
+                    onClick={() => handleRenameSubmit(file.id, 'file')}
+                    className={styles.actionButton}
+                    title="Save"
+                  >
+                    <FiCheck size={14} />
+                  </button>
+                  <button 
+                    onClick={handleRenameCancel}
+                    className={styles.actionButton}
+                    title="Cancel"
+                  >
+                    <FiX size={14} />
+                  </button>
                 </div>
               </div>
             ) : (
               <>
-                <File 
-                  value={file.id}
-                  isSelect={currentFileId === file.id}
-                  onClick={() => handleFileClick(file)}
-                >
-                  {file.name}
-                </File>
-                <div className={styles.itemActions}>
+                <div className={styles.fileItemName} onClick={() => handleFileClick(file)}>
+                  <File 
+                    value={file.id}
+                    isSelect={currentFileId === file.id}
+                  >
+                    {file.name}
+                  </File>
+                </div>
+                
+                <div className={styles.fileActions}>
                   <button 
-                    className={styles.actionButton}
                     onClick={(e) => {
                       e.stopPropagation();
                       handleRename(file.id, file.name);
                     }}
+                    className={styles.actionButton}
                     title="Rename"
                   >
                     <FiEdit2 size={14} />
                   </button>
                   <button 
-                    className={styles.actionButton}
                     onClick={(e) => {
                       e.stopPropagation();
                       handleDelete(file.id, 'file');
                     }}
+                    className={styles.actionButton}
                     title="Delete"
                   >
                     <FiTrash2 size={14} />
@@ -317,22 +502,24 @@ export default function FileTreeDemo({ onFileSelect, onContentUpdate, currentFil
 
   return (
     <div className={styles.fileTreeContainer}>
-      <div className={styles.fileTreeHeader}>
-        <div className={styles.fileTreeActions}>
-          <button 
-            onClick={() => {
-              setSelectedFolderId(null);
-              setIsCreatingFile(true);
-            }} 
-            title="New"
-            className={styles.actionButton}
-          >
-            <FiPlus />
-          </button>
+      {!isPreview && (
+        <div className={styles.fileTreeHeader}>
+          <div className={styles.fileTreeActions}>
+            <button 
+              onClick={() => {
+                setSelectedFolderId(null);
+                setIsCreatingFile(true);
+              }} 
+              title="New"
+              className={styles.actionButton}
+            >
+              <FiPlus />
+            </button>
+          </div>
         </div>
-      </div>
+      )}
 
-      {isCreatingFile && (
+      {isCreatingFile && !isPreview && (
         <div className={styles.createFileForm}>
           <input
             type="text"
@@ -357,7 +544,7 @@ export default function FileTreeDemo({ onFileSelect, onContentUpdate, currentFil
         ) : (
           <div className={styles.emptyState}>
             <p>No files or folders yet</p>
-            <p>Click + to create one</p>
+            {!isPreview && <p>Click + to create one</p>}
           </div>
         )}
       </Tree>

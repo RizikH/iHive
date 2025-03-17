@@ -1,6 +1,17 @@
 const Tags = require("../models/Tags");
 const Idea = require("../models/Idea");
 
+
+const getAllTags = async (req, res) => {
+    try {
+        const tags = await Tags.getAllTags();
+        res.json(tags);
+    } catch (error) {
+        console.error("Error fetching tags:", error);
+        res.status(500).json({ error: error.message });
+    }
+};
+
 // ✅ GET /api/tags/idea/:id - Get tags for a specific idea
 const getTagsByIdea = async (req, res) => {
     try {
@@ -67,9 +78,23 @@ const linkTagToIdea = async (req, res) => {
     }
 };
 
+const searchName = (req, res) => {
+    const name = req.query.name;
+
+    try {
+        const tags = Tags.searchName(name);
+        res.json(tags);
+    } catch (error) {
+        console.error("Error searching tags by name:", error);
+        res.status(500).json({ error: error.message });
+    }
+};
+
 module.exports = {
+    getAllTags,
     getTagsByIdea,
     createTagsForIdea,
     deleteTag,
     linkTagToIdea,
+    searchName
 };
