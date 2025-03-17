@@ -1,6 +1,36 @@
 {
-  "dependencies": {
-    "@radix-ui/react-dialog": "^1.1.6",
-    "lucide-react": "^0.482.0"
-  }
+    "name": "backend",
+    "version": "1.0.0",
+    "private": true,
+    "scripts": {
+        "dev": "nodemon server.js",
+        "start": "node server.js"
+    },
+    "dependencies": {
+        "@radix-ui/react-slot": "^1.1.2",
+        "@supabase/supabase-js": "latest",
+        "@tabler/icons-react": "^3.30.0",
+        "body-parser": "latest",
+        "class-variance-authority": "^0.7.1",
+        "clsx": "^2.1.1",
+        "cors": "latest",
+        "dotenv": "^16.4.7",
+        "express": "latest",
+        "framer-motion": "^12.4.2",
+        "jsonwebtoken": "latest",
+        "motion": "^12.4.2",
+        "next": "latest",
+        "openai": "latest",
+        "react": "^19.0.0",
+        "react-dom": "^19.0.0",
+        "react-icons": "^5.5.0",
+        "socket.io": "^4.8.1",
+        "tailwind-merge": "^3.0.1"
+    },
+    "devDependencies": {
+        "chai": "^5.2.0",
+        "mocha": "^11.1.0",
+        "socket.io-client": "^4.8.1",
+        "supertest": "^7.0.0"
+    }
 }
