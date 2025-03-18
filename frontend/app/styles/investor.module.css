@@ -456,3 +456,18 @@
 .tagDropdown li:hover {
     background-color: #f0f0f0;
 }
+
+.clearTagsButton {
+    background-color: #f44336; /* Red color */
+    color: white;
+    border: none;
+    padding: 8px 16px;
+    margin-top: 10px;
+    cursor: pointer;
+    font-size: 14px;
+    border-radius: 4px;
+}
+
+.clearTagsButton:hover {
+    background-color: #d32f2f;
+}

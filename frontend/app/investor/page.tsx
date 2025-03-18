@@ -41,6 +41,9 @@ const InvestorPage = () => {
     const [showFilterPopup, setShowFilterPopup] = useState(false);
     const [allTags, setAllTags] = useState<Tag[]>([]);
     const [filteredTags, setFilteredTags] = useState<Tag[]>([]); // Holds filtered tags based on input
+    const [allIdeas, setAllIdeas] = useState<Idea[]>([]);
+
+    const [dropdownVisible, setDropdownVisible] = useState(false); // New state to manage dropdown visibility
 
     useEffect(() => {
         const fetchIdeas = async () => {
@@ -48,7 +51,8 @@ const InvestorPage = () => {
                 const response = await fetch(`${API_URL}/ideas`);
                 if (!response.ok) throw new Error("Failed to fetch ideas");
                 const data = await response.json();
-                setIdeas(data || []);
+                setAllIdeas(data || []); // Store original ideas
+                setIdeas(data || []);    // Use for filtering
             } catch (err: unknown) {
                 setErrorIdeas(err instanceof Error ? err.message : "An unknown error occurred.");
             } finally {
@@ -99,44 +103,56 @@ const InvestorPage = () => {
 
     const handleTagSearch = (e: React.ChangeEvent<HTMLInputElement>) => {
         const searchTerm = e.target.value.trim().toLowerCase();
-        console.log("Search Term:", searchTerm);  // Debugging
 
         if (searchTerm === "") {
             setFilteredTags(allTags);
         } else {
             const matchedTags = allTags.filter(tag => tag.name.toLowerCase().includes(searchTerm));
-            console.log("Matched Tags:", matchedTags);  // Debugging
             setFilteredTags(matchedTags);
         }
+
+        setDropdownVisible(true); // Show the dropdown as the user types
     };
 
+    const handleInputFocus = () => {
+        setDropdownVisible(true); // Show the dropdown when input is focused
+    };
 
 
     const handleAddTag = (tag: Tag) => {
         if (!tagsFilter.some((t) => t.id === tag.id)) {
             setTagsFilter((prevTags) => [...prevTags, tag]);
         }
+        setDropdownVisible(false); // Hide the dropdown when a tag is selected
     };
 
     const handleRemoveTag = (tag: Tag) => {
         setTagsFilter((prevTags) => prevTags.filter((t) => t.id !== tag.id));
     };
 
+    const handleClearTags = () => {
+        setTagsFilter([]); // Clear all selected tags
+    };
+
+
     const handleApplyFilters = () => {
-        const filteredIdeas = ideas.filter((idea) => {
-            const matchesTags = tagsFilter.every((tag) =>
-                idea.idea_tags?.some((t) => t.tags.id === tag.id)
+        const filteredIdeas = allIdeas.filter((idea) => {
+            const matchesTags = tagsFilter.length === 0 || tagsFilter.some((tag) =>
+                idea.idea_tags?.some((ideaTag) => ideaTag.tags.id === tag.id)
             );
-            const matchesPrice =
-                idea.price !== undefined &&
-                idea.price >= priceRange[0] &&
-                idea.price <= priceRange[1];
+
+            const matchesPrice = idea.price === undefined ||
+                (idea.price >= priceRange[0] && idea.price <= priceRange[1]);
 
             return matchesTags && matchesPrice;
         });
 
         setIdeas(filteredIdeas);
         setShowFilterPopup(false);
+    };
+
+    const toggleDropdownVisibility = () => {
+        setDropdownVisible(!dropdownVisible);
     };
 
     return (
@@ -198,10 +214,14 @@ const InvestorPage = () => {
                                 type="text"
                                 placeholder="Search tags"
                                 onChange={handleTagSearch}
-                                onFocus={() => setFilteredTags(allTags)} // Ensures all tags show on focus
+                                onFocus={handleInputFocus} // Add this to show dropdown on focus
                             />
+                            {/* Button to clear all tags */}
+                            <button className={styles.clearTagsButton} onClick={handleClearTags}>
+                                Clear All Tags
+                            </button>
 
-                            {filteredTags.length > 0 && (
+                            {dropdownVisible && filteredTags.length > 0 && (
                                 <ul className={styles.tagDropdown}>
                                     {filteredTags.map((tag) => (
                                         <li key={tag.id} onClick={() => handleAddTag(tag)}>
