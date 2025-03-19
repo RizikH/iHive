@@ -49,32 +49,59 @@ const Repository = () => {
   };
 
   const handleUpload = () => {
-    alert('Only accept txt files')
     const input = document.createElement('input');
     input.type = 'file';
-    input.accept = '.txt';  // Only accept txt files
+    input.accept = '.txt,.doc,.docx,.pdf,.jpg,.jpeg,.png,.gif';
     
-    input.onchange = (e) => {
+    input.onchange = async (e) => {
       const file = (e.target as HTMLInputElement).files?.[0];
       if (file) {
         const reader = new FileReader();
         reader.onload = (e) => {
           const fileContent = e.target?.result;
-          if (typeof fileContent === 'string') {
-            
-            const formattedContent = fileContent.split('\n').map(line => 
-              line.trim() ? `<p>${line}</p>` : '<p><br></p>'
-            ).join('');
-            
-            setContent(formattedContent);
-            
-           
-            if (currentFileId) {
-              handleContentUpdate(currentFileId, formattedContent);
+          let formattedContent = '';
+          
+          // Handle different file types
+          if (file.type.includes('text/plain')) {
+            // Handle .txt files
+            if (typeof fileContent === 'string') {
+              formattedContent = fileContent.split('\n').map(line => 
+                line.trim() ? `<p>${line}</p>` : '<p><br></p>'
+              ).join('');
             }
+          } else if (file.type.includes('image')) {
+            // Handle image files
+            formattedContent = `<p><img src="${fileContent}" alt="${file.name}" style="max-width: 100%; height: auto;"/></p>`;
+          } else {
+            // For other file types (PDF, DOC, etc.)
+            formattedContent = `<p>File uploaded: ${file.name}</p>`;
           }
+
+          // Generate a unique ID for the new file
+          const newFileId = `file-${Date.now()}`;
+          
+          // Update file contents state
+          setFileContents(prev => ({
+            ...prev,
+            [newFileId]: formattedContent
+          }));
+
+          // Set this as the current file
+          setCurrentFileId(newFileId);
+          setContent(formattedContent);
+          setCurrentFileName(file.name);
+          setHasContent(true);
+
+          // Update the file tree through the onContentUpdate callback
+          handleContentUpdate(newFileId, formattedContent);
         };
-        reader.readAsText(file);
+
+        // Use different reading methods based on file type
+        if (file.type.includes('image')) {
+          reader.readAsDataURL(file);
+        } else {
+          reader.readAsText(file);
+        }
       }
     };
     input.click();
