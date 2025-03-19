@@ -481,20 +481,21 @@ const Repository = () => {
   <div className={styles.pageContainer}>
     <nav className={styles.navContainer}>
       <div className={styles.logo}>
-        <Image 
-          src="/Images/iHive.png"
-          alt="Logo"
-          title="Home"
-          width={35}
-          height={35}
-          className={styles.logoImage}
-        />
-        <Link href="/">iHive</Link>
+        <Link href="/" title="Home" className="flex items-center gap-2">
+          <Image
+            src="/Images/iHive.png"
+            alt="Logo"
+            width={35}
+            height={35}
+            className={styles.logoImage}
+          />
+          <span>iHive-Entrepreneur</span>
+        </Link>
       </div>
       <div className={styles['nav-links']}>
         <Link href="/entrepreneur">Profile</Link>
         <Link href="/setting">Setting</Link>
-        <Link href="/sponsors">Your Sponsors</Link>
+        <Link href="/sponsors">Sponsors</Link>
         <Link href="/get-started">Sign Out</Link>
       </div>
     </nav>

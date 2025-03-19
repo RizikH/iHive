@@ -39,7 +39,7 @@ const Setting = () => {
                         <div className={styles['nav-links']}>
                             <Link href="/repository">Repository</Link>
                             <Link href="/entrepreneur">Profile</Link>
-                            <Link href="/sponsors">Your Sponsors</Link>
+                            <Link href="/sponsors">Sponsors</Link>
                             <Link href="/get-started">Sign Out</Link>
                         </div>
                     </nav>

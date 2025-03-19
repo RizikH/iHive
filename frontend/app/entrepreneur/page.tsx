@@ -1,7 +1,7 @@
 'use client';
 import DOMPurify from 'dompurify';
 
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import Head from 'next/head';
 import Link from 'next/link';
 import Image from 'next/image';
@@ -59,20 +59,21 @@ const EntrepreneurProfile = () => {
       {/* Navigation */}
       <nav className={styles.navContainer}>
         <div className={styles.logo}>
-          <Image
-            src="/Images/iHive.png"
-            alt="Logo"
-            title="Home"
-            width={35}
-            height={35}
-            className={styles.logoImage}
-          />
-          <Link href="/">iHive</Link>
+          <Link href="/" title="Home" className="flex items-center gap-2">
+            <Image
+              src="/Images/iHive.png"
+              alt="Logo"
+              width={35}
+              height={35}
+              className={styles.logoImage}
+            />
+            <span>iHive-Entrepreneur</span>
+          </Link>
         </div>
         <div className={styles['nav-links']}>
           <Link href="/repository">Repository</Link>
           <Link href="/setting">Setting</Link>
-          <Link href="/sponsors">Your Sponsors</Link>
+          <Link href="/sponsors">Sponsors</Link>
           <Link href="/get-started">Sign Out</Link>
         </div>
       </nav>
@@ -110,7 +111,7 @@ const EntrepreneurProfile = () => {
             <p>Skills</p>
           </div>
 
-          {/* Social Links */}
+          {/* Social Links: link to setting social media */}
           <div className={styles.socialLinks}>
             <Link href="https://github.com" className={styles.socialIcon} title="GitHub">
               <FontAwesomeIcon icon={faGithub} />

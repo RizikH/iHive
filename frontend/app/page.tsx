@@ -5,7 +5,6 @@ import styles from ".//styles/home.module.css"; // ✅ Fixed Import Path
 import ".//styles/globals.css"; // ✅ Fixed Import Path
 import React from "react";
 import Image from "next/image";
-import { AuthForm } from "@/components/auth-form";
 
 export default function Home() {
   return (
@@ -14,19 +13,28 @@ export default function Home() {
 
       <nav className={styles.navContainer}>
         <div className={styles.logo}>
-          <Image
-            src="/Images/iHive.png"
-            alt="Logo"
-            title="Home"
-            width={35}
-            height={35}
-            className={styles.logoImage}
-          />
-          <Link href="/">iHive-Home</Link>
+          <Link href="/get-started" title="Get-Started" className="flex items-center gap-2">
+            <Image
+              src="/Images/iHive.png"
+              alt="Logo"
+              title="Home"
+              width={35}
+              height={35}
+              className={styles.logoImage}
+            />
+            <span>iHive-Home</span>
+          </Link>
         </div>
 
-        {/* Remove setting & signout here */}
-        
+        {/* 
+        Maybe we don't need these: since a one-time page
+
+        <div className={styles['nav-links']}>
+          <Link href="setting">Settings</Link>
+          <Link href="get-started">Signout</Link> 
+        </div>
+        */}
+
       </nav>
 
       {/* Split Layout */}
