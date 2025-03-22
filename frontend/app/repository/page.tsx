@@ -271,6 +271,42 @@ const Repository = () => {
     return false;
   };
 
+  // Add a new function to detect font size of selected text
+  const getSelectionFontSize = () => {
+    const selection = window.getSelection();
+    if (selection && selection.rangeCount > 0) {
+      const range = selection.getRangeAt(0);
+      if (range.commonAncestorContainer.nodeType === Node.TEXT_NODE) {
+        const parentElement = range.commonAncestorContainer.parentElement;
+        if (parentElement) {
+          const computedStyle = window.getComputedStyle(parentElement);
+          const fontSize = parseInt(computedStyle.fontSize);
+          if (!isNaN(fontSize)) {
+            return fontSize;
+          }
+        }
+      } else if (range.commonAncestorContainer.nodeType === Node.ELEMENT_NODE) {
+        const computedStyle = window.getComputedStyle(range.commonAncestorContainer as Element);
+        const fontSize = parseInt(computedStyle.fontSize);
+        if (!isNaN(fontSize)) {
+          return fontSize;
+        }
+      }
+    }
+    return currentFontSize; // Default if can't detect
+  };
+
+  // Update this function to detect and set font size when selecting text
+  const handleMouseUp = () => {
+    if (isEditing) {
+      const detectedSize = getSelectionFontSize();
+      if (detectedSize !== currentFontSize) {
+        setCurrentFontSize(detectedSize);
+      }
+    }
+  };
+
+  // Modify the handleFontSizeChange function to work better with selections
   const handleFontSizeChange = (size: number) => {
     setCurrentFontSize(size);
     
@@ -278,7 +314,7 @@ const Repository = () => {
       // Try to restore selection
       const selectionRestored = restoreSelection();
       
-      if (selectionRestored) {
+      if (selectionRestored && window.getSelection()?.toString().trim() !== '') {
         // Apply font size to selection
         document.execCommand('fontSize', false, '7'); // Use 7 as a dummy size
         
@@ -292,13 +328,34 @@ const Repository = () => {
         // Re-focus the editor
         editorRef.current.focus();
       } else {
-        // No selection, set font size for entire editor
-        editorRef.current.style.fontSize = `${size}px`;
+        // No selection or empty selection, set font size for entire editor or at cursor position
+        if (window.getSelection()?.rangeCount) {
+          const range = window.getSelection()!.getRangeAt(0);
+          const span = document.createElement('span');
+          span.style.fontSize = `${size}px`;
+          span.textContent = '\u200B'; // Zero-width space
+          range.insertNode(span);
+          
+          // Position cursor after the inserted span
+          range.setStartAfter(span);
+          range.setEndAfter(span);
+          window.getSelection()!.removeAllRanges();
+          window.getSelection()!.addRange(range);
+        } else {
+          // Fall back to setting the entire editor
+          editorRef.current.style.fontSize = `${size}px`;
+        }
       }
     }
   };
 
-  const toggleFontSizeDropdown = () => {
+  // Update this function to also prevent default event behavior
+  const toggleFontSizeDropdown = (e?: React.MouseEvent<HTMLElement>) => {
+    // If event is provided, prevent default behavior
+    if (e) {
+      e.preventDefault();
+    }
+    
     // Save selection before opening dropdown
     saveSelection();
     
@@ -322,11 +379,6 @@ const Repository = () => {
 
   const handleFontSizeInputFocus = () => {
     saveSelection();
-  };
-
-  const handleMouseUp = () => {
-    // Handle mouse up event for editor selections
-    // This could be used for showing formatting options when text is selected
   };
 
   // =============================================
@@ -484,11 +536,18 @@ const Repository = () => {
                     className={styles.fontSizeInput}
                     onKeyDown={handleFontSizeInputKeyDown}
                     onFocus={handleFontSizeInputFocus}
+                    onMouseDown={(e) => {
+                      saveSelection();
+                      e.stopPropagation();
+                    }}
                   />
                   <div 
                     id="fontSizeDropdown" 
                     className={styles.fontSizeDropdown}
-                    onClick={toggleFontSizeDropdown}
+                    onMouseDown={(e) => {
+                      e.preventDefault();
+                      toggleFontSizeDropdown();
+                    }}
                   >
                     <span className={styles.dropdownArrow}>▼</span>
                   </div>
@@ -504,6 +563,7 @@ const Repository = () => {
                         className={`${styles.fontSizeOption} ${currentFontSize === size ? styles.selected : ''}`}
                         onMouseDown={(e) => {
                           e.preventDefault();
+                          e.stopPropagation();
                           handleFontSizeChange(size);
                           toggleFontSizeDropdown();
                         }}
