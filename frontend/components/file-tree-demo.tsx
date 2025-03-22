@@ -415,11 +415,8 @@ export default function FileTreeDemo({
       return newSet;
     });
     
-    // Force update tree component
-    setTimeout(() => {
-      // This small delay ensures the state is updated before the re-render
-      setFileList(prev => [...prev]);
-    }, 0);
+    // Force update tree component immediately
+    setFileList(prev => [...prev]);
   };
 
   // =============================================
