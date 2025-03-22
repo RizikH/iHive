@@ -20,6 +20,7 @@ function MousePosition(): MousePosition {
   });
 
   useEffect(() => {
+    // TODO: Add missing dependencies if needed
     const handleMouseMove = (event: MouseEvent) => {
       setMousePosition({ x: event.clientX, y: event.clientY });
     };
@@ -100,6 +101,7 @@ export const Particles: React.FC<ParticlesProps> = ({
   const resizeTimeout = useRef<NodeJS.Timeout | null>(null);
 
   useEffect(() => {
+    // TODO: Add missing dependencies if needed
     if (canvasRef.current) {
       context.current = canvasRef.current.getContext("2d");
     }
@@ -129,10 +131,12 @@ export const Particles: React.FC<ParticlesProps> = ({
   }, [color]);
 
   useEffect(() => {
+    // TODO: Add missing dependencies if needed
     onMouseMove();
   }, [mousePosition.x, mousePosition.y]);
 
   useEffect(() => {
+    // TODO: Add missing dependencies if needed
     initCanvas();
   }, [refresh]);
 

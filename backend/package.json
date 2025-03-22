@@ -3,8 +3,8 @@
     "version": "1.0.0",
     "private": true,
     "scripts": {
-        "dev": "nodemon server.js",
-        "start": "node server.js"
+      "dev": "nodemon server.js",
+      "start": "node server.js"
     },
     "dependencies": {
         "@radix-ui/react-slot": "^1.1.2",
@@ -20,6 +20,7 @@
         "jsonwebtoken": "latest",
         "motion": "^12.4.2",
         "next": "latest",
+        "nodemon": "^3.1.9",
         "openai": "latest",
         "react": "^19.0.0",
         "react-dom": "^19.0.0",
@@ -28,6 +29,7 @@
         "tailwind-merge": "^3.0.1"
     },
     "devDependencies": {
-        "supertest": "^7.0.0"
+      "supertest": "^7.1.0"
     }
-}
+  }
+  

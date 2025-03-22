@@ -123,6 +123,7 @@ const Tree = forwardRef<HTMLDivElement, TreeViewProps>(
     )
 
     useEffect(() => {
+    // TODO: Add missing dependencies if needed
       if (initialSelectedId) {
         expandSpecificTargetedElements(elements, initialSelectedId)
       }
@@ -303,6 +304,7 @@ const CollapseButton = forwardRef<
   }, [setExpandedItems])
 
   useEffect(() => {
+    // TODO: Add missing dependencies if needed
     console.log(expandAll)
     if (expandAll) {
       expendAllTree(elements)

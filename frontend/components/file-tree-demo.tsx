@@ -56,6 +56,7 @@ export default function FileTreeDemo({
   
   // Update file content when currentFileId changes
   useEffect(() => {
+    // TODO: Add missing dependencies if needed
     if (currentFileId) {
       const updateFileContent = (items: FileContent[]): FileContent[] => {
         return items.map(item => {
@@ -75,6 +76,7 @@ export default function FileTreeDemo({
 
   // Handle content updates from file list
   useEffect(() => {
+    // TODO: Add missing dependencies if needed
     const handleContentUpdates = () => {
       const findAndUpdateContent = (items: FileContent[]) => {
         items.forEach(item => {
@@ -359,7 +361,7 @@ export default function FileTreeDemo({
         });
       };
 
-      let newFiles = removeItem([...prevFiles]);
+      const newFiles = removeItem([...prevFiles]);
 
       const addToFolder = (items: FileContent[]): FileContent[] => {
         return items.map(item => {
