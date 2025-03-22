@@ -49,6 +49,27 @@ export default function FileTreeDemo({
   const [openFolders, setOpenFolders] = useState<Set<string>>(new Set());
   const [fileContentsMap, setFileContentsMap] = useState<Record<string, string>>({});
 
+  // Initialize file list from props
+  useEffect(() => {
+    if (initialFiles && initialFiles.length > 0) {
+      // Convert initialFiles to FileContent array
+      const files: FileContent[] = initialFiles.map(idea => ({
+        id: idea.id.toString(), // Ensure ID is string
+        name: idea.title,
+        type: 'file',
+        content: idea.description,
+      }));
+      
+      setFileList(files);
+      
+      // Initialize fileContentsMap
+      const contentsMap: Record<string, string> = {};
+      initialFiles.forEach(idea => {
+        contentsMap[idea.id.toString()] = idea.description;
+      });
+      setFileContentsMap(contentsMap);
+    }
+  }, [initialFiles]);
 
   // =============================================
   // Effects
@@ -56,7 +77,6 @@ export default function FileTreeDemo({
   
   // Update file content when currentFileId changes
   useEffect(() => {
-    // TODO: Add missing dependencies if needed
     if (currentFileId) {
       const updateFileContent = (items: FileContent[]): FileContent[] => {
         return items.map(item => {
@@ -76,7 +96,6 @@ export default function FileTreeDemo({
 
   // Handle content updates from file list
   useEffect(() => {
-    // TODO: Add missing dependencies if needed
     const handleContentUpdates = () => {
       const findAndUpdateContent = (items: FileContent[]) => {
         items.forEach(item => {
@@ -103,7 +122,6 @@ export default function FileTreeDemo({
   // Notify parent about content updates
   useEffect(() => {
     if (fileList) {
-      // Avoid unnecessary updates that may cause duplication
       const uniqueFileIds = new Set<string>();
       
       const notifyForUniqueFiles = (items: FileContent[]) => {
@@ -125,7 +143,6 @@ export default function FileTreeDemo({
   // Handle external content updates
   useEffect(() => {
     const handleExternalContentUpdate = (fileId: string, newContent: string) => {
-      // Prevent duplicate updates
       if (fileContentsMap[fileId] !== newContent) {
         setFileContentsMap(prev => ({
           ...prev,

@@ -25,6 +25,11 @@ import {
 // Styles
 import styles from '../styles/repository.module.css';
 
+// API URL
+const API_URL = process.env.NODE_ENV === "production" 
+  ? "https://ihive.onrender.com/api" 
+  : "http://localhost:5000/api";
+
 const Repository = () => {
   // =============================================
   // State Management
@@ -49,18 +54,40 @@ const Repository = () => {
   // =============================================
   // Load saved ideas on component mount
   useEffect(() => {
-    const savedIdeas = localStorage.getItem('ideas');
-    const fetchedIdeas = savedIdeas ? JSON.parse(savedIdeas) : [];
-    setIdeas(fetchedIdeas);
-    setFileContents(fetchedIdeas.reduce((acc: any, idea: any) => (
-      { ...acc, [idea.id]: idea.description }
-    ), {}));
+    const fetchIdeas = async () => {
+      try {
+        setIsLoading(true);
+        const response = await fetch(`${API_URL}/ideas`);
+        if (!response.ok) throw new Error('Failed to fetch ideas');
+        
+        const fetchedIdeas = await response.json();
+        setIdeas(fetchedIdeas);
+        // Map backend structure to frontend structure
+        setFileContents(fetchedIdeas.reduce((acc: any, idea: any) => (
+          { ...acc, [idea.id]: idea.description }
+        ), {}));
+      } catch (error) {
+        console.error('Error fetching ideas:', error);
+        setError('Failed to load ideas');
+        // Fallback to localStorage if API fails
+        const savedIdeas = localStorage.getItem('ideas');
+        const localIdeas = savedIdeas ? JSON.parse(savedIdeas) : [];
+        setIdeas(localIdeas);
+        setFileContents(localIdeas.reduce((acc: any, idea: any) => (
+          { ...acc, [idea.id]: idea.description }
+        ), {}));
+      } finally {
+        setIsLoading(false);
+      }
+    };
+    
+    fetchIdeas();
   }, []);
 
   // Add selection change listener when editing
   useEffect(() => {
     const handleSelectionChange = () => {
-      // Selection change handler logic would go here
+      // Selection change handler logic
       // This can be used for handling text selection in the editor
     };
     
@@ -143,7 +170,7 @@ const Repository = () => {
     }
   };
 
-  const handleFileDelete = (fileId: string) => {
+  const handleFileDelete = async (fileId: string) => {
     if (currentFileId === fileId) {
       setCurrentFileId(null);
       setContent('');
@@ -213,9 +240,28 @@ const Repository = () => {
           category: 'document'
         };
         
+        // First, check if the idea exists
+        const existingIndex = ideas.findIndex(item => item.id === currentFileId);
+        
+        // API request to create or update the idea
+        const url = `${API_URL}/ideas${existingIndex >= 0 ? `/${currentFileId}` : ''}`;
+        const method = existingIndex >= 0 ? 'PUT' : 'POST';
+        
+        const response = await fetch(url, {
+          method,
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify(idea),
+        });
+        
+        if (!response.ok) {
+          throw new Error(`Failed to ${existingIndex >= 0 ? 'update' : 'create'} idea`);
+        }
+        
+        // Update local state
         setIdeas(prevIdeas => {
           const updatedIdeas = [...prevIdeas];
-          const existingIndex = updatedIdeas.findIndex(item => item.id === currentFileId);
           
           if (existingIndex >= 0) {
             updatedIdeas[existingIndex] = idea;
@@ -223,6 +269,7 @@ const Repository = () => {
             updatedIdeas.push(idea);
           }
           
+          // Fallback: keep localStorage synced
           localStorage.setItem('ideas', JSON.stringify(updatedIdeas));
           return updatedIdeas;
         });
@@ -435,21 +482,68 @@ const Repository = () => {
     input.onchange = async (e) => {
       const file = (e.target as HTMLInputElement).files?.[0];
       if (file) {
-        const reader = new FileReader();
-        reader.onload = () => {
-          const newFileId = `file-${Date.now()}`;
-          const fileContent = file.type.includes('image') 
-            ? `<img src="${reader.result}" alt="${file.name}" />` 
-            : reader.result as string;
+        try {
+          setIsLoading(true);
+          const reader = new FileReader();
+          reader.onload = async () => {
+            const fileContent = file.type.includes('image') 
+              ? `<img src="${reader.result}" alt="${file.name}" />` 
+              : reader.result as string;
+            
+            // First save the file to the database
+            const newFileId = Date.now().toString();
+            const newIdea = {
+              id: newFileId,
+              title: file.name,
+              description: fileContent,
+              category: 'document'
+            };
+            
+            try {
+              const response = await fetch(`${API_URL}/ideas`, {
+                method: 'POST',
+                headers: {
+                  'Content-Type': 'application/json',
+                },
+                body: JSON.stringify(newIdea),
+              });
+              
+              if (!response.ok) {
+                throw new Error('Failed to save file');
+              }
+              
+              // Get the created idea from the response
+              const savedIdea = await response.json();
+              const savedId = savedIdea.idea?.id || newFileId;
+              
+              // Update local state
+              setFileContents(prev => ({ ...prev, [savedId]: fileContent }));
+              setIdeas(prev => [...prev, { ...newIdea, id: savedId }]);
+              setCurrentFileId(savedId);
+              setContent(fileContent);
+              setCurrentFileName(file.name);
+              
+            } catch (error) {
+              console.error('Error saving file:', error);
+              // Fallback to local storage
+              localStorage.setItem('ideas', JSON.stringify([...ideas, newIdea]));
+              setFileContents(prev => ({ ...prev, [newFileId]: fileContent }));
+              setCurrentFileId(newFileId);
+              setContent(fileContent);
+              setCurrentFileName(file.name);
+            }
+          };
           
-          setFileContents({ ...fileContents, [newFileId]: fileContent });
-          setCurrentFileId(newFileId);
-          setContent(fileContent);
-          setCurrentFileName(file.name);
-        };
-        file.type.includes('image') 
-          ? reader.readAsDataURL(file) 
-          : reader.readAsText(file);
+          file.type.includes('image') 
+            ? reader.readAsDataURL(file) 
+            : reader.readAsText(file);
+            
+        } catch (error) {
+          console.error('Error processing file:', error);
+          setError('Failed to process file');
+        } finally {
+          setIsLoading(false);
+        }
       }
     };
     input.click();
@@ -503,16 +597,33 @@ const Repository = () => {
                   setFileContents({ ...fileContents, [fileId]: updatedContent });
                   if (fileId === currentFileId) setContent(updatedContent);
                 }}
-                onFileDelete={(fileId) => {
-                  const updatedIdeas = ideas.filter(idea => idea.id !== fileId);
-                  localStorage.setItem('ideas', JSON.stringify(updatedIdeas));
-                  setIdeas(updatedIdeas);
-                  const { [fileId]: _, ...remainingContents } = fileContents;
-                  setFileContents(remainingContents);
-                  if (fileId === currentFileId) {
-                    setCurrentFileId(null);
-                    setContent('');
-                    setCurrentFileName('Main Content');
+                onFileDelete={async (fileId) => {
+                  try {
+                    // Delete from API
+                    const response = await fetch(`${API_URL}/ideas/${fileId}`, {
+                      method: 'DELETE',
+                    });
+                    
+                    if (!response.ok) {
+                      throw new Error('Failed to delete file');
+                    }
+                    
+                    // Update local state
+                    const updatedIdeas = ideas.filter(idea => idea.id !== fileId);
+                    localStorage.setItem('ideas', JSON.stringify(updatedIdeas)); // Fallback
+                    setIdeas(updatedIdeas);
+                    
+                    const { [fileId]: _, ...remainingContents } = fileContents;
+                    setFileContents(remainingContents);
+                    
+                    if (fileId === currentFileId) {
+                      setCurrentFileId(null);
+                      setContent('');
+                      setCurrentFileName('Main Content');
+                    }
+                  } catch (error) {
+                    console.error('Error deleting file:', error);
+                    setError('Failed to delete file');
                   }
                 }}
               />
