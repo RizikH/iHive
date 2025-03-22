@@ -147,13 +147,8 @@ export default function FileTreeDemo({
 
   // Sync expandedItems with openFolders
   useEffect(() => {
-    // This effect ensures the Tree component gets updated when openFolders changes
-    // The initialExpandedItems prop needs the current state of openFolders
-    // This makes sure folder icons display correctly based on their open/closed state
     const expandedItemsArray = Array.from(openFolders);
-    // Force re-render of tree component when openFolders changes
     if (expandedItemsArray.length > 0) {
-      // Need to actually update something here
       setFileList(prev => [...prev]);
     }
   }, [openFolders]);
@@ -480,19 +475,6 @@ export default function FileTreeDemo({
                       e.preventDefault();
                       e.stopPropagation();
                       toggleFolder(file.id);
-                      
-                      // Force update to ensure icon changes
-                      const folderIcon = e.currentTarget.querySelector('svg');
-                      if (folderIcon) {
-                        // Toggle a class to change the icon's appearance
-                        if (openFolders.has(file.id)) {
-                          folderIcon.classList.add('folder-open');
-                          folderIcon.classList.remove('folder-closed');
-                        } else {
-                          folderIcon.classList.add('folder-closed');
-                          folderIcon.classList.remove('folder-open');
-                        }
-                      }
                     }}
                   >
                     <Folder 
