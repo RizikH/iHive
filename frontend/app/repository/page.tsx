@@ -8,7 +8,6 @@ import styles from '../styles/repository.module.css';
 import '../styles/globals.css';
 import FileTreeDemo from '@/components/file-tree-demo';
 import { FiCopy, FiDownload, FiUpload, FiEdit, FiCheck, FiBold, FiItalic, FiUnderline } from 'react-icons/fi';
-import { ideaService } from '../../../backend/services/ideaService.js';
 
 const Repository = () => {
   const [isEditing, setIsEditing] = React.useState(false);
@@ -33,13 +32,14 @@ const Repository = () => {
     const fetchIdeas = async () => {
       try {
         setIsLoading(true);
-        const fetchedIdeas = await ideaService.getAllContents();
+        
+        const savedIdeas = localStorage.getItem('ideas');
+        const fetchedIdeas = savedIdeas ? JSON.parse(savedIdeas) : [];
         setIdeas(fetchedIdeas);
         
-        // Populate file tree with existing ideas
+        
         const ideaContents: Record<string, string> = {};
         fetchedIdeas.forEach((idea: any) => {
-          // Use the idea ID directly without the 'file-' prefix
           ideaContents[idea.id] = idea.description;
         });
         setFileContents(ideaContents);
@@ -90,19 +90,19 @@ const Repository = () => {
           const fileContent = e.target?.result;
           let formattedContent = '';
           
-          // Handle different file types
+          
           if (file.type.includes('text/plain')) {
-            // Handle .txt files
+            
             if (typeof fileContent === 'string') {
               formattedContent = fileContent.split('\n').map(line => 
                 line.trim() ? `<p>${line}</p>` : '<p><br></p>'
               ).join('');
             }
           } else if (file.type.includes('image')) {
-            // Handle image files
+            
             formattedContent = `<p><img src="${fileContent}" alt="${file.name}" style="max-width: 100%; height: auto;"/></p>`;
           } else {
-            // For other file types (PDF, DOC, etc.)
+            
             formattedContent = `<p>File uploaded: ${file.name}</p>`;
           }
 
@@ -125,7 +125,7 @@ const Repository = () => {
           handleContentUpdate(newFileId, formattedContent);
         };
 
-        // Use different reading methods based on file type
+        
         if (file.type.includes('image')) {
           reader.readAsDataURL(file);
         } else {
@@ -166,21 +166,21 @@ const Repository = () => {
 
     const range = selection.getRangeAt(0);
     
-    // If no text is selected (just a cursor position), return
+    
     if (range.collapsed) return;
     
-    // Get the actual selected text node
+    
     const selectedNode = range.startContainer;
     
-    // Try to get the font size directly from the selected node or its parent
+    
     if (selectedNode) {
       let element: HTMLElement | null = null;
       
-      // If it's a text node, get its parent element
+      
       if (selectedNode.nodeType === Node.TEXT_NODE && selectedNode.parentElement) {
         element = selectedNode.parentElement;
       } 
-      // If it's an element node, use it directly
+      
       else if (selectedNode.nodeType === Node.ELEMENT_NODE) {
         element = selectedNode as HTMLElement;
       }
@@ -194,20 +194,20 @@ const Repository = () => {
       }
     }
     
-    // If we couldn't get the font size directly, try with a temporary element
+    
     try {
-      // Create a temporary span with the exact content of the selection
+      
       const tempSpan = document.createElement('span');
       tempSpan.appendChild(range.cloneContents());
       
-      // Add to document to compute style (but hidden)
+      
       tempSpan.style.position = 'absolute';
       tempSpan.style.visibility = 'hidden';
       document.body.appendChild(tempSpan);
       
       const fontSize = getActualFontSize(tempSpan);
       
-      // Remove the temporary element
+      
       document.body.removeChild(tempSpan);
       
       if (fontSize !== null) {
@@ -218,9 +218,9 @@ const Repository = () => {
     }
   };
 
-  // Helper function to get the actual font size from an element
+  
   const getActualFontSize = (element: HTMLElement): number | null => {
-    // First check for inline style (highest priority)
+    
     if (element.style && element.style.fontSize) {
       const size = parseInt(element.style.fontSize);
       if (!isNaN(size)) {
@@ -228,7 +228,7 @@ const Repository = () => {
       }
     }
     
-    // Then check computed style
+    
     const computedStyle = window.getComputedStyle(element);
     const computedSize = parseInt(computedStyle.fontSize);
     if (!isNaN(computedSize)) {
@@ -248,12 +248,12 @@ const Repository = () => {
     
     const range = selection.getRangeAt(0);
     
-    // If no text is selected, set the font size for future typing
+    
     if (range.collapsed) {
       const marker = document.createElement('span');
       marker.id = 'font-size-marker';
       marker.style.fontSize = `${size}px`;
-      marker.innerHTML = '&#8203;'; // Zero-width space
+      marker.innerHTML = '&#8203;'; 
       
       range.insertNode(marker);
       range.setStartAfter(marker);
@@ -261,28 +261,28 @@ const Repository = () => {
       selection.removeAllRanges();
       selection.addRange(range);
     } else {
-      // For selected text, wrap it in a span with the desired font size
+      
       const selectedContent = range.extractContents();
       const wrapper = document.createElement('span');
       wrapper.style.fontSize = `${size}px`;
       wrapper.appendChild(selectedContent);
       range.insertNode(wrapper);
       
-      // Select the wrapped content
+      
       const newRange = document.createRange();
       newRange.selectNodeContents(wrapper);
       selection.removeAllRanges();
       selection.addRange(newRange);
     }
     
-    // Update content
+    
     const docBody = document.querySelector(`.${styles.docBody}`) as HTMLElement;
     if (docBody) {
       setContent(docBody.innerHTML);
     }
   };
 
-  // Improve the selection change handler to better detect font size
+ 
   const handleSelectionChange = () => {
     if (!isEditing) return;
     
@@ -291,21 +291,21 @@ const Repository = () => {
     
     const range = selection.getRangeAt(0);
     
-    // If text is selected, use the mouseUp handler
+    
     if (!range.collapsed) {
       handleMouseUp();
       return;
     }
     
-    // For cursor position (no selection), get font size at cursor
+    
     let currentNode = range.startContainer;
     let element: HTMLElement | null = null;
     
-    // If it's a text node, get its parent element
+    
     if (currentNode.nodeType === Node.TEXT_NODE && currentNode.parentElement) {
       element = currentNode.parentElement;
     } 
-    // If it's an element node, use it directly
+   
     else if (currentNode.nodeType === Node.ELEMENT_NODE) {
       element = currentNode as HTMLElement;
     }
@@ -318,10 +318,10 @@ const Repository = () => {
       }
     }
     
-    // If we couldn't get the font size from the current node, traverse up the DOM tree
+    
     while (currentNode && currentNode.parentElement) {
       currentNode = currentNode.parentElement;
-      // Cast to HTMLElement to fix type error
+      
       const element = currentNode as HTMLElement;
       
       const fontSize = getActualFontSize(element);
@@ -367,7 +367,7 @@ const Repository = () => {
   };
 
   const handleFileSelect = (fileId: string, fileContent: string, fileName: string) => {
-    // Remove the 'file-' prefix if it exists
+
     const cleanFileId = fileId.replace(/^file-/, '');
     setCurrentFileId(cleanFileId);
     setContent(fileContent);
@@ -375,7 +375,7 @@ const Repository = () => {
     setIsEditing(false);
     setHasContent(fileContent.trim() !== '');
     
-    // Update the file contents map
+   
     setFileContents(prev => ({
       ...prev,
       [cleanFileId]: fileContent
@@ -384,10 +384,10 @@ const Repository = () => {
 
   const handleContentUpdate = (fileId: string, newContent: string) => {
     if (fileId) {
-      // Remove the 'file-' prefix if it exists
+      
       const cleanFileId = fileId.replace(/^file-/, '');
       
-      // Only update the content display if this is the current file
+     
       if (cleanFileId === currentFileId) {
         setContent(newContent);
         setHasContent(newContent.trim() !== '');
@@ -405,16 +405,16 @@ const Repository = () => {
     if (isEditing) {
       const newContent = e.currentTarget.innerHTML || '';
       
-      // Immediately update hasContent state based on current content
+   
       const contentExists = newContent.trim() !== '';
       setHasContent(contentExists);
       
-      // If this is the first character typed, make sure to remove placeholder styling
+    
       if (contentExists && !hasContent && editorRef.current) {
         editorRef.current.classList.remove(styles.placeholder);
       }
       
-      // Update the file contents map for the current file
+   
       if (currentFileId) {
         setFileContents(prev => ({
           ...prev,
@@ -422,7 +422,7 @@ const Repository = () => {
         }));
       }
       
-      // Remove font size marker if empty
+     
       const marker = document.getElementById('font-size-marker');
       if (marker && marker.textContent === '') {
         marker.remove();
@@ -452,20 +452,20 @@ const Repository = () => {
     
     setTimeout(() => {
       if (editorRef.current) {
-        // Always set the font size when enabling edit mode
+       
         editorRef.current.style.fontSize = `${currentFontSize}px`;
         
-        // Set contentEditable attribute
+    
         editorRef.current.setAttribute('contenteditable', 'true');
         
-        // Focus the editor
+      
         editorRef.current.focus();
         
-        // Set focus to the end of the content
+        
         const selection = window.getSelection();
         if (selection) {
           try {
-            // Try to place cursor at the end of content
+         
             const range = document.createRange();
             const contentDiv = editorRef.current.querySelector('div');
             if (contentDiv && contentDiv.childNodes.length > 0) {
@@ -483,7 +483,7 @@ const Repository = () => {
             selection.addRange(range);
           } catch (e) {
             console.error('Error setting cursor position:', e);
-            // Fallback to just focusing the element
+        
             editorRef.current.focus();
           }
         }
@@ -496,13 +496,32 @@ const Repository = () => {
       const newContent = editorRef.current.innerHTML;
       try {
         setIsLoading(true);
-        await ideaService.saveContent({
+        
+       
+        const idea = {
+          id: currentFileId,
           title: currentFileName,
           description: newContent,
-          category: 'document' // or any appropriate category
+          category: 'document'
+        };
+        
+      
+        setIdeas(prevIdeas => {
+          const updatedIdeas = [...prevIdeas];
+          const existingIndex = updatedIdeas.findIndex(item => item.id === currentFileId);
+          
+          if (existingIndex >= 0) {
+            updatedIdeas[existingIndex] = idea;
+          } else {
+            updatedIdeas.push(idea);
+          }
+          
+       
+          localStorage.setItem('ideas', JSON.stringify(updatedIdeas));
+          return updatedIdeas;
         });
 
-        // Update local state only after successful save
+ 
         setContent(newContent);
         handleContentUpdate(currentFileId, newContent);
         setIsEditing(false);
@@ -567,16 +586,16 @@ const Repository = () => {
   }, [styles.fontSizeContainer]);
 
   useEffect(() => {
-    // Initialize editor content when it changes
+
     if (editorRef.current && !isEditing) {
       editorRef.current.innerHTML = content;
       
-      // Set hasContent correctly when initializing
+
       setHasContent(content.trim() !== '');
     }
   }, [content, isEditing]);
 
-  // Add a new effect to apply CSS classes directly when hasContent changes
+
   useEffect(() => {
     if (editorRef.current) {
       if (hasContent) {
@@ -658,27 +677,27 @@ const Repository = () => {
                   const value = e.target.value;
                   if (value === '') {
                     setCurrentFontSize(0);
-                  } else if (/^\d*$/.test(value)) { // Only allow digits
+                  } else if (/^\d*$/.test(value)) { 
                     const numValue = parseInt(value);
-                    if (numValue <= 400) { // Set a reasonable maximum
+                    if (numValue <= 400) { 
                       setCurrentFontSize(numValue);
                     }
                   }
                 }}
                 onBlur={(e) => {
                   if (!currentFontSize || currentFontSize < 1) {
-                    setCurrentFontSize(16); // Reset to default if invalid
+                    setCurrentFontSize(16); 
                   } else {
                     handleDirectFontSizeInput(e);
                   }
-                  // Restore selection after changing font size
+                 
                   setTimeout(restoreSelection, 0);
                 }}
                 onKeyDown={(e) => {
                   if (e.key === 'Enter') {
                     e.preventDefault();
                     if (!currentFontSize || currentFontSize < 1) {
-                      setCurrentFontSize(16); // Reset to default if invalid
+                      setCurrentFontSize(16); 
                     }
                     handleDirectFontSizeInput(e as unknown as React.FocusEvent<HTMLInputElement>);
              
@@ -711,7 +730,7 @@ const Repository = () => {
                     key={size} 
                     className={`${styles.fontSizeOption} ${currentFontSize === size ? styles.selected : ''}`}
                     onMouseDown={(e) => {
-                      // Prevent default to avoid losing selection
+                 
                       e.preventDefault();
                       e.stopPropagation();
                       
@@ -719,7 +738,7 @@ const Repository = () => {
                       const dropdown = document.getElementById('fontSizeDropdown');
                       if (dropdown) dropdown.style.display = 'none';
                       
-                      // Restore selection after changing font size
+                     
                       setTimeout(restoreSelection, 0);
                     }}
                   >
