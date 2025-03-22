@@ -1,3 +1,6 @@
+/* =============================================
+   Container and Layout
+   ============================================= */
 .pageContainer {
     min-height: 100vh;
     display: flex;
@@ -6,6 +9,24 @@
     color: #000;
 }
 
+.mainContent {
+    display: flex;
+    flex-direction: row;
+    min-height: calc(100vh - 150px);
+    padding: 2rem;
+    gap: 2rem;
+}
+
+.divider {
+    width: 1px;
+    height: 24px;
+    background-color: #e2e8f0;
+    margin: 0 0.5rem;
+}
+
+/* =============================================
+   Navigation
+   ============================================= */
 .navContainer {
     padding: 1.5rem 4rem;
     display: flex;
@@ -50,15 +71,9 @@
     background-color: transparent;
 }
 
-.mainContent {
-    display: flex;
-    flex-direction: row;
-    min-height: calc(100vh - 150px);
-    padding: 2rem;
-    gap: 2rem;
-}
-
-/* Sidebar */
+/* =============================================
+   Sidebar
+   ============================================= */
 .sideBar {
     width: 25%;
     display: flex;
@@ -84,7 +99,9 @@
     overflow: hidden;
 }
 
-/* Details Section */
+/* =============================================
+   Document Space
+   ============================================= */
 .docSpace {
     width: 75%;
     padding: 2rem;
@@ -118,35 +135,19 @@
     overflow: hidden;
 }
 
-.divider {
-    width: 1px;
-    height: 24px;
-    background-color: #e2e8f0;
-    margin: 0 0.5rem;
-}
-
 .docBody {
     min-height: 300px;
     padding: 20px;
     outline: none;
 }
 
-.placeholder {
-    position: relative;
+.docBody span {
+    white-space: pre-wrap;
 }
 
-.placeholderText {
-    color: #999;
-    position: absolute;
-    pointer-events: none;
-    font-style: italic;
-}
-
-/* Hide placeholder when content is being edited */
-.docBody:focus .placeholderText {
-    display: none;
-}
-
+/* =============================================
+   Document Controls
+   ============================================= */
 .dockButton {
     display: flex;
     align-items: center;
@@ -169,45 +170,9 @@
     background-color: #cbd5e0;
 }
 
-/* Footer */
-.footer {
-    text-align: center;
-    padding: 1rem;
-    background-color: #fff;
-    font-size: 0.9rem;
-}
-
-.footIcon {
-    position: relative;
-    z-index: 2;
-    background-color: transparent;
-    align-items: center;
-    justify-self: center;
-    display: flex;
-}
-
-.footer a {
-    color: #000;
-    text-decoration: none;
-}
-
-.footer a:hover {
-    color: #1a1a1a;
-    text-decoration: underline;
-}
-
-@media (max-width: 768px) {
-    .navbar {
-        flex-direction: column;
-        text-align: center;
-        gap: 1rem;
-    }
-
-    .navLinks {
-        gap: 1rem;
-    }
-}
-
+/* =============================================
+   Font Size Controls
+   ============================================= */
 .fontSizeContainer {
     position: relative;
     display: flex;
@@ -292,8 +257,18 @@
     display: none;
 }
 
-.docBody span {
-    white-space: pre-wrap;
+/* =============================================
+   Placeholder Styles
+   ============================================= */
+.placeholder {
+    position: relative;
+}
+
+.placeholderText {
+    color: #999;
+    position: absolute;
+    pointer-events: none;
+    font-style: italic;
 }
 
 .placeholderContent {
@@ -314,6 +289,18 @@
   color: #999;
 }
 
+/* Hide placeholder when content is being edited */
+.docBody:focus .placeholderText {
+    display: none;
+}
+
+.docBody:focus .placeholderContent {
+  display: none;
+}
+
+/* =============================================
+   Keyboard Shortcuts
+   ============================================= */
 .shortcuts {
   margin-top: 24px;
   padding: 16px;
@@ -344,10 +331,9 @@
   margin: 0 2px;
 }
 
-.docBody:focus .placeholderContent {
-  display: none;
-}
-
+/* =============================================
+   Notifications
+   ============================================= */
 .loading {
   position: fixed;
   top: 50%;
@@ -370,4 +356,48 @@
   border-radius: 4px;
   box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
   z-index: 1000;
+}
+
+/* =============================================
+   Footer
+   ============================================= */
+.footer {
+    text-align: center;
+    padding: 1rem;
+    background-color: #fff;
+    font-size: 0.9rem;
+}
+
+.footIcon {
+    position: relative;
+    z-index: 2;
+    background-color: transparent;
+    align-items: center;
+    justify-self: center;
+    display: flex;
+}
+
+.footer a {
+    color: #000;
+    text-decoration: none;
+}
+
+.footer a:hover {
+    color: #1a1a1a;
+    text-decoration: underline;
+}
+
+/* =============================================
+   Media Queries
+   ============================================= */
+@media (max-width: 768px) {
+    .navbar {
+        flex-direction: column;
+        text-align: center;
+        gap: 1rem;
+    }
+
+    .navLinks {
+        gap: 1rem;
+    }
 }

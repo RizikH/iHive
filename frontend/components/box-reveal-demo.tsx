@@ -6,23 +6,36 @@ import { BoxReveal } from "@/components/magicui/box-reveal";
 import { AuthForm } from "@/components/auth-form";
 import { useState } from "react";
 
+// =============================================
+// Box Reveal Demo Component
+// =============================================
+
 export function BoxRevealDemo() {
+  // =============================================
+  // State Management
+  // =============================================
   const [showAuthForm, setShowAuthForm] = useState(false);
 
+  // =============================================
+  // Render Component
+  // =============================================
   return (
     <div className="size-full max-w-lg items-center justify-center overflow-hidden pt-8">
+      {/*Title Box*/}
       <BoxReveal boxColor={"#5046e6"} duration={0.5}>
         <p className="text-[3.5rem] font-semibold">
           iHive<span className="text-[#5046e6]">.</span>
         </p>
       </BoxReveal>
 
+      {/*Subtitle Box*/}
       <BoxReveal boxColor={"#5046e6"} duration={0.5}>
         <h2 className="mt-[.5rem] text-[1rem]">
           Welcome to the iHive.
         </h2>
       </BoxReveal>
 
+      {/*Features Description*/}
       <BoxReveal boxColor={"#5046e6"} duration={0.5}>
         <div className="mt-6">
           <p>
@@ -32,6 +45,7 @@ export function BoxRevealDemo() {
         </div>
       </BoxReveal>
 
+      {/*Action Buttons*/}
       <BoxReveal boxColor={"#5046e6"} duration={0.5}>
         <div className="mt-[1.6rem] flex gap-4">
           <Link href="/">
@@ -62,6 +76,7 @@ export function BoxRevealDemo() {
         </div>
       </BoxReveal>
 
+      {/*Auth Form Modal*/}
       {showAuthForm && (
         <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50 z-50">
           <div className="relative">

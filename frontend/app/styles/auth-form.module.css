@@ -1,3 +1,6 @@
+/* =============================================
+   Container and Layout
+   ============================================= */
 .wrapper {
   position: relative;
   width: 400px;
@@ -15,6 +18,14 @@
   transition: transform .5s ease, height .2s ease;
 }
 
+.wrapper .formBox {
+  width: 100%;
+  padding: 40px;
+}
+
+/* =============================================
+   Animation and Transitions
+   ============================================= */
 .wrapper.activePopup {
   transform: scale(1);
 }
@@ -23,11 +34,9 @@
   height: 520px;
 }
 
-.wrapper .formBox {
-  width: 100%;
-  padding: 40px;
-}
-
+/* =============================================
+   Form Switching
+   ============================================= */
 .wrapper .formBox.login {
   transition: transform .18s ease;
   transform: translateX(0);
@@ -49,6 +58,9 @@
   transform: translateX(0);
 }
 
+/* =============================================
+   Close Button
+   ============================================= */
 .iconClose {
   position: absolute;
   top: 0;
@@ -67,12 +79,18 @@
   border: none;
 }
 
+/* =============================================
+   Form Header
+   ============================================= */
 .formBox h2 {
   font-size: 2em;
   color: #1a1a1a;
   text-align: center;
 }
 
+/* =============================================
+   Input Fields
+   ============================================= */
 .inputBox {
   position: relative;
   width: 100%;
@@ -118,6 +136,9 @@
   line-height: 57px;
 }
 
+/* =============================================
+   Authentication Options
+   ============================================= */
 .rememberForgot {
   font-size: .9em;
   color: #1a1a1a;
@@ -141,6 +162,9 @@
   text-decoration: underline;
 }
 
+/* =============================================
+   Buttons
+   ============================================= */
 .btn {
   width: 100%;
   height: 45px;

@@ -1,10 +1,10 @@
 'use client';
-import DOMPurify from 'dompurify';
 
 import React, { useEffect, useState } from 'react';
 import Head from 'next/head';
 import Link from 'next/link';
 import Image from 'next/image';
+import DOMPurify from 'dompurify';
 import styles from '../styles/entrepreneur-profile.module.css';
 import '../styles/globals.css';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
@@ -17,14 +17,28 @@ import {
 import MarqueeDemo from '@/components/marquee-demo';
 import ChangeAvatar from '@/components/change-avatar';
 
+// =============================================
+// Helper Functions
+// =============================================
+
 const isValidBlobUrl = (url: string) => {
   return url.startsWith('blob:');
 };
 
+// =============================================
+// Main Component
+// =============================================
+
 const EntrepreneurProfile = () => {
+  // =============================================
+  // State Management
+  // =============================================
   const [isAvatarModalOpen, setIsAvatarModalOpen] = useState(false);
   const [currentAvatar, setCurrentAvatar] = useState('https://avatar.vercel.sh/jack');
 
+  // =============================================
+  // Event Handlers
+  // =============================================
   const handleAvatarChange = (newAvatarUrl: string) => {
     if (currentAvatar.startsWith('blob:')) {
       URL.revokeObjectURL(currentAvatar);
@@ -38,6 +52,9 @@ const EntrepreneurProfile = () => {
     setIsAvatarModalOpen(false);
   };
 
+  // =============================================
+  // Effects
+  // =============================================
   React.useEffect(() => {
     return () => {
       if (currentAvatar.startsWith('blob:')) {
@@ -46,6 +63,9 @@ const EntrepreneurProfile = () => {
     };
   }, []);
 
+  // =============================================
+  // Render
+  // =============================================
   return (
     <>
     <Head>
@@ -56,7 +76,7 @@ const EntrepreneurProfile = () => {
     </Head>
 
     <div className={styles.container}>
-      {/* Navigation */}
+      {/*Navigation*/}
       <nav className={styles.navContainer}>
         <div className={styles.logo}>
           <Link href="/" title="Home" className="flex items-center gap-2">
@@ -78,12 +98,11 @@ const EntrepreneurProfile = () => {
         </div>
       </nav>
 
-      {/* Profile Section */}
+      {/*Main Content*/}
       <main className={styles.main}>
-
-        {/* Sidebar */}
-
+        {/*Profile Information Section*/}
         <div className={styles.profileSection}>
+          {/*Avatar with Change Functionality*/}
           <div className={styles.profileImage} onClick={() => setIsAvatarModalOpen(true)}>
             <img 
               src={currentAvatar} 
@@ -98,6 +117,7 @@ const EntrepreneurProfile = () => {
             />
           </div>
           
+          {/*Avatar Change Modal*/}
           <ChangeAvatar
             isOpen={isAvatarModalOpen}
             onClose={() => setIsAvatarModalOpen(false)}
@@ -105,13 +125,14 @@ const EntrepreneurProfile = () => {
             currentAvatar={currentAvatar}
           />
           
+          {/*User Information*/}
           <h1 className={styles.name}>Username</h1>
           <div className={styles.titles}>
             <p>Job Title</p>
             <p>Skills</p>
           </div>
 
-          {/* Social Links: link to setting social media */}
+          {/*Social Media Links*/}
           <div className={styles.socialLinks}>
             <Link href="https://github.com" className={styles.socialIcon} title="GitHub">
               <FontAwesomeIcon icon={faGithub} />
@@ -125,7 +146,7 @@ const EntrepreneurProfile = () => {
           </div>
         </div>
 
-        {/* Repo-Cards */}
+        {/*Repository Showcase*/}
         <div className={styles.marquee}>
           <h2 className={styles.marqueeTitle}>Popular Repositories</h2>
           <div className={styles.marqueeContainer}>
@@ -134,7 +155,7 @@ const EntrepreneurProfile = () => {
         </div>
       </main>
 
-      {/* Footer */}
+      {/*Footer*/}
       <footer className={styles.footer}>
         <p>
           © 2025 iHive · Entrepreneur | <Link href="/terms" target='_blank'>Terms</Link> | <Link href="/Privacy" target='_blank'>Privacy</Link>

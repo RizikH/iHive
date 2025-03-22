@@ -5,13 +5,26 @@ import { useRouter } from "next/navigation"; // ✅ Import useRouter for redirec
 import { FiMail, FiLock, FiUser, FiX } from "react-icons/fi";
 import styles from "@/app/styles/auth-form.module.css";
 
+// =============================================
+// Types and Interfaces
+// =============================================
+
 interface AuthFormProps {
   initialView?: "login" | "register";
   onClose?: () => void;
 }
 
+// =============================================
+// Authentication Form Component
+// =============================================
+
 export const AuthForm = ({ initialView = "login", onClose }: AuthFormProps) => {
   const router = useRouter(); // ✅ Initialize router for navigation
+  
+  // =============================================
+  // State Management
+  // =============================================
+  
   const [isActive, setIsActive] = useState(initialView === "register");
   const [isVisible, setIsVisible] = useState(true);
   const [loading, setLoading] = useState(false);
@@ -26,6 +39,10 @@ export const AuthForm = ({ initialView = "login", onClose }: AuthFormProps) => {
     rememberMe: false,
     termsAccepted: false,
   });
+
+  // =============================================
+  // Event Handlers
+  // =============================================
 
   // Hide Form
   const hideForm = () => {
@@ -99,38 +116,52 @@ export const AuthForm = ({ initialView = "login", onClose }: AuthFormProps) => {
     }
   };
 
+  // =============================================
+  // Render
+  // =============================================
+
   return (
     <div className={`${styles.wrapper} ${isVisible ? styles.activePopup : ""} ${isActive ? styles.active : ""}`}>
+      {/*Close Button*/}
       <button className={styles.iconClose} onClick={hideForm}>
         <FiX />
       </button>
 
-      {/* Login Form */}
+      {/*Login Form Section*/}
       {!isActive && (
         <div className={`${styles.formBox} ${styles.login}`}>
           <h2>Login</h2>
           {error && <p className={styles.error}>{error}</p>}
           {success && <p className={styles.success}>{success}</p>}
           <form onSubmit={handleSubmit}>
+            {/*Email Input*/}
             <div className={styles.inputBox}>
               <FiMail className={styles.icon} />
               <input type="email" name="email" value={formData.email} onChange={handleChange} required />
               <label>Email</label>
             </div>
+            
+            {/*Password Input*/}
             <div className={styles.inputBox}>
               <FiLock className={styles.icon} />
               <input type="password" name="password" value={formData.password} onChange={handleChange} required />
               <label>Password</label>
             </div>
+            
+            {/*Remember Me and Forgot Password*/}
             <div className={styles.rememberForgot}>
               <label>
                 <input type="checkbox" name="rememberMe" checked={formData.rememberMe} onChange={handleChange} /> Remember me
               </label>
               <a href="#">Forgot Password?</a>
             </div>
+            
+            {/*Login Button*/}
             <button type="submit" className={styles.btn} disabled={loading}>
               {loading ? "Logging in..." : "Login"}
             </button>
+            
+            {/*Register Link*/}
             <div className={styles.loginRegister}>
               <p>
                 Don't have an account?
@@ -143,37 +174,48 @@ export const AuthForm = ({ initialView = "login", onClose }: AuthFormProps) => {
         </div>
       )}
 
-      {/* Register Form */}
+      {/*Register Form Section*/}
       {isActive && (
         <div className={`${styles.formBox} ${styles.register}`}>
           <h2>Sign up</h2>
           {error && <p className={styles.error}>{error}</p>}
           {success && <p className={styles.success}>{success}</p>}
           <form onSubmit={handleSubmit}>
+            {/*Username Input*/}
             <div className={styles.inputBox}>
               <FiUser className={styles.icon} />
               <input type="text" name="username" value={formData.username} onChange={handleChange} required />
               <label>Username</label>
             </div>
+            
+            {/*Email Input*/}
             <div className={styles.inputBox}>
               <FiMail className={styles.icon} />
               <input type="email" name="email" value={formData.email} onChange={handleChange} required />
               <label>Email</label>
             </div>
+            
+            {/*Password Input*/}
             <div className={styles.inputBox}>
               <FiLock className={styles.icon} />
               <input type="password" name="password" value={formData.password} onChange={handleChange} required />
               <label>Password</label>
             </div>
+            
+            {/*Terms and Conditions*/}
             <div className={styles.rememberForgot}>
               <label>
                 <input type="checkbox" name="termsAccepted" checked={formData.termsAccepted} onChange={handleChange} required />{" "}
                 I agree to the <a href="/terms">Terms</a> & <a href="/privacy">Privacy</a>
               </label>
             </div>
+            
+            {/*Register Button*/}
             <button type="submit" className={styles.btn} disabled={loading}>
               {loading ? "Registering..." : "Register"}
             </button>
+            
+            {/*Login Link*/}
             <div className={styles.loginRegister}>
               <p>
                 Already have an account?

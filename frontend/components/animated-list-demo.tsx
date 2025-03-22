@@ -3,6 +3,10 @@
 import { cn } from "@/lib/utils"
 import { AnimatedList } from "@/components/magicui/animated-list"
 
+// =============================================
+// Types and Interfaces
+// =============================================
+
 interface Item {
   name: string
   description: string
@@ -11,21 +15,17 @@ interface Item {
   time: string
 }
 
+// =============================================
+// Sample Notification Data
+// =============================================
+
 let notifications = [
   {
-    name: "Payment received",
+    name: "Donation received",
     description: "Magic UI",
     time: "15m ago",
-
     icon: "💸",
     color: "#00C9A7",
-  },
-  {
-    name: "User signed up",
-    description: "Magic UI",
-    time: "10m ago",
-    icon: "👤",
-    color: "#FFB800",
   },
   {
     name: "New message",
@@ -45,6 +45,10 @@ let notifications = [
 
 notifications = Array.from({ length: 10 }, () => notifications).flat()
 
+// =============================================
+// Notification Item Component
+// =============================================
+
 const Notification = ({ name, description, icon, color, time }: Item) => {
   return (
     <figure
@@ -58,6 +62,7 @@ const Notification = ({ name, description, icon, color, time }: Item) => {
         "transform-gpu dark:bg-transparent dark:backdrop-blur-md dark:[border:1px_solid_rgba(255,255,255,.1)] dark:[box-shadow:0_-20px_80px_-20px_#ffffff1f_inset]",
       )}
     >
+      {/*Notification Icon*/}
       <div className="flex flex-row items-center gap-3">
         <div
           className="flex size-10 items-center justify-center rounded-2xl"
@@ -67,6 +72,8 @@ const Notification = ({ name, description, icon, color, time }: Item) => {
         >
           <span className="text-lg">{icon}</span>
         </div>
+        
+        {/*Notification Content*/}
         <div className="flex flex-col overflow-hidden">
           <figcaption className="flex flex-row items-center whitespace-pre text-lg font-medium dark:text-white ">
             <span className="text-sm sm:text-lg">{name}</span>
@@ -80,6 +87,10 @@ const Notification = ({ name, description, icon, color, time }: Item) => {
   )
 }
 
+// =============================================
+// Animated List Component
+// =============================================
+
 export default function AnimatedListDemo({
   className,
 }: {
@@ -87,12 +98,14 @@ export default function AnimatedListDemo({
 }) {
   return (
     <div className={cn("relative flex h-[500px] w-full flex-col overflow-hidden p-2", className)}>
+      {/*Notifications List*/}
       <AnimatedList>
         {notifications.map((item, idx) => (
           <Notification {...item} key={idx} />
         ))}
       </AnimatedList>
 
+      {/*Gradient Overlay*/}
       <div className="pointer-events-none absolute inset-x-0 bottom-0 h-1/4 bg-gradient-to-t from-background"></div>
     </div>
   )

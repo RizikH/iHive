@@ -1,9 +1,36 @@
+/* =============================================
+   Container and Layout
+   ============================================= */
 .fileTreeContainer {
   display: flex;
   flex-direction: column;
   gap: 1rem;
 }
 
+.emptyState {
+  text-align: center;
+  padding: 20px;
+  color: #666;
+  font-size: 14px;
+}
+
+.emptyState p:first-child {
+  margin-bottom: 8px;
+}
+
+.emptyState p:last-child {
+  font-size: 12px;
+  color: #999;
+}
+
+.folderContent {
+  width: 100%;
+  padding-left: 16px;
+}
+
+/* =============================================
+   File Tree Actions
+   ============================================= */
 .fileTreeActions {
   display: flex;
   gap: 8px;
@@ -51,6 +78,9 @@
   background: #e0e0e0;
 }
 
+/* =============================================
+   File and Folder Items
+   ============================================= */
 .treeItem {
   position: relative;
   cursor: move;
@@ -67,6 +97,42 @@
   padding-right: 8px;
 }
 
+.fileItem {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 2px 4px;
+  border-radius: 4px;
+}
+
+.fileItem:hover {
+  background-color: rgba(0, 0, 0, 0.05);
+}
+
+.fileItemName {
+  flex: 1;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+}
+
+/* Ensure delete button doesn't interfere with folder expansion */
+.folderLabel {
+  width: 100%;
+  min-width: 0;
+}
+
+.fileLabel {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  width: 100%;
+  gap: 8px;
+}
+
+/* =============================================
+   Action Buttons
+   ============================================= */
 .deleteButton {
   opacity: 0;
   background: none;
@@ -85,25 +151,6 @@
 
 .treeItem:hover .deleteButton {
   opacity: 1;
-}
-
-/* Ensure delete button doesn't interfere with folder expansion */
-.folderLabel {
-  width: 100%;
-  min-width: 0;
-}
-
-/* Style for the delete confirmation dialog (optional) */
-.deleteDialog {
-  position: fixed;
-  top: 50%;
-  left: 50%;
-  transform: translate(-50%, -50%);
-  background: white;
-  padding: 20px;
-  border-radius: 8px;
-  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
-  z-index: 1000;
 }
 
 .itemActions {
@@ -137,8 +184,8 @@
 }
 
 .actionButton:hover {
-  background: rgba(0, 0, 0, 0.05);
-  color: #333;
+  background-color: rgba(0, 0, 0, 0.1);
+  color: #000;
 }
 
 .actionButton[title*="Delete"]:hover {
@@ -151,6 +198,27 @@
   background-color: rgba(0, 112, 243, 0.1);
 }
 
+/* You can add these specific hover effects if desired */
+.actionButton[title="Save"]:hover {
+  color: #4caf50;
+}
+
+.actionButton[title="Cancel"]:hover {
+  color: #f44336;
+}
+
+.fileActions {
+  display: none;
+  gap: 4px;
+}
+
+.fileItem:hover .fileActions {
+  display: flex;
+}
+
+/* =============================================
+   Rename Controls
+   ============================================= */
 .renameForm {
   display: flex;
   align-items: center;
@@ -208,30 +276,24 @@
   background: rgba(239, 68, 68, 0.1);
 }
 
-.fileLabel {
+.renameControls {
   display: flex;
-  align-items: center;
-  justify-content: space-between;
   width: 100%;
   gap: 8px;
+  align-items: center;
 }
 
-.emptyState {
-  text-align: center;
-  padding: 20px;
-  color: #666;
-  font-size: 14px;
+.renameControls input {
+  flex: 1;
+  padding: 2px 4px;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+  font-size: 0.9rem;
 }
 
-.emptyState p:first-child {
-  margin-bottom: 8px;
-}
-
-.emptyState p:last-child {
-  font-size: 12px;
-  color: #999;
-}
-
+/* =============================================
+   Drag and Drop
+   ============================================= */
 .dropTarget {
   position: relative;
 }
@@ -274,76 +336,18 @@
   pointer-events: none;
 }
 
-.folderContent {
-  width: 100%;
-  padding-left: 16px;
-}
-
-.fileItem {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  padding: 2px 4px;
-  border-radius: 4px;
-}
-
-.fileItem:hover {
-  background-color: rgba(0, 0, 0, 0.05);
-}
-
-.fileItemName {
-  flex: 1;
-  cursor: pointer;
-  display: flex;
-  align-items: center;
-}
-
-.fileActions {
-  display: none;
-  gap: 4px;
-}
-
-.fileItem:hover .fileActions {
-  display: flex;
-}
-
-.actionButton {
-  background: none;
-  border: none;
-  cursor: pointer;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  padding: 4px;
-  border-radius: 4px;
-  color: #666;
-}
-
-.actionButton:hover {
-  background-color: rgba(0, 0, 0, 0.1);
-  color: #000;
-}
-
-.renameControls {
-  display: flex;
-  width: 100%;
-  gap: 8px;
-  align-items: center;
-}
-
-.renameControls input {
-  flex: 1;
-  padding: 2px 4px;
-  border: 1px solid #ccc;
-  border-radius: 4px;
-  font-size: 0.9rem;
-}
-
-/* You can add these specific hover effects if desired */
-.actionButton[title="Save"]:hover {
-  color: #4caf50;
-}
-
-.actionButton[title="Cancel"]:hover {
-  color: #f44336;
+/* =============================================
+   Dialogs
+   ============================================= */
+/* Style for the delete confirmation dialog (optional) */
+.deleteDialog {
+  position: fixed;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  background: white;
+  padding: 20px;
+  border-radius: 8px;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+  z-index: 1000;
 } 

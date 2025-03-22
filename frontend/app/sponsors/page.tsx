@@ -11,18 +11,26 @@ import AvatarCirclesDemo from '@/components/avatar-circles-demo';
 import AnimatedListDemo from "@/components/animated-list-demo";
 import { Pie } from 'react-chartjs-2';
 import {
-  Chart as ChartJS, 
-  ArcElement, 
-  Tooltip, 
+  Chart as ChartJS,
+  ArcElement,
+  Tooltip,
   Legend
 } from 'chart.js';
 
+// Register Chart.js components
 ChartJS.register(
-  ArcElement, Tooltip, Legend
+  ArcElement, 
+  Tooltip, 
+  Legend
+  
 );
 
-const Sponsors = () => {
+// =============================================
+// Main Component
+// =============================================
 
+const Sponsors = () => {
+  // Chart configuration data
   const chartData = {
     labels: ['Gold Sponsors', 'Silver Sponsors', 'Bronze Sponsors'],  // labels for now, maybe sponsors' username
     datasets: [{
@@ -33,6 +41,7 @@ const Sponsors = () => {
     }]
   };
 
+  // Chart display options
   const options = {
     responsive: true, 
     plugins: {
@@ -56,7 +65,7 @@ const Sponsors = () => {
     </Head>
 
     <div className={styles.container}>
-      {/* Navigation */}
+      {/*Navigation*/}
       <nav className={styles.navContainer}>
         <div className={styles.logo}>
           <Link href="/" title="Home" className="flex items-center gap-2">
@@ -78,10 +87,9 @@ const Sponsors = () => {
         </div>
       </nav>
 
-
+      {/*Main Content*/}
       <main className={styles.main}>
-        {/* Sidebar */}
-
+        {/*Profile and Recent Sponsors Section*/}
         <div className={styles.profileSection}>
           <div className={styles.profileImage}>
               <img src="/Images/sample.jpeg" alt="Profile" title="Change your Avatar"/>
@@ -89,18 +97,18 @@ const Sponsors = () => {
           
           <h1 className={styles.recently}>Recent Sponsors...</h1>
 
-          {/* Your Sponsors */}
+          {/*Sponsor Avatar Circles*/}
           <div className={styles.avatarCircles}>
             <AvatarCirclesDemo />
           </div>
 
-          {/* Notifications/Direct Messages */}
+          {/*Notifications and Messages*/}
           <div className={styles.notifications}>
             <AnimatedListDemo />
           </div>
         </div>
 
-        {/* Repo-Cards */}
+        {/*Sponsorship Analytics*/}
         <div className={styles.graph}>
           <h2 className={styles.graphTitle}>Your Sponsors Graph</h2>
           <div className={styles.graphContainer}>
@@ -109,7 +117,7 @@ const Sponsors = () => {
         </div>
       </main>
 
-      {/* Footer */}
+      {/*Footer*/}
       <footer className={styles.footer}>
         <p>
           © 2025 iHive · Entrepreneur | <Link href="/terms" target='_blank'>Terms</Link> | <Link href="/Privacy" target='_blank'>Privacy</Link>

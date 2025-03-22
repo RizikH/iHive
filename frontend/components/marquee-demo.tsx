@@ -4,8 +4,17 @@ import Link from 'next/link'
 import { useState } from 'react'
 import FileTreeDemo from '@/components/file-tree-demo'
 import { FiX } from 'react-icons/fi'
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from "../components/ui/dialog"
+import { 
+  Dialog, 
+  DialogContent, 
+  DialogHeader, 
+  DialogTitle 
+} from "../components/ui/dialog"
 import styles from '@/app/styles/repository-modal.module.css'
+
+// =============================================
+// Repository Modal Component
+// =============================================
 
 const RepositoryModal = ({
   isOpen,
@@ -18,10 +27,12 @@ const RepositoryModal = ({
   repoId: string;
   name: string;
 }) => {
+  // State Management
   const [content, setContent] = useState<string>('');
   const [currentFileId, setCurrentFileId] = useState<string | null>(null);
   const [currentFileName, setCurrentFileName] = useState<string>('Main Content');
 
+  // Event Handlers
   const handleFileSelect = (fileId: string, fileContent: string, fileName: string) => {
     setCurrentFileId(fileId);
     setContent(fileContent);
@@ -32,7 +43,7 @@ const RepositoryModal = ({
     <Dialog open={isOpen} onOpenChange={onClose}>
       <DialogContent className={styles['modal-content']}>
         <div className={styles['modal-container']}>
-          {/* Sidebar with FileTree */}
+          {/*File Tree Sidebar*/}
           <div className={styles.sidebar}>
             <h3 className={styles['sidebar-title']}>Files</h3>
             <div className={styles['file-tree-container']}>
@@ -45,7 +56,8 @@ const RepositoryModal = ({
               />
             </div>
           </div>
-          {/* Main Content Area */}
+          
+          {/*Repository Content Area*/}
           <div className={styles['content-area']}>
             <div className={styles['content-header']}>
               <h3 className={styles['content-title']}>{currentFileName}</h3>
@@ -65,6 +77,10 @@ const RepositoryModal = ({
     </Dialog>
   );
 };
+
+// =============================================
+// Sample Repository Data
+// =============================================
 
 const reviews = [
   {
@@ -114,6 +130,10 @@ const reviews = [
 const firstRow = reviews.slice(0, reviews.length / 2)
 const secondRow = reviews.slice(reviews.length / 2)
 
+// =============================================
+// Repository Card Component
+// =============================================
+
 const ReviewCard = ({
   img,
   name,
@@ -136,6 +156,7 @@ const ReviewCard = ({
 
   return (
     <>
+      {/*Repository Card*/}
       <div onClick={handleCardClick}>
         <figure
           className={cn(
@@ -144,6 +165,7 @@ const ReviewCard = ({
             "hover:shadow-md transform hover:-translate-y-1 transition-all duration-200"
           )}
         >
+          {/*Author Information*/}
           <div className="flex flex-row items-center gap-2">
             <img 
               className="rounded-full" 
@@ -157,10 +179,13 @@ const ReviewCard = ({
               <p className="text-xs font-medium text-gray-500">{username}</p>
             </div>
           </div>
+          
+          {/*Repository Description*/}
           <blockquote className="mt-2 text-sm text-gray-700">{body}</blockquote>
         </figure>
       </div>
 
+      {/*Repository Detail Modal*/}
       <RepositoryModal
         isOpen={isModalOpen}
         onClose={() => setIsModalOpen(false)}
@@ -171,19 +196,28 @@ const ReviewCard = ({
   );
 };
 
+// =============================================
+// Marquee Component
+// =============================================
+
 export default function MarqueeDemo() {
   return (
     <div className="relative flex h-[500px] w-full flex-col items-center justify-center overflow-hidden rounded-lg border bg-gray-100 shadow-xl">
+      {/*Top Repository Row*/}
       <Marquee pauseOnHover className="[--duration:20s]">
         {firstRow.map((review) => (
           <ReviewCard key={review.username} {...review} />
         ))}
       </Marquee>
+      
+      {/*Bottom Repository Row*/}
       <Marquee reverse pauseOnHover className="[--duration:20s]">
         {secondRow.map((review) => (
           <ReviewCard key={review.username} {...review} />
         ))}
       </Marquee>
+      
+      {/*Gradient Overlays*/}
       <div className="pointer-events-none absolute inset-y-0 left-0 w-1/3 bg-gradient-to-r from-gray-100"></div>
       <div className="pointer-events-none absolute inset-y-0 right-0 w-1/3 bg-gradient-to-l from-gray-100"></div>
     </div>
