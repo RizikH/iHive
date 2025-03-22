@@ -9,6 +9,9 @@ import FileTreeDemo from '@/components/file-tree-demo';
 import { FiCopy, FiDownload, FiUpload, FiEdit, FiCheck, FiBold, FiItalic, FiUnderline } from 'react-icons/fi';
 
 const Repository = () => {
+  // =============================================
+  // State Management
+  // =============================================
   const [isEditing, setIsEditing] = useState(false);
   const [content, setContent] = useState('');
   const [currentFileId, setCurrentFileId] = useState<string | null>(null);
@@ -18,8 +21,12 @@ const Repository = () => {
   const [currentFontSize, setCurrentFontSize] = useState(16);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [hasContent, setHasContent] = useState(false);
   const editorRef = useRef<HTMLDivElement>(null);
 
+  // =============================================
+  // Effects
+  // =============================================
   useEffect(() => {
     const savedIdeas = localStorage.getItem('ideas');
     const fetchedIdeas = savedIdeas ? JSON.parse(savedIdeas) : [];
@@ -29,6 +36,11 @@ const Repository = () => {
 
   // Add selection change listener when editing
   useEffect(() => {
+    const handleSelectionChange = () => {
+      // Selection change handler logic would go here
+      // This can be used for handling text selection in the editor
+    };
+    
     if (isEditing) {
       document.addEventListener('selectionchange', handleSelectionChange);
     }
@@ -208,9 +220,29 @@ const Repository = () => {
     }
   };
 
+  // =============================================
+  // Editor Style Handlers
+  // =============================================
+  
   const handleStyle = (command: string) => {
     if (isEditing) document.execCommand(command, false);
   };
+
+  const handleFontSizeChange = (size: number) => {
+    setCurrentFontSize(size);
+    if (editorRef.current) {
+      editorRef.current.style.fontSize = `${size}px`;
+    }
+  };
+
+  const handleMouseUp = () => {
+    // Handle mouse up event for editor selections
+    // This could be used for showing formatting options when text is selected
+  };
+
+  // =============================================
+  // Editor Action Handlers
+  // =============================================
 
   const handleEnableEdit = () => {
     setIsEditing(true);
@@ -288,6 +320,9 @@ const Repository = () => {
     URL.revokeObjectURL(url);
   };
 
+  // =============================================
+  // Render Component
+  // =============================================
   return (
     <>
       <Head>
@@ -348,7 +383,7 @@ const Repository = () => {
                 <button onClick={() => handleStyle('underline')}><FiUnderline /></button>
                 <button onClick={handleUpload}><FiUpload /></button>
                 <button onClick={handleDownload}><FiDownload /></button>
-                <button onClick={isEditing ? handleSave : () => setIsEditing(true)}>
+                <button onClick={isEditing ? handleSave : handleEnableEdit}>
                   {isEditing ? <FiCheck /> : <FiEdit />}
                 </button>
               </div>
