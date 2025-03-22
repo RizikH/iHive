@@ -1,25 +1,44 @@
 import { File, Folder, Tree } from "@/components/magicui/file-tree"
 import { useState, useRef, useEffect } from 'react';
 import { FileContent } from '@/components/magicui/file-tree';
-import { FiPlus, FiTrash2, FiEdit2, FiCheck, FiX } from 'react-icons/fi';
+import { 
+  FiPlus, 
+  FiTrash2, 
+  FiEdit2, 
+  FiCheck, 
+  FiX 
+} from 'react-icons/fi';
 import styles from '@/app/styles/file-tree.module.css';
+
+// =============================================
+// Types and Interfaces
+// =============================================
 
 interface FileTreeDemoProps {
   onFileSelect: (fileId: string, content: string, fileName: string) => void;
-  onContentUpdate: (fileId: string, newContent: string) => void;
+  onContentUpdate: (fileId: string, content: string) => void;
   currentFileId: string | null;
   onFileDelete: (fileId: string) => void;
+  files?: Array<{ id: string; title: string; description: string }>;
   isPreview?: boolean;
 }
+
+// =============================================
+// File Tree Component
+// =============================================
 
 export default function FileTreeDemo({ 
   onFileSelect, 
   onContentUpdate, 
   currentFileId, 
   onFileDelete,
+  files: initialFiles,
   isPreview = false 
 }: FileTreeDemoProps) {
-  const [files, setFiles] = useState<FileContent[]>([]);
+  // =============================================
+  // State Management
+  // =============================================
+  const [fileList, setFileList] = useState<FileContent[]>([]);
   const [editingId, setEditingId] = useState<string | null>(null);
   const [editingName, setEditingName] = useState('');
   const [isCreatingFile, setIsCreatingFile] = useState(false);
@@ -31,6 +50,11 @@ export default function FileTreeDemo({
   const [fileContentsMap, setFileContentsMap] = useState<Record<string, string>>({});
 
 
+  // =============================================
+  // Effects
+  // =============================================
+  
+  // Update file content when currentFileId changes
   useEffect(() => {
     // TODO: Add missing dependencies if needed
     if (currentFileId) {
@@ -46,10 +70,11 @@ export default function FileTreeDemo({
         });
       };
 
-      setFiles(prevFiles => updateFileContent(prevFiles));
+      setFileList(prevFiles => updateFileContent(prevFiles));
     }
   }, [currentFileId, fileContentsMap]);
 
+  // Handle content updates from file list
   useEffect(() => {
     // TODO: Add missing dependencies if needed
     const handleContentUpdates = () => {
@@ -69,12 +94,45 @@ export default function FileTreeDemo({
         });
       };
 
-      findAndUpdateContent(files);
+      findAndUpdateContent(fileList);
     };
 
     handleContentUpdates();
-  }, [files]);
+  }, [fileList]);
 
+  // Notify parent about content updates
+  useEffect(() => {
+    if (fileList) {
+      fileList.forEach(file => {
+        onContentUpdate(file.id, file.content || '');
+      });
+    }
+  }, [fileList]);
+
+  // Handle external content updates
+  useEffect(() => {
+    const handleExternalContentUpdate = (fileId: string, newContent: string) => {
+      setFileContentsMap(prev => ({
+        ...prev,
+        [fileId]: newContent
+      }));
+    };
+
+    const originalOnContentUpdate = onContentUpdate;
+    onContentUpdate = (fileId: string, newContent: string) => {
+      handleExternalContentUpdate(fileId, newContent);
+      originalOnContentUpdate(fileId, newContent);
+    };
+
+    return () => {
+      onContentUpdate = originalOnContentUpdate;
+    };
+  }, [onContentUpdate]);
+
+  // =============================================
+  // File Creation Handlers
+  // =============================================
+  
   const handleCreateFile = (parentId: string | null = null) => {
     if (!newFileName.trim()) {
       alert('Please enter a file name');
@@ -90,7 +148,7 @@ export default function FileTreeDemo({
       parentId: parentId || undefined
     };
 
-    setFiles(prevFiles => {
+    setFileList(prevFiles => {
       if (!parentId) {
         return [...prevFiles, newFile];
       }
@@ -98,7 +156,6 @@ export default function FileTreeDemo({
       return prevFiles.map(item => updateFileStructure(item, parentId, newFile));
     });
 
-  
     setTimeout(() => {
       onFileSelect(newFileId, '', newFileName.trim());
     }, 0);
@@ -122,7 +179,7 @@ export default function FileTreeDemo({
       children: []
     };
 
-    setFiles(prevFiles => {
+    setFileList(prevFiles => {
       if (!parentId) {
         return [...prevFiles, newFolder];
       }
@@ -130,7 +187,6 @@ export default function FileTreeDemo({
       return prevFiles.map(item => updateFileStructure(item, parentId, newFolder));
     });
 
-   
     setOpenFolders(prev => {
       const newSet = new Set(prev);
       newSet.add(newFolder.id);
@@ -141,6 +197,10 @@ export default function FileTreeDemo({
     setIsCreatingFile(false);
   };
 
+  // =============================================
+  // File Structure Manipulation
+  // =============================================
+  
   const updateFileStructure = (item: FileContent, parentId: string, newItem: FileContent): FileContent => {
     if (item.id === parentId) {
       return {
@@ -171,7 +231,7 @@ export default function FileTreeDemo({
   };
 
   const deleteFileOrFolder = (id: string) => {
-    setFiles(prevFiles => {
+    setFileList(prevFiles => {
       const deleteFromArray = (items: FileContent[]): FileContent[] => {
         return items.filter(item => {
           if (item.id === id) {
@@ -187,7 +247,6 @@ export default function FileTreeDemo({
       return deleteFromArray(prevFiles);
     });
 
-    
     setFileContentsMap(prev => {
       const newMap = { ...prev };
       delete newMap[id];
@@ -195,6 +254,10 @@ export default function FileTreeDemo({
     });
   };
 
+  // =============================================
+  // File Renaming Handlers
+  // =============================================
+  
   const handleRename = (id: string, currentName: string) => {
     setEditingId(id);
     setEditingName(currentName);
@@ -202,7 +265,7 @@ export default function FileTreeDemo({
 
   const handleRenameSubmit = (id: string, type: 'file' | 'folder') => {
     if (editingName.trim()) {
-      setFiles(prevFiles => {
+      setFileList(prevFiles => {
         const updateFileName = (items: FileContent[]): FileContent[] => {
           return items.map(item => {
             if (item.id === id) {
@@ -217,7 +280,6 @@ export default function FileTreeDemo({
         return updateFileName(prevFiles);
       });
 
-     
       if (currentFileId === id) {
         onFileSelect(id, fileContentsMap[id] || '', editingName.trim());
       }
@@ -231,6 +293,10 @@ export default function FileTreeDemo({
     setEditingName('');
   };
 
+  // =============================================
+  // Drag and Drop Handlers
+  // =============================================
+  
   const handleDragStart = (e: React.DragEvent, id: string) => {
     e.stopPropagation();
     setDraggedItem(id);
@@ -250,7 +316,7 @@ export default function FileTreeDemo({
 
     if (!draggedItem || draggedItem === targetId) return;
 
-    setFiles(prevFiles => {
+    setFileList(prevFiles => {
       let draggedItemData: FileContent | null = null;
       
       const removeItem = (items: FileContent[]): FileContent[] => {
@@ -298,14 +364,18 @@ export default function FileTreeDemo({
     setDropTarget(null);
   };
 
+  // =============================================
+  // File Interaction Handlers
+  // =============================================
+  
   const handleFileClick = (file: FileContent) => {
     if (file.type === 'file') {
-      
       const fileContent = fileContentsMap[file.id] || file.content || '';
       onFileSelect(file.id, fileContent, file.name);
     }
   };
 
+<<<<<<< HEAD
  
   useEffect(() => {
     // TODO: Add missing dependencies if needed
@@ -329,6 +399,8 @@ export default function FileTreeDemo({
     };
   }, [onContentUpdate]);
 
+=======
+>>>>>>> yixi-latest
   const toggleFolder = (folderId: string) => {
     setOpenFolders(prev => {
       const newSet = new Set(prev);
@@ -341,6 +413,10 @@ export default function FileTreeDemo({
     });
   };
 
+  // =============================================
+  // Rendering Functions
+  // =============================================
+  
   const renderFileTree = (files: FileContent[], level: number = 0) => {
     return files.map(file => {
       if (file.type === 'folder') {
@@ -503,8 +579,13 @@ export default function FileTreeDemo({
     });
   };
 
+  // =============================================
+  // Render Component
+  // =============================================
+  
   return (
     <div className={styles.fileTreeContainer}>
+      {/*File Tree Actions*/}
       {!isPreview && (
         <div className={styles.fileTreeHeader}>
           <div className={styles.fileTreeActions}>
@@ -522,6 +603,7 @@ export default function FileTreeDemo({
         </div>
       )}
 
+      {/*File Creation Form*/}
       {isCreatingFile && !isPreview && (
         <div className={styles.createFileForm}>
           <input
@@ -537,13 +619,14 @@ export default function FileTreeDemo({
         </div>
       )}
     
+      {/*File Tree Structure*/}
       <Tree
         className="w-full"
         initialSelectedId={currentFileId || undefined}
-        elements={files}
+        elements={fileList}
       >
-        {files.length > 0 ? (
-          renderFileTree(files)
+        {fileList.length > 0 ? (
+          renderFileTree(fileList)
         ) : (
           <div className={styles.emptyState}>
             <p>No files or folders yet</p>

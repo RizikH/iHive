@@ -1,11 +1,25 @@
+/* =============================================
+   Container and Layout
+   ============================================= */
 .container {
     min-height: 100vh;
     display: flex;
     flex-direction: column;
     background-color: #ffffff;
     color: #000000;
-  }
-  
+}
+
+.main {
+    display: flex;
+    flex-direction: row;
+    min-height: calc(100vh - 150px); 
+    padding: 2rem;
+    gap: 2rem;
+}
+
+/* =============================================
+   Navigation
+   ============================================= */
 .navContainer {
     padding: 1.5rem 4rem;
     display: flex;
@@ -55,14 +69,9 @@
     text-decoration: none;
 }
 
-.main {
-    display: flex;
-    flex-direction: row;
-    min-height: calc(100vh - 150px); 
-    padding: 2rem;
-    gap: 2rem;
-}
-
+/* =============================================
+   Profile Section
+   ============================================= */
 .profileSection {
     width: 30%;
     display: flex;
@@ -70,25 +79,6 @@
     align-items: center;
     padding: 2rem;
     border-right: 1px solid #eaeaea;
-}
-
-.marquee {
-    width: 70%;
-    padding: 2rem;
-}
-
-.marqueeTitle {
-    font-size: 1.5rem;
-    font-weight: bold;
-    margin-bottom: 1rem;
-    color: #1a1a1a;
-}
-
-.marqueeContainer {
-    background-color: #fff;
-    border: 1px solid #eaeaea;
-    border-radius: 0.5rem;
-    box-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1);
 }
 
 .profileImage {
@@ -123,6 +113,31 @@
     color: #1a1a1a;
 }
 
+/* =============================================
+   Marquee Section
+   ============================================= */
+.marquee {
+    width: 70%;
+    padding: 2rem;
+}
+
+.marqueeTitle {
+    font-size: 1.5rem;
+    font-weight: bold;
+    margin-bottom: 1rem;
+    color: #1a1a1a;
+}
+
+.marqueeContainer {
+    background-color: #fff;
+    border: 1px solid #eaeaea;
+    border-radius: 0.5rem;
+    box-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1);
+}
+
+/* =============================================
+   Social Links
+   ============================================= */
 .socialLinks {
     display: flex;
     gap: 1.5rem;
@@ -140,6 +155,9 @@
     color: #cccccc;
 }
 
+/* =============================================
+   Footer
+   ============================================= */
 .footer {
     text-align: center;
     padding: 1rem;
@@ -166,6 +184,9 @@
     text-decoration: underline;
 }
 
+/* =============================================
+   Media Queries
+   ============================================= */
 @media (max-width: 768px) {
     .navbar {
       flex-direction: column;

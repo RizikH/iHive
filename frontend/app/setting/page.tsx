@@ -12,6 +12,10 @@ import SocialMedia from '@/components/social-media';
 import AccountSettings from '@/components/account-settings';
 import NotificationPreferences from '@/components/notification';
 
+// =============================================
+// Main Component
+// =============================================
+
 const Setting = () => {
     return (
         <>
@@ -23,6 +27,7 @@ const Setting = () => {
             </Head>
 
             <div className={styles.pageContainer}>
+                {/*Navigation*/}
                 <header className={styles.navContainer}>
                     <nav className={styles.navbar}>
                         <div className={styles.logo}>
@@ -39,14 +44,14 @@ const Setting = () => {
                         <div className={styles['nav-links']}>
                             <Link href="/repository">Repository</Link>
                             <Link href="/entrepreneur">Profile</Link>
-                            <Link href="/sponsors">Your Sponsors</Link>
+                            <Link href="/sponsors">Sponsors</Link>
                             <Link href="/get-started">Sign Out</Link>
                         </div>
                     </nav>
                 </header>
 
                 <main className={styles.mainContainer}>
-                    {/* Sidebar - Category for setting */}
+                    {/*Settings Sidebar*/}
                     <div className={styles.sidebar}>
                         <ul className={styles.sidebarList}>
                             <li className={styles.sidebarItem}>
@@ -74,7 +79,7 @@ const Setting = () => {
 
                     <div className={styles.divider}></div>
 
-                    {/* SettingContent wrapped in Suspense */}
+                    {/*Settings Content*/}
                     <div className={styles.setting}>
                         <Suspense fallback={<div>Loading settings...</div>}>
                             <SettingContent />
@@ -86,11 +91,20 @@ const Setting = () => {
     );
 };
 
-// Move the useSearchParams logic inside a separate component wrapped in Suspense
+// =============================================
+// Content Component
+// =============================================
+
+/**
+ * SettingContent - Dynamic component that renders different setting tabs
+ * Uses client-side routing parameters to determine which setting to display
+ */
 const SettingContent = () => {
+    // Get current tab from URL parameters, default to 'basic'
     const searchParams = useSearchParams();
     const tab = searchParams?.get('tab') || 'basic';
 
+    // Render appropriate component based on selected tab
     switch (tab) {
         case 'social':
             return <SocialMedia />;

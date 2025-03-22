@@ -1,3 +1,6 @@
+/* =============================================
+   Container and Layout
+   ============================================= */
 .pageContainer {
     min-height: 100vh;
     display: flex;
@@ -6,6 +9,26 @@
     color: #000;
 }
 
+.mainContainer {
+    display: flex;
+    flex-direction: row;
+    min-height: calc(100vh - 150px);
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "Noto Sans", Helvetica, Arial, sans-serif;
+    margin: 0 auto;
+    max-width: 1280px;
+    width: 100%;
+    padding: 0 24px;
+}
+
+.divider {
+    width: 1px;
+    background-color: #ddd;
+    margin: 0 20px;
+}
+
+/* =============================================
+   Navigation
+   ============================================= */
 .navbar {
     padding: 1.5rem 4rem;
     display: flex;
@@ -53,18 +76,9 @@
     text-decoration: none;
 }
 
-
-.mainContainer {
-    display: flex;
-    flex-direction: row;
-    min-height: calc(100vh - 150px);
-    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "Noto Sans", Helvetica, Arial, sans-serif;
-    margin: 0 auto;
-    max-width: 1280px;
-    width: 100%;
-    padding: 0 24px;
-}
-
+/* =============================================
+   Sidebar Elements
+   ============================================= */
 .sidebar {
     width: 250px;
     padding: 20px;
@@ -100,6 +114,9 @@
     border-left: 2px solid #0969da;
 }
 
+/* =============================================
+   Settings Content Area
+   ============================================= */
 .setting {
     flex: 1;
     padding: 20px;
@@ -138,6 +155,9 @@
     margin-bottom: 2rem;
 }
 
+/* =============================================
+   Form Elements
+   ============================================= */
 .formGroup {
     margin-bottom: 1.5rem;
 }
@@ -181,6 +201,15 @@
     border-color: #5046e6;
 }
 
+.icon {
+    color: #1a1a1a;
+    width: 1.2rem;
+    height: 1.2rem;
+}
+
+/* =============================================
+   Buttons
+   ============================================= */
 .saveButton {
     width: 100%;
     padding: 0.75rem;
@@ -198,19 +227,9 @@
     background: #333;
 }
 
-.icon {
-    color: #1a1a1a;
-    width: 1.2rem;
-    height: 1.2rem;
-}
-
-.divider {
-    width: 1px;
-    background-color: #ddd;
-    margin: 0 20px;
-}
-
-/* Add these new styles */
+/* =============================================
+   Checkbox Styles
+   ============================================= */
 .checkboxGroup {
     display: flex;
     flex-direction: column;

@@ -1,3 +1,6 @@
+/* =============================================
+   Modal Overlay
+   ============================================= */
 .overlay {
     position: fixed;
     top: 0;
@@ -9,9 +12,9 @@
     justify-content: center;
     align-items: center;
     z-index: 1000;
-  }
+}
   
-  .modal {
+.modal {
     position: relative;
     width: 400px;
     background: rgba(255, 255, 255, 0.9);
@@ -22,26 +25,32 @@
     transform: scale(0);
     animation: scaleUp 0.5s ease forwards;
     overflow: hidden;
-  }
+}
   
-  @keyframes scaleUp {
+/* =============================================
+   Animation
+   ============================================= */
+@keyframes scaleUp {
     to {
       transform: scale(1);
     }
-  }
+}
   
-  .header {
+/* =============================================
+   Modal Header
+   ============================================= */
+.header {
     padding: 40px 40px 20px;
     text-align: center;
-  }
+}
   
-  .header h2 {
+.header h2 {
     font-size: 2em;
     color: #1a1a1a;
     margin: 0;
-  }
+}
   
-  .closeButton {
+.closeButton {
     position: absolute;
     top: 0;
     right: 0;
@@ -57,64 +66,76 @@
     cursor: pointer;
     z-index: 1;
     border: none;
-  }
+}
   
-  .content {
+/* =============================================
+   Modal Content
+   ============================================= */
+.content {
     padding: 0 40px 40px;
-  }
+}
   
-  .currentAvatar {
+/* =============================================
+   Current Avatar
+   ============================================= */
+.currentAvatar {
     text-align: center;
     margin-bottom: 30px;
-  }
+}
   
-  .currentAvatar h3 {
+.currentAvatar h3 {
     color: #1a1a1a;
     font-size: 1.2em;
     margin-bottom: 15px;
-  }
+}
   
-  .previewImage {
+.previewImage {
     border-radius: 50%;
     border: 2px solid #1a1a1a;
     padding: 3px;
-  }
+}
   
-  .defaultAvatars {
+/* =============================================
+   Avatar Selection
+   ============================================= */
+.defaultAvatars {
     margin: 30px 0;
-  }
+}
   
-  .defaultAvatars h3 {
+.defaultAvatars h3 {
     color: #1a1a1a;
     font-size: 1.2em;
     margin-bottom: 15px;
-  }
+}
   
-  .avatarGrid {
+.avatarGrid {
     display: grid;
     grid-template-columns: repeat(3, 1fr);
     gap: 15px;
     margin-top: 15px;
-  }
+}
   
-  .avatarOption {
+.avatarOption {
     border-radius: 50%;
     cursor: pointer;
     transition: all 0.3s ease;
     border: 2px solid transparent;
     padding: 2px;
-  }
+}
   
-  .avatarOption:hover {
+.avatarOption:hover {
     transform: scale(1.1);
-  }
+}
   
-  .avatarOption.selected {
+.avatarOption.selected {
     border-color: #1a1a1a;
     background-color: rgba(26, 26, 26, 0.1);
-  }
+}
   
-  .uploadAvatar {
+/* =============================================
+   Upload Controls
+   ============================================= */
+.uploadAvatar {
     width: 60px;
     height: 60px;
     border-radius: 50%;
@@ -125,26 +146,29 @@
     cursor: pointer;
     transition: all 0.3s ease;
     border: 2px solid transparent;
-  }
+}
   
-  .uploadAvatar:hover {
+.uploadAvatar:hover {
     background-color: #d0d0d0;
     transform: scale(1.1);
-  }
+}
   
-  .uploadAvatar svg {
+.uploadAvatar svg {
     width: 24px;
     height: 24px;
     color: #666;
-  }
+}
   
-  .actions {
+/* =============================================
+   Action Buttons
+   ============================================= */
+.actions {
     display: flex;
     gap: 10px;
     margin-top: 30px;
-  }
+}
   
-  .cancelButton, .saveButton {
+.cancelButton, .saveButton {
     flex: 1;
     height: 45px;
     border-radius: 6px;
@@ -152,29 +176,29 @@
     font-size: 1em;
     font-weight: 500;
     transition: all 0.3s ease;
-  }
+}
   
-  .cancelButton {
+.cancelButton {
     background: transparent;
     border: 2px solid #1a1a1a;
     color: #1a1a1a;
-  }
+}
   
-  .cancelButton:hover {
+.cancelButton:hover {
     background: rgba(26, 26, 26, 0.1);
-  }
+}
   
-  .saveButton {
+.saveButton {
     background: #1a1a1a;
     color: white;
     border: none;
-  }
+}
   
-  .saveButton:hover {
+.saveButton:hover {
     background: #333;
-  }
+}
   
-  .saveButton:disabled {
+.saveButton:disabled {
     background: #999;
     cursor: not-allowed;
-  }
+}
