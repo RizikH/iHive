@@ -111,13 +111,16 @@ const Repository = () => {
     };
   }, [styles.fontSizeContainer]);
 
-  // Update editor content when not editing
+  // Update editor content when switching between edit/view modes
   useEffect(() => {
-    if (editorRef.current && !isEditing) {
-      editorRef.current.innerHTML = content;
+    if (editorRef.current) {
+      if (isEditing) {
+        // When entering edit mode, set content directly to HTML
+        editorRef.current.innerHTML = content;
+      }
       setHasContent(content.trim() !== '');
     }
-  }, [content, isEditing]);
+  }, [isEditing, content]);
 
   // Update placeholder styling based on content
   useEffect(() => {
@@ -136,11 +139,20 @@ const Repository = () => {
   
   const handleFileSelect = (fileId: string, fileContent: string, fileName: string) => {
     const cleanFileId = fileId.replace(/^file-/, '');
+    
+    // Important: Clear the editor ref content when switching files to avoid mixed content
+    if (editorRef.current) {
+      editorRef.current.innerHTML = '';
+    }
+    
     setCurrentFileId(cleanFileId);
     setContent(fileContent);
     setCurrentFileName(fileName);
     setIsEditing(false);
-    setHasContent(fileContent.trim() !== '');
+    
+    // Properly determine if the file has content
+    const contentExists = fileContent ? fileContent.trim() !== '' : false;
+    setHasContent(contentExists);
     
     setFileContents(prev => ({
       ...prev,
@@ -152,11 +164,16 @@ const Repository = () => {
     if (fileId) {
       const cleanFileId = fileId.replace(/^file-/, '');
       
+      // Only update the current file's content if it's the active file
       if (cleanFileId === currentFileId) {
         setContent(newContent);
-        setHasContent(newContent.trim() !== '');
+        
+        // Check if the content has actual text
+        const contentExists = newContent ? newContent.trim() !== '' : false;
+        setHasContent(contentExists);
       }
       
+      // Always update the content in the fileContents map
       setFileContents(prev => ({
         ...prev,
         [cleanFileId]: newContent
@@ -223,7 +240,9 @@ const Repository = () => {
 
   const handleSave = async () => {
     if (currentFileId && editorRef.current) {
+      // Get the raw content from the editor
       const newContent = editorRef.current.innerHTML;
+      
       try {
         setIsLoading(true);
         
@@ -234,6 +253,7 @@ const Repository = () => {
           category: 'document'
         };
         
+        // Update state and local storage
         setIdeas(prevIdeas => {
           const updatedIdeas = [...prevIdeas];
           const existingIndex = updatedIdeas.findIndex(item => item.id === currentFileId);
@@ -248,8 +268,13 @@ const Repository = () => {
           return updatedIdeas;
         });
 
+        // Set content directly, without wrapping in additional HTML
         setContent(newContent);
+        
+        // Update the file tree content
         handleContentUpdate(currentFileId, newContent);
+        
+        // Exit edit mode
         setIsEditing(false);
       } catch (error) {
         setError('Failed to save content');
@@ -279,8 +304,15 @@ const Repository = () => {
     
     setTimeout(() => {
       if (editorRef.current) {
+        // Set font size
         editorRef.current.style.fontSize = `${currentFontSize}px`;
         editorRef.current.setAttribute('contenteditable', 'true');
+        
+        // If there's existing content, load it into the editor
+        if (content && !editorRef.current.innerHTML) {
+          editorRef.current.innerHTML = content;
+        }
+        
         editorRef.current.focus();
         
         const selection = window.getSelection();
@@ -776,9 +808,11 @@ const Repository = () => {
                   contentEditable={true}
                 />
               ) : (
-                <div className={`${styles.docBody} ${!hasContent ? styles.placeholder : ''}`}>
-                  {content ? (
-                    <div dangerouslySetInnerHTML={{ __html: content }} />
+                <div 
+                  className={`${styles.docBody} ${!hasContent ? styles.placeholder : ''}`}
+                >
+                  {hasContent ? (
+                    <div ref={editorRef} dangerouslySetInnerHTML={{ __html: content }} />
                   ) : (
                     <div className={styles.placeholderContent}>
                       <h3>Welcome to iHive Editor!</h3>

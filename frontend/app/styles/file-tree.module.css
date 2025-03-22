@@ -116,6 +116,23 @@
   align-items: center;
 }
 
+/* Folder icon styling */
+.fileItemName :global(svg) {
+  color: #616161; /* Default color for closed folder */
+}
+
+.fileItemName :global([data-state="open"] svg) {
+  color: #1e88e5; /* Color for open folder */
+}
+
+.fileItemName :global(.folder-open) {
+  color: #1e88e5 !important;
+}
+
+.fileItemName :global(.folder-closed) {
+  color: #616161 !important;
+}
+
 /* Ensure delete button doesn't interfere with folder expansion */
 .folderLabel {
   width: 100%;

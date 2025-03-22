@@ -101,19 +101,35 @@ export default function FileTreeDemo({
   // Notify parent about content updates
   useEffect(() => {
     if (fileList) {
-      fileList.forEach(file => {
-        onContentUpdate(file.id, file.content || '');
-      });
+      // Avoid unnecessary updates that may cause duplication
+      const uniqueFileIds = new Set<string>();
+      
+      const notifyForUniqueFiles = (items: FileContent[]) => {
+        items.forEach(file => {
+          if (file.type === 'file' && !uniqueFileIds.has(file.id) && file.content !== undefined) {
+            uniqueFileIds.add(file.id);
+            onContentUpdate(file.id, file.content || '');
+          }
+          if (file.children) {
+            notifyForUniqueFiles(file.children);
+          }
+        });
+      };
+      
+      notifyForUniqueFiles(fileList);
     }
   }, [fileList]);
 
   // Handle external content updates
   useEffect(() => {
     const handleExternalContentUpdate = (fileId: string, newContent: string) => {
-      setFileContentsMap(prev => ({
-        ...prev,
-        [fileId]: newContent
-      }));
+      // Prevent duplicate updates
+      if (fileContentsMap[fileId] !== newContent) {
+        setFileContentsMap(prev => ({
+          ...prev,
+          [fileId]: newContent
+        }));
+      }
     };
 
     const originalOnContentUpdate = onContentUpdate;
@@ -126,6 +142,19 @@ export default function FileTreeDemo({
       onContentUpdate = originalOnContentUpdate;
     };
   }, [onContentUpdate]);
+
+  // Sync expandedItems with openFolders
+  useEffect(() => {
+    // This effect ensures the Tree component gets updated when openFolders changes
+    // The initialExpandedItems prop needs the current state of openFolders
+    // This makes sure folder icons display correctly based on their open/closed state
+    const expandedItemsArray = Array.from(openFolders);
+    // Force re-render of tree component when openFolders changes
+    if (expandedItemsArray.length > 0) {
+      // Need to actually update something here
+      setFileList(prev => [...prev]);
+    }
+  }, [openFolders]);
 
   // =============================================
   // File Creation Handlers
@@ -368,8 +397,13 @@ export default function FileTreeDemo({
   
   const handleFileClick = (file: FileContent) => {
     if (file.type === 'file') {
+      // Get the content from our local state
       const fileContent = fileContentsMap[file.id] || file.content || '';
-      onFileSelect(file.id, fileContent, file.name);
+      
+      // Notify parent component without causing a double update
+      if (onFileSelect && typeof onFileSelect === 'function') {
+        onFileSelect(file.id, fileContent, file.name);
+      }
     }
   };
 
@@ -383,6 +417,12 @@ export default function FileTreeDemo({
       }
       return newSet;
     });
+    
+    // Force update tree component
+    setTimeout(() => {
+      // This small delay ensures the state is updated before the re-render
+      setFileList(prev => [...prev]);
+    }, 0);
   };
 
   // =============================================
@@ -392,6 +432,7 @@ export default function FileTreeDemo({
   const renderFileTree = (files: FileContent[], level: number = 0) => {
     return files.map(file => {
       if (file.type === 'folder') {
+        const isExpanded = openFolders.has(file.id);
         return (
           <div 
             key={file.id}
@@ -431,7 +472,27 @@ export default function FileTreeDemo({
                 </div>
               ) : (
                 <>
-                  <div onClick={() => toggleFolder(file.id)} className={styles.fileItemName}>
+                  <div 
+                    className={styles.fileItemName}
+                    onClick={(e) => {
+                      e.preventDefault();
+                      e.stopPropagation();
+                      toggleFolder(file.id);
+                      
+                      // Force update to ensure icon changes
+                      const folderIcon = e.currentTarget.querySelector('svg');
+                      if (folderIcon) {
+                        // Toggle a class to change the icon's appearance
+                        if (openFolders.has(file.id)) {
+                          folderIcon.classList.add('folder-open');
+                          folderIcon.classList.remove('folder-closed');
+                        } else {
+                          folderIcon.classList.add('folder-closed');
+                          folderIcon.classList.remove('folder-open');
+                        }
+                      }
+                    }}
+                  >
                     <Folder 
                       element={file.name}
                       value={file.id}
@@ -596,6 +657,7 @@ export default function FileTreeDemo({
         className="w-full"
         initialSelectedId={currentFileId || undefined}
         elements={fileList}
+        initialExpandedItems={Array.from(openFolders)}
       >
         {fileList.length > 0 ? (
           renderFileTree(fileList)

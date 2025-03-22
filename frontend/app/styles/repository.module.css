@@ -289,12 +289,14 @@
   color: #999;
 }
 
-/* Hide placeholder when content is being edited */
-.docBody:focus .placeholderText {
+/* Hide placeholder when content is being edited or when content exists */
+.docBody:focus .placeholderText,
+.docBody:not(.placeholder) .placeholderText {
     display: none;
 }
 
-.docBody:focus .placeholderContent {
+.docBody:focus .placeholderContent,
+.docBody:not(.placeholder) .placeholderContent {
   display: none;
 }
 
