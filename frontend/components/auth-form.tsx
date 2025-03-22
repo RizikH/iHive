@@ -55,18 +55,18 @@ export const AuthForm = ({ initialView = "login", onClose }: AuthFormProps) => {
     setError(null);
     setSuccess(null);
     setLoading(true);
-  
+
     const endpoint = isActive
       ? (process.env.NEXT_PUBLIC_API_URL ? `${process.env.NEXT_PUBLIC_API_URL}/api/users/register` : "http://localhost:5000/api/users/register")
       : (process.env.NEXT_PUBLIC_API_URL ? `${process.env.NEXT_PUBLIC_API_URL}/api/users/login` : "http://localhost:5000/api/users/login");
-  
+
     // Registration requires accepting terms
     if (isActive && !formData.termsAccepted) {
       setError("You must accept the Terms & Privacy Policy.");
       setLoading(false);
       return;
     }
-  
+
     try {
       const response = await fetch(endpoint, {
         method: "POST",
@@ -77,13 +77,13 @@ export const AuthForm = ({ initialView = "login", onClose }: AuthFormProps) => {
             : { email: formData.email, password: formData.password }
         ),
       });
-  
+
       const data = await response.json();
-  
+
       if (!response.ok) throw new Error(data.error || "An error occurred");
-  
+
       setSuccess(isActive ? "Registration successful! You can now log in." : "Login successful!");
-  
+
       if (!isActive) {
         localStorage.setItem("token", data.token); // ✅ Store JWT token
         localStorage.setItem("username", data.username); // ✅ Store username
@@ -92,10 +92,12 @@ export const AuthForm = ({ initialView = "login", onClose }: AuthFormProps) => {
           router.push("/"); // ✅ Redirect to main app page after login
         }, 1000);
       }
-    } catch (error: any) {
-      setError(error.message);
-    } finally {
-      setLoading(false);
+    } catch (error: unknown) {
+      if (error instanceof Error) {
+        setError(error.message);
+      } else {
+        setError("An unexpected error occurred.");
+      }
     }
   };
 
@@ -133,7 +135,7 @@ export const AuthForm = ({ initialView = "login", onClose }: AuthFormProps) => {
             </button>
             <div className={styles.loginRegister}>
               <p>
-                Don't have an account?
+                Don&apos;t have an account?
                 <button type="button" onClick={toggleForm} className={styles.registerLink}>
                   Register
                 </button>

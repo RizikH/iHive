@@ -83,7 +83,7 @@ const Sponsors = () => {
 
         <div className={styles.profileSection}>
           <div className={styles.profileImage}>
-              <img src="/Images/sample.jpeg" alt="Profile" title="Change your Avatar"/>
+              <Image src="/Images/sample.jpeg" alt="Profile" title="Change your Avatar"/>
           </div>
           
           <h1 className={styles.recently}>Recent Sponsors...</h1>

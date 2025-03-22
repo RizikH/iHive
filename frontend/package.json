@@ -17,7 +17,6 @@
     "@radix-ui/react-accordion": "^1.2.3",
     "@radix-ui/react-dialog": "^1.1.6",
     "@radix-ui/react-scroll-area": "^1.2.3",
-    "@tailwindcss/postcss": "^4.0.15",
     "class-variance-authority": "^0.7.1",
     "clsx": "^2.1.1",
     "dompurify": "^3.2.4",
@@ -39,10 +38,11 @@
     "@types/node": "^22",
     "@types/react": "^19",
     "@types/react-dom": "^19",
+    "autoprefixer": "^10.4.21",
     "eslint": "^9",
     "eslint-config-next": "15.2.3",
-    "postcss": "^8",
-    "tailwindcss": "^4.0.15",
+    "postcss": "^8.5.3",
+    "tailwindcss": "^3.4.1",
     "typescript": "^5"
   }
 }
