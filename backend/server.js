@@ -42,6 +42,10 @@ app.use(cors(corsOptions));
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
+// Setup cookies for Auth sake
+const cookieParser = require("cookie-parser");
+app.use(cookieParser());
+
 /**
  * 🔹 API Routes
  * Routes are organized under `/api` for structured access.

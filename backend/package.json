@@ -13,6 +13,7 @@
         "body-parser": "latest",
         "class-variance-authority": "^0.7.1",
         "clsx": "^2.1.1",
+        "cookie-parser": "^1.4.7",
         "cors": "latest",
         "dotenv": "^16.4.7",
         "express": "latest",

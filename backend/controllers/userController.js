@@ -49,14 +49,32 @@ const loginUser = async (req, res) => {
         }
 
         const { data, error } = await supabase.auth.signInWithPassword({ email, password });
-        if (error) throw new Error(error.message);
+        if (error || !data.session) throw new Error(error?.message || "Login failed");
 
-        // Return the token and user info
-        res.json({ token: data.session.access_token, user: data.user });
+        const token = data.session.access_token;
+
+        // ✅ Set the token as an HTTP-only cookie
+        res.cookie("token", token, {
+            httpOnly: true,
+            secure: process.env.NODE_ENV === "production",
+            sameSite: "lax",
+            maxAge: 1000 * 60 * 60 * 24 * 7 // 7 days
+        });
+
+        res.status(200).json({
+            message: "Login successful",
+            user: data.user
+        });
     } catch (error) {
         console.error("Login Error:", error.message);
         res.status(401).json({ error: error.message });
     }
+};
+
+// ✅ POST /api/users/logout
+const logoutUser = (req, res) => {
+    res.clearCookie("token");
+    res.status(200).json({ message: "Logged out successfully" });
 };
 
 // ✅ PUT /api/users/update/:id
@@ -83,11 +101,28 @@ const deleteUser = async (req, res) => {
     }
 };
 
+// ✅ controllers/userController.js
+const getCurrentUser = async (req, res) => {
+    try {
+      if (!req.user) {
+        return res.status(401).json({ error: "User not authenticated" });
+      }
+  
+      res.json({ id: req.user.id, email: req.user.email });
+    } catch (err) {
+      res.status(500).json({ error: err.message });
+    }
+  };
+  
+
+
 module.exports = {
     getUsers,
     getUser,
     addUser,
     loginUser,
+    logoutUser, // ✅ Add logout function
     updateUser,
-    deleteUser
+    deleteUser,
+    getCurrentUser
 };
