@@ -7,16 +7,6 @@
       "start": "node server.js"
     },
     "dependencies": {
-<<<<<<< HEAD
-      "@supabase/supabase-js": "latest",
-      "body-parser": "latest",
-      "cors": "latest",
-      "dotenv": "^16.4.7",
-      "express": "latest",
-      "jsonwebtoken": "latest",
-      "openai": "latest",
-      "socket.io": "^4.8.1"
-=======
         "@radix-ui/react-slot": "^1.1.2",
         "@supabase/supabase-js": "latest",
         "@tabler/icons-react": "^3.30.0",
@@ -37,7 +27,6 @@
         "react-icons": "^5.5.0",
         "socket.io": "^4.8.1",
         "tailwind-merge": "^3.0.1"
->>>>>>> sam-buttonow
     },
     "devDependencies": {
       "supertest": "^7.1.0"

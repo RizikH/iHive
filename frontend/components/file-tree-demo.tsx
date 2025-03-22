@@ -375,32 +375,6 @@ export default function FileTreeDemo({
     }
   };
 
-<<<<<<< HEAD
- 
-  useEffect(() => {
-    // TODO: Add missing dependencies if needed
-    const handleExternalContentUpdate = (fileId: string, newContent: string) => {
-      setFileContentsMap(prev => ({
-        ...prev,
-        [fileId]: newContent
-      }));
-    };
-
-
-    const originalOnContentUpdate = onContentUpdate;
-    onContentUpdate = (fileId: string, newContent: string) => {
-      handleExternalContentUpdate(fileId, newContent);
-      originalOnContentUpdate(fileId, newContent);
-    };
-
-    return () => {
-  
-      onContentUpdate = originalOnContentUpdate;
-    };
-  }, [onContentUpdate]);
-
-=======
->>>>>>> yixi-latest
   const toggleFolder = (folderId: string) => {
     setOpenFolders(prev => {
       const newSet = new Set(prev);
