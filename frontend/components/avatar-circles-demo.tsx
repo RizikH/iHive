@@ -1,3 +1,5 @@
+"use client";
+
 import { AvatarCircles } from "@/components/magicui/avatar-circles"
 
 const avatars = [
