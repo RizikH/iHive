@@ -30,7 +30,8 @@
     "react-dom": "^18.2.0",
     "react-icons": "^5.5.0",
     "tailwind-merge": "^3.0.1",
-    "tailwindcss-animate": "^1.0.7"
+    "tailwindcss-animate": "^1.0.7",
+    "sanitize-html": "^2.15.0"
   },
   "devDependencies": {
     "@eslint/eslintrc": "^3",

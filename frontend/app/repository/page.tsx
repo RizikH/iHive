@@ -8,6 +8,7 @@ import styles from '../styles/repository.module.css';
 import '../styles/globals.css';
 import FileTreeDemo from '@/components/file-tree-demo';
 import { FiCopy, FiDownload, FiUpload, FiEdit, FiCheck, FiBold, FiItalic, FiUnderline } from 'react-icons/fi';
+import sanitizeHtml from 'sanitize-html';
 
 const Repository = () => {
   const [isEditing, setIsEditing] = React.useState(false);
@@ -42,7 +43,8 @@ const Repository = () => {
 
   const handleCopy = () => {
     if (content) {
-      navigator.clipboard.writeText(content.replace(/<[^>]*>/g, ''))
+      const sanitizedContent = sanitizeHtml(content);
+      navigator.clipboard.writeText(sanitizedContent)
         .then(() => alert('Content copied to clipboard!'))
         .catch(err => console.error('Failed to copy:', err));
     }
@@ -83,8 +85,8 @@ const Repository = () => {
   const handleDownload = () => {
     if (content) {
      
-      const plainText = content.replace(/<[^>]*>/g, '');
-      const blob = new Blob([plainText], { type: 'text/plain' });
+      const sanitizedContent = sanitizeHtml(content);
+      const blob = new Blob([sanitizedContent], { type: 'text/plain' });
       const url = URL.createObjectURL(blob);
       const a = document.createElement('a');
       a.href = url;
