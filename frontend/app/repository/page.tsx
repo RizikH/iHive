@@ -7,10 +7,6 @@ import Image from 'next/image';
 import styles from '../styles/repository.module.css';
 import '../styles/globals.css';
 import FileTreeDemo from '@/components/file-tree-demo';
-<<<<<<< HEAD
-import { FiCopy, FiDownload, FiUpload, FiEdit, FiCheck, FiBold, FiItalic, FiUnderline } from 'react-icons/fi';
-import sanitizeHtml from 'sanitize-html';
-=======
 import {
   FiCopy,
   FiDownload,
@@ -21,7 +17,7 @@ import {
   FiItalic,
   FiUnderline
 } from 'react-icons/fi';
->>>>>>> yixi-latest
+import sanitizeHtml from 'sanitize-html';
 
 const Repository = () => {
   // =============================================
@@ -62,59 +58,6 @@ const Repository = () => {
     setHasContent(content.trim() !== '');
   }, [content]);
 
-<<<<<<< HEAD
-  const handleKeyDown = (e: React.KeyboardEvent) => {
-    if (isEditing) {
-      if (e.key === 'Enter') {
-        if (e.shiftKey) {
-          
-          return;
-        } else {
-         
-          e.preventDefault();
-          handleSave();
-        }
-      }
-    }
-  };
-
-  const handleCopy = () => {
-    if (content) {
-      const sanitizedContent = sanitizeHtml(content);
-      navigator.clipboard.writeText(sanitizedContent)
-        .then(() => alert('Content copied to clipboard!'))
-        .catch(err => console.error('Failed to copy:', err));
-    }
-  };
-
-  const handleUpload = () => {
-    alert('Only accept txt files')
-    const input = document.createElement('input');
-    input.type = 'file';
-    input.accept = '.txt';  // Only accept txt files
-    
-    input.onchange = (e) => {
-      const file = (e.target as HTMLInputElement).files?.[0];
-      if (file) {
-        const reader = new FileReader();
-        reader.onload = (e) => {
-          const fileContent = e.target?.result;
-          if (typeof fileContent === 'string') {
-            
-            const formattedContent = fileContent.split('\n').map(line => 
-              line.trim() ? `<p>${line}</p>` : '<p><br></p>'
-            ).join('');
-            
-            setContent(formattedContent);
-            
-           
-            if (currentFileId) {
-              handleContentUpdate(currentFileId, formattedContent);
-            }
-          }
-        };
-        reader.readAsText(file);
-=======
   // Load saved files on initial render
   useEffect(() => {
     const fetchIdeas = async () => {
@@ -135,212 +78,11 @@ const Repository = () => {
         console.error('Error fetching ideas:', error);
       } finally {
         setIsLoading(false);
->>>>>>> yixi-latest
       }
     };
 
-<<<<<<< HEAD
-  const handleDownload = () => {
-    if (content) {
-     
-      const sanitizedContent = sanitizeHtml(content);
-      const blob = new Blob([sanitizedContent], { type: 'text/plain' });
-      const url = URL.createObjectURL(blob);
-      const a = document.createElement('a');
-      a.href = url;
-      a.download = currentFileName ? `${currentFileName}.txt` : 'document.txt';
-      a.click();
-      URL.revokeObjectURL(url);
-    }
-  };
-
-  const handleEdit = () => {
-    const docBody = document.querySelector(`.${styles.docBody}`) as HTMLElement;
-    if (docBody) {
-      setIsEditing(!isEditing);
-      docBody.setAttribute('contenteditable', (!isEditing).toString());
-      docBody.focus();
-    }
-  };
-
-  const handleMouseUp = () => {
-    if (!isEditing) return;
-    
-    const selection = window.getSelection();
-    if (!selection || selection.rangeCount === 0) return;
-
-    const range = selection.getRangeAt(0);
-    
-    // If no text is selected (just a cursor position), return
-    if (range.collapsed) return;
-    
-    // Get the actual selected text node
-    const selectedNode = range.startContainer;
-    
-    // Try to get the font size directly from the selected node or its parent
-    if (selectedNode) {
-      let element: HTMLElement | null = null;
-      
-      // If it's a text node, get its parent element
-      if (selectedNode.nodeType === Node.TEXT_NODE && selectedNode.parentElement) {
-        element = selectedNode.parentElement;
-      } 
-      // If it's an element node, use it directly
-      else if (selectedNode.nodeType === Node.ELEMENT_NODE) {
-        element = selectedNode as HTMLElement;
-      }
-      
-      if (element) {
-        const fontSize = getActualFontSize(element);
-        if (fontSize !== null) {
-          setCurrentFontSize(fontSize);
-          return;
-        }
-      }
-    }
-    
-    // If we couldn't get the font size directly, try with a temporary element
-    try {
-      // Create a temporary span with the exact content of the selection
-      const tempSpan = document.createElement('span');
-      tempSpan.appendChild(range.cloneContents());
-      
-      // Add to document to compute style (but hidden)
-      tempSpan.style.position = 'absolute';
-      tempSpan.style.visibility = 'hidden';
-      document.body.appendChild(tempSpan);
-      
-      const fontSize = getActualFontSize(tempSpan);
-      
-      // Remove the temporary element
-      document.body.removeChild(tempSpan);
-      
-      if (fontSize !== null) {
-        setCurrentFontSize(fontSize);
-      }
-    } catch (e) {
-      console.error('Error getting font size:', e);
-    }
-  };
-
-  // Helper function to get the actual font size from an element
-  const getActualFontSize = (element: HTMLElement): number | null => {
-    // First check for inline style (highest priority)
-    if (element.style && element.style.fontSize) {
-      const size = parseInt(element.style.fontSize);
-      if (!isNaN(size)) {
-        return size;
-      }
-    }
-    
-    // Then check computed style
-    const computedStyle = window.getComputedStyle(element);
-    const computedSize = parseInt(computedStyle.fontSize);
-    if (!isNaN(computedSize)) {
-      return computedSize;
-    }
-    
-    return null;
-  };
-
-  const handleFontSizeChange = (size: number) => {
-    setCurrentFontSize(size);
-    
-    if (!isEditing) return;
-    
-    const selection = window.getSelection();
-    if (!selection || selection.rangeCount === 0) return;
-    
-    const range = selection.getRangeAt(0);
-    
-    // If no text is selected, set the font size for future typing
-    if (range.collapsed) {
-      const marker = document.createElement('span');
-      marker.id = 'font-size-marker';
-      marker.style.fontSize = `${size}px`;
-      marker.innerHTML = '&#8203;'; // Zero-width space
-      
-      range.insertNode(marker);
-      range.setStartAfter(marker);
-      range.setEndAfter(marker);
-      selection.removeAllRanges();
-      selection.addRange(range);
-    } else {
-      // For selected text, wrap it in a span with the desired font size
-      const selectedContent = range.extractContents();
-      const wrapper = document.createElement('span');
-      wrapper.style.fontSize = `${size}px`;
-      wrapper.appendChild(selectedContent);
-      range.insertNode(wrapper);
-      
-      // Select the wrapped content
-      const newRange = document.createRange();
-      newRange.selectNodeContents(wrapper);
-      selection.removeAllRanges();
-      selection.addRange(newRange);
-    }
-    
-    // Update content
-    const docBody = document.querySelector(`.${styles.docBody}`) as HTMLElement;
-    if (docBody) {
-      setContent(docBody.innerHTML);
-    }
-  };
-
-  // Improve the selection change handler to better detect font size
-  const handleSelectionChange = () => {
-    if (!isEditing) return;
-    
-    const selection = window.getSelection();
-    if (!selection || selection.rangeCount === 0) return;
-    
-    const range = selection.getRangeAt(0);
-    
-    // If text is selected, use the mouseUp handler
-    if (!range.collapsed) {
-      handleMouseUp();
-      return;
-    }
-    
-    // For cursor position (no selection), get font size at cursor
-    let currentNode = range.startContainer;
-    let element: HTMLElement | null = null;
-    
-    // If it's a text node, get its parent element
-    if (currentNode.nodeType === Node.TEXT_NODE && currentNode.parentElement) {
-      element = currentNode.parentElement;
-    } 
-    // If it's an element node, use it directly
-    else if (currentNode.nodeType === Node.ELEMENT_NODE) {
-      element = currentNode as HTMLElement;
-    }
-    
-    if (element) {
-      const fontSize = getActualFontSize(element);
-      if (fontSize !== null) {
-        setCurrentFontSize(fontSize);
-        return;
-      }
-    }
-    
-    // If we couldn't get the font size from the current node, traverse up the DOM tree
-    while (currentNode && currentNode.parentElement) {
-      currentNode = currentNode.parentElement;
-      // Cast to HTMLElement to fix type error
-      const element = currentNode as HTMLElement;
-      
-      const fontSize = getActualFontSize(element);
-      if (fontSize !== null) {
-        setCurrentFontSize(fontSize);
-        break;
-      }
-    }
-  };
-  
-=======
     fetchIdeas();
   }, []);
->>>>>>> yixi-latest
 
   // Add selection change listener when editing
   useEffect(() => {
