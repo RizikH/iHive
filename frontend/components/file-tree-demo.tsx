@@ -32,6 +32,7 @@ export default function FileTreeDemo({
 
 
   useEffect(() => {
+    // TODO: Add missing dependencies if needed
     if (currentFileId) {
       const updateFileContent = (items: FileContent[]): FileContent[] => {
         return items.map(item => {
@@ -50,6 +51,7 @@ export default function FileTreeDemo({
   }, [currentFileId, fileContentsMap]);
 
   useEffect(() => {
+    // TODO: Add missing dependencies if needed
     const handleContentUpdates = () => {
       const findAndUpdateContent = (items: FileContent[]) => {
         items.forEach(item => {
@@ -264,7 +266,7 @@ export default function FileTreeDemo({
         });
       };
 
-      let newFiles = removeItem([...prevFiles]);
+      const newFiles = removeItem([...prevFiles]);
 
       const addToFolder = (items: FileContent[]): FileContent[] => {
         return items.map(item => {
@@ -306,6 +308,7 @@ export default function FileTreeDemo({
 
  
   useEffect(() => {
+    // TODO: Add missing dependencies if needed
     const handleExternalContentUpdate = (fileId: string, newContent: string) => {
       setFileContentsMap(prev => ({
         ...prev,

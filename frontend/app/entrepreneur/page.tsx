@@ -1,3 +1,4 @@
+import Image from 'next/image';
 'use client';
 import DOMPurify from 'dompurify';
 
@@ -39,6 +40,7 @@ const EntrepreneurProfile = () => {
   };
 
   React.useEffect(() => {
+    // TODO: Add missing dependencies if needed
     return () => {
       if (currentAvatar.startsWith('blob:')) {
         URL.revokeObjectURL(currentAvatar);
@@ -84,7 +86,7 @@ const EntrepreneurProfile = () => {
 
         <div className={styles.profileSection}>
           <div className={styles.profileImage} onClick={() => setIsAvatarModalOpen(true)}>
-            <img 
+            <Image 
               src={currentAvatar} 
               alt="Avatar" 
               title="Change your Avatar"

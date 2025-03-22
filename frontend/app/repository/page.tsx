@@ -23,6 +23,7 @@ const Repository = () => {
 
  
   useEffect(() => {
+    // TODO: Add missing dependencies if needed
     setHasContent(content.trim() !== '');
   }, [content]);
 
@@ -281,6 +282,7 @@ const Repository = () => {
   
 
   useEffect(() => {
+    // TODO: Add missing dependencies if needed
     if (isEditing) {
       document.addEventListener('selectionchange', handleSelectionChange);
     }
@@ -455,6 +457,7 @@ const Repository = () => {
   };
 
   useEffect(() => {
+    // TODO: Add missing dependencies if needed
     const handleClickOutside = (event: MouseEvent) => {
       const dropdown = document.getElementById('fontSizeDropdown');
       const container = document.querySelector(`.${styles.fontSizeContainer}`);
