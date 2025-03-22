@@ -1,20 +1,35 @@
 'use client';
 
 import React, { useState, useEffect } from 'react';
+
+// Next.js
 import Head from 'next/head';
 import Link from 'next/link';
 import Image from 'next/image';
-import DOMPurify from 'dompurify';
-import styles from '../styles/entrepreneur-profile.module.css';
-import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { faGithub, faLinkedin, faXTwitter } from '@fortawesome/free-brands-svg-icons';
+
+// Components
+import NavBar from '@/components/nav-bar';
 import MarqueeDemo from '@/components/marquee-demo';
 import ChangeAvatar from '@/components/change-avatar';
 
+// Libraries
+import DOMPurify from 'dompurify';
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
+import { faGithub, faLinkedin, faXTwitter } from '@fortawesome/free-brands-svg-icons';
+
+// Styles
+import styles from '../styles/entrepreneur-profile.module.css';
+
 const EntrepreneurProfile = () => {
+  // =============================================
+  // State Management
+  // =============================================
   const [isAvatarModalOpen, setIsAvatarModalOpen] = useState(false);
   const [currentAvatar, setCurrentAvatar] = useState('https://avatar.vercel.sh/jack');
 
+  // =============================================
+  // Event Handlers
+  // =============================================
   const handleAvatarChange = (newAvatarUrl: string) => {
     if (currentAvatar.startsWith('blob:')) URL.revokeObjectURL(currentAvatar);
     const sanitizedUrl = DOMPurify.sanitize(newAvatarUrl);
@@ -23,12 +38,18 @@ const EntrepreneurProfile = () => {
     setIsAvatarModalOpen(false);
   };
 
+  // =============================================
+  // Effects
+  // =============================================
   useEffect(() => {
     return () => {
       if (currentAvatar.startsWith('blob:')) URL.revokeObjectURL(currentAvatar);
     };
   }, [currentAvatar]);
 
+  // =============================================
+  // Render Component
+  // =============================================
   return (
     <>
       <Head>
@@ -38,18 +59,15 @@ const EntrepreneurProfile = () => {
 
       <div className={styles.container}>
         {/* Navigation */}
-        <nav className={styles.navContainer}>
-          <Link href="/" className="flex items-center gap-2">
-            <Image src="/Images/iHive.png" alt="Logo" width={35} height={35} />
-            <span>iHive-Entrepreneur</span>
-          </Link>
-          <div className={styles.navLinks}>
-            <Link href="/repository">Repository</Link>
-            <Link href="/setting">Setting</Link>
-            <Link href="/sponsors">Sponsors</Link>
-            <Link href="/get-started">Sign Out</Link>
-          </div>
-        </nav>
+        <NavBar 
+          title="iHive-Entrepreneur" 
+          links={[
+            { href: "/repository", label: "Repository" },
+            { href: "/setting", label: "Setting" },
+            { href: "/sponsors", label: "Sponsors" },
+            { href: "/get-started", label: "Sign Out" }
+          ]}
+        />
 
         {/* Main Content */}
         <main className={styles.main}>

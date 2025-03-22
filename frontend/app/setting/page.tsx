@@ -1,21 +1,28 @@
 'use client';
+
 import React, { Suspense } from 'react';
+
+// Next.js
 import Head from 'next/head';
 import Link from 'next/link';
 import Image from 'next/image';
-import styles from '../styles/setting.module.css';
-import '../styles/globals.css';
-import '@fortawesome/fontawesome-svg-core/styles.css';
 import { useSearchParams } from 'next/navigation';
+
+// Components
+import NavBar from '@/components/nav-bar';
 import BasicInfo from '@/components/basic-form';
 import SocialMedia from '@/components/social-media';
 import AccountSettings from '@/components/account-settings';
 import NotificationPreferences from '@/components/notification';
 
+// Styles
+import styles from '../styles/setting.module.css';
+import '../styles/globals.css';
+import '@fortawesome/fontawesome-svg-core/styles.css';
+
 // =============================================
 // Main Component
 // =============================================
-
 const Setting = () => {
     return (
         <>
@@ -27,31 +34,19 @@ const Setting = () => {
             </Head>
 
             <div className={styles.pageContainer}>
-                {/*Navigation*/}
-                <header className={styles.navContainer}>
-                    <nav className={styles.navbar}>
-                        <div className={styles.logo}>
-                            <Image 
-                                src="/Images/iHive.png"
-                                alt="Logo"
-                                title="Home"
-                                width={35}
-                                height={35}
-                                className={styles.logoIcon}
-                            />
-                            <Link href="/">iHive</Link>
-                        </div>
-                        <div className={styles['nav-links']}>
-                            <Link href="/repository">Repository</Link>
-                            <Link href="/entrepreneur">Profile</Link>
-                            <Link href="/sponsors">Sponsors</Link>
-                            <Link href="/get-started">Sign Out</Link>
-                        </div>
-                    </nav>
-                </header>
+                {/* Navigation */}
+                <NavBar 
+                    title="iHive"
+                    links={[
+                        { href: "/repository", label: "Repository" },
+                        { href: "/entrepreneur", label: "Profile" },
+                        { href: "/sponsors", label: "Sponsors" },
+                        { href: "/get-started", label: "Sign Out" }
+                    ]}
+                />
 
                 <main className={styles.mainContainer}>
-                    {/*Settings Sidebar*/}
+                    {/* Settings Sidebar */}
                     <div className={styles.sidebar}>
                         <ul className={styles.sidebarList}>
                             <li className={styles.sidebarItem}>
@@ -79,7 +74,7 @@ const Setting = () => {
 
                     <div className={styles.divider}></div>
 
-                    {/*Settings Content*/}
+                    {/* Settings Content */}
                     <div className={styles.setting}>
                         <Suspense fallback={<div>Loading settings...</div>}>
                             <SettingContent />
@@ -94,7 +89,6 @@ const Setting = () => {
 // =============================================
 // Content Component
 // =============================================
-
 /**
  * SettingContent - Dynamic component that renders different setting tabs
  * Uses client-side routing parameters to determine which setting to display

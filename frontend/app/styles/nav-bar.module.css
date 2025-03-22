@@ -1,0 +1,77 @@
+/* =============================================================================
+   Navigation Bar Styles
+   ============================================================================= */
+
+/* -----------------------------------------------------------------------------
+   Main Navigation Container
+   ----------------------------------------------------------------------------- */
+.navContainer {
+  padding: 1.5rem 4rem;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  background-color: #1a1a1a;
+}
+
+/* -----------------------------------------------------------------------------
+   Logo and Branding
+   ----------------------------------------------------------------------------- */
+.logo {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-size: 1.5rem;
+  font-weight: bold;
+  color: #ffffff;
+  text-decoration: none;
+}
+
+.logo span {
+  color: #ffffff;
+  font-size: 1.25rem;
+  font-weight: 600;
+}
+
+.logoImage {
+  width: 35px;
+  height: 35px;
+  object-fit: contain;
+}
+
+/* -----------------------------------------------------------------------------
+   Navigation Links
+   ----------------------------------------------------------------------------- */
+.navLinks {
+  display: flex;
+  gap: 2rem;
+  font-weight: bold;
+}
+
+.navLinks a, 
+.navLinks:visited {
+  color: #ccc;
+  background-color: transparent;
+  text-decoration: none;
+}
+
+.navLinks a:hover, 
+.navLinks a:active {
+  text-decoration: underline;
+  background-color: transparent;
+}
+
+/* -----------------------------------------------------------------------------
+   Responsive Styles
+   ----------------------------------------------------------------------------- */
+@media (max-width: 768px) {
+  .navContainer {
+    flex-direction: column;
+    text-align: center;
+    gap: 1rem;
+    padding: 1rem;
+  }
+
+  .navLinks {
+    gap: 1rem;
+  }
+} 

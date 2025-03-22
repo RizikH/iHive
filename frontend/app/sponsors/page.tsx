@@ -1,14 +1,18 @@
 "use client";
 
 import React from 'react';
+
+// Next.js
 import Head from 'next/head';
 import Link from 'next/link';
 import Image from 'next/image';
-import styles from '../styles/sponsors.module.css';
-import '../styles/globals.css';
-import '@fortawesome/fontawesome-svg-core/styles.css';
+
+// Components
+import NavBar from '@/components/nav-bar';
 import AvatarCirclesDemo from '@/components/avatar-circles-demo';
 import AnimatedListDemo from "@/components/animated-list-demo";
+
+// Chart.js
 import { Pie } from 'react-chartjs-2';
 import {
   Chart as ChartJS,
@@ -17,10 +21,21 @@ import {
   Legend
 } from 'chart.js';
 
+// Styles
+import styles from '../styles/sponsors.module.css';
+import '../styles/globals.css';
+import '@fortawesome/fontawesome-svg-core/styles.css';
+
 // Register Chart.js components
 ChartJS.register(ArcElement, Tooltip, Legend);
 
+// =============================================
+// Main Component
+// =============================================
 const Sponsors = () => {
+  // =============================================
+  // Chart Configuration
+  // =============================================
   // Chart configuration data
   const chartData = {
     labels: ['Gold Sponsors', 'Silver Sponsors', 'Bronze Sponsors'],
@@ -46,6 +61,9 @@ const Sponsors = () => {
     }
   };
 
+  // =============================================
+  // Render Component
+  // =============================================
   return (
     <>
       <Head>
@@ -57,26 +75,15 @@ const Sponsors = () => {
 
       <div className={styles.container}>
         {/* Navigation */}
-        <nav className={styles.navContainer}>
-          <div className={styles.logo}>
-            <Link href="/" title="Home" className="flex items-center gap-2">
-              <Image
-                src="/Images/iHive.png"
-                alt="Logo"
-                width={35}
-                height={35}
-                className={styles.logoImage}
-              />
-              <span>iHive-Entrepreneur</span>
-            </Link>
-          </div>
-          <div className={styles['nav-links']}>
-            <Link href="/repository">Repository</Link>
-            <Link href="/setting">Setting</Link>
-            <Link href="/entrepreneur">Profile</Link>
-            <Link href="/get-started">Sign Out</Link>
-          </div>
-        </nav>
+        <NavBar 
+          title="iHive-Entrepreneur"
+          links={[
+            { href: "/repository", label: "Repository" },
+            { href: "/setting", label: "Setting" },
+            { href: "/entrepreneur", label: "Profile" },
+            { href: "/get-started", label: "Sign Out" }
+          ]}
+        />
 
         {/* Main Content */}
         <main className={styles.main}>

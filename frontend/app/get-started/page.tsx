@@ -1,17 +1,23 @@
 "use client";
 
 import React from "react";
+
+// Next.js
 import Head from "next/head";
 import Image from "next/image";
 import Link from "next/link";
+
+// Components
+import NavBar from '@/components/nav-bar';
+import { BoxRevealDemo } from '@/components/box-reveal-demo';
+
+// Styles
 import styles from "../styles/get-started.module.css"; 
 import "../styles/globals.css"; 
-import { BoxRevealDemo } from '@/components/box-reveal-demo';
 
 // =============================================
 // Main Component
 // =============================================
-
 const GetStartedPage: React.FC = () => {
     return (
         <div className={styles.bodyContainer}>
@@ -23,27 +29,18 @@ const GetStartedPage: React.FC = () => {
                 <link rel="icon" href="/Images/iHive.png" />
             </Head>
             
-            {/*Navigation*/}
-            <nav className={styles.navContainer}>
-                <div className={styles.logo}>
-                <Image
-                    src="/Images/iHive.png"
-                    alt="Logo"
-                    title="Home"
-                    width={35}
-                    height={35}
-                    className={styles.logoImage}
-                />
-                <Link href="/">iHive</Link>
-                </div>
-            </nav>
+            {/* Navigation */}
+            <NavBar 
+                title="iHive"
+                links={[]}
+            />
 
-            {/*Main Content*/}
+            {/* Main Content */}
             <main className={styles['main-content']}>
-                {/*Interactive Box Animation*/}
+                {/* Interactive Box Animation */}
                 <BoxRevealDemo />
                 
-                {/*Logo*/}
+                {/* Logo */}
                 <div className={styles['ihive-icon']}>
                     <Image 
                         src="/Images/iHive.png" 

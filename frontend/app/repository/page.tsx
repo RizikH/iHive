@@ -1,12 +1,29 @@
 "use client";
 
 import React, { useState, useEffect, useRef } from 'react';
+
+// Next.js
 import Head from 'next/head';
 import Link from 'next/link';
-import Image from 'next/image';
-import styles from '../styles/repository.module.css';
+
+// Components
+import NavBar from '@/components/nav-bar';
 import FileTreeDemo from '@/components/file-tree-demo';
-import { FiCopy, FiDownload, FiUpload, FiEdit, FiCheck, FiBold, FiItalic, FiUnderline } from 'react-icons/fi';
+
+// Icons
+import { 
+  FiCopy, 
+  FiDownload, 
+  FiUpload, 
+  FiEdit, 
+  FiCheck, 
+  FiBold, 
+  FiItalic, 
+  FiUnderline 
+} from 'react-icons/fi';
+
+// Styles
+import styles from '../styles/repository.module.css';
 
 const Repository = () => {
   // =============================================
@@ -22,16 +39,22 @@ const Repository = () => {
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [hasContent, setHasContent] = useState(false);
+  const [savedSelection, setSavedSelection] = useState<Range | null>(null);
+  
+  // Refs
   const editorRef = useRef<HTMLDivElement>(null);
 
   // =============================================
   // Effects
   // =============================================
+  // Load saved ideas on component mount
   useEffect(() => {
     const savedIdeas = localStorage.getItem('ideas');
     const fetchedIdeas = savedIdeas ? JSON.parse(savedIdeas) : [];
     setIdeas(fetchedIdeas);
-    setFileContents(fetchedIdeas.reduce((acc: any, idea: any) => ({ ...acc, [idea.id]: idea.description }), {}));
+    setFileContents(fetchedIdeas.reduce((acc: any, idea: any) => (
+      { ...acc, [idea.id]: idea.description }
+    ), {}));
   }, []);
 
   // Add selection change listener when editing
@@ -53,7 +76,7 @@ const Repository = () => {
   // Close font size dropdown when clicking outside
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
-      const dropdown = document.getElementById('fontSizeDropdown');
+      const dropdown = document.getElementById('fontSizeOptions');
       const container = document.querySelector(`.${styles.fontSizeContainer}`);
       
       if (dropdown && container && !container.contains(event.target as Node)) {
@@ -90,7 +113,6 @@ const Repository = () => {
   // =============================================
   // File Management Handlers
   // =============================================
-  
   const handleFileSelect = (fileId: string, fileContent: string, fileName: string) => {
     const cleanFileId = fileId.replace(/^file-/, '');
     setCurrentFileId(cleanFileId);
@@ -139,7 +161,6 @@ const Repository = () => {
   // =============================================
   // Editor Content Handlers
   // =============================================
-  
   const handleInput = (e: React.FormEvent<HTMLDivElement>) => {
     if (isEditing) {
       const newContent = e.currentTarget.innerHTML || '';
@@ -223,16 +244,84 @@ const Repository = () => {
   // =============================================
   // Editor Style Handlers
   // =============================================
-  
   const handleStyle = (command: string) => {
     if (isEditing) document.execCommand(command, false);
   };
 
+  // Save the current text selection
+  const saveSelection = () => {
+    if (isEditing) {
+      const selection = window.getSelection();
+      if (selection && selection.rangeCount > 0) {
+        setSavedSelection(selection.getRangeAt(0).cloneRange());
+      }
+    }
+  };
+
+  // Restore the saved selection
+  const restoreSelection = () => {
+    if (isEditing && savedSelection && editorRef.current) {
+      const selection = window.getSelection();
+      if (selection) {
+        selection.removeAllRanges();
+        selection.addRange(savedSelection);
+        return true;
+      }
+    }
+    return false;
+  };
+
   const handleFontSizeChange = (size: number) => {
     setCurrentFontSize(size);
+    
     if (editorRef.current) {
-      editorRef.current.style.fontSize = `${size}px`;
+      // Try to restore selection
+      const selectionRestored = restoreSelection();
+      
+      if (selectionRestored) {
+        // Apply font size to selection
+        document.execCommand('fontSize', false, '7'); // Use 7 as a dummy size
+        
+        // Find all font elements with size 7 and change to desired px size
+        const fontElements = editorRef.current.querySelectorAll('font[size="7"]');
+        fontElements.forEach(el => {
+          el.removeAttribute('size');
+          (el as HTMLElement).style.fontSize = `${size}px`;
+        });
+        
+        // Re-focus the editor
+        editorRef.current.focus();
+      } else {
+        // No selection, set font size for entire editor
+        editorRef.current.style.fontSize = `${size}px`;
+      }
     }
+  };
+
+  const toggleFontSizeDropdown = () => {
+    // Save selection before opening dropdown
+    saveSelection();
+    
+    const dropdown = document.getElementById('fontSizeOptions');
+    if (dropdown) {
+      dropdown.style.display = dropdown.style.display === 'none' ? 'block' : 'none';
+    }
+  };
+
+  const handleFontSizeInputKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
+    if (e.key === 'Enter') {
+      e.preventDefault();
+      const size = Number((e.target as HTMLInputElement).value);
+      if (size > 0) {
+        handleFontSizeChange(size);
+        const dropdown = document.getElementById('fontSizeOptions');
+        if (dropdown) dropdown.style.display = 'none';
+      }
+    }
+  };
+
+  const handleFontSizeInputFocus = () => {
+    saveSelection();
   };
 
   const handleMouseUp = () => {
@@ -243,7 +332,6 @@ const Repository = () => {
   // =============================================
   // Editor Action Handlers
   // =============================================
-
   const handleEnableEdit = () => {
     setIsEditing(true);
     
@@ -298,13 +386,18 @@ const Repository = () => {
         const reader = new FileReader();
         reader.onload = () => {
           const newFileId = `file-${Date.now()}`;
-          const fileContent = file.type.includes('image') ? `<img src="${reader.result}" alt="${file.name}" />` : reader.result as string;
+          const fileContent = file.type.includes('image') 
+            ? `<img src="${reader.result}" alt="${file.name}" />` 
+            : reader.result as string;
+          
           setFileContents({ ...fileContents, [newFileId]: fileContent });
           setCurrentFileId(newFileId);
           setContent(fileContent);
           setCurrentFileName(file.name);
         };
-        file.type.includes('image') ? reader.readAsDataURL(file) : reader.readAsText(file);
+        file.type.includes('image') 
+          ? reader.readAsDataURL(file) 
+          : reader.readAsText(file);
       }
     };
     input.click();
@@ -329,67 +422,126 @@ const Repository = () => {
         <title>Entrepreneur Repository</title>
         <link rel="icon" href="/Images/iHive.png" />
       </Head>
+      
       <div className={styles.pageContainer}>
-        <nav className={styles.navContainer}>
-          <Link href="/" className="flex items-center gap-2">
-            <Image src="/Images/iHive.png" alt="Logo" width={35} height={35} />
-            <span>iHive-Entrepreneur</span>
-          </Link>
-          <div className={styles.navLinks}>
-            <Link href="/entrepreneur">Profile</Link>
-            <Link href="/setting">Setting</Link>
-            <Link href="/sponsors">Sponsors</Link>
-            <Link href="/get-started">Sign Out</Link>
-          </div>
-        </nav>
+        {/* Navigation */}
+        <NavBar 
+          title="iHive-Entrepreneur" 
+          links={[
+            { href: "/entrepreneur", label: "Profile" },
+            { href: "/setting", label: "Setting" },
+            { href: "/sponsors", label: "Sponsors" },
+            { href: "/get-started", label: "Sign Out" }
+          ]}
+        />
+        
         <main className={styles.mainContent}>
+          {/* Status Indicators */}
           {isLoading && <div className={styles.loading}>Loading...</div>}
           {error && <div className={styles.error}>{error}</div>}
+          
+          {/* Sidebar with File Tree */}
           <div className={styles.sideBar}>
             <h2>File Tree</h2>
-            <FileTreeDemo
-              onFileSelect={handleFileSelect}
-              currentFileId={currentFileId}
-              onContentUpdate={(fileId, updatedContent) => {
-                setFileContents({ ...fileContents, [fileId]: updatedContent });
-                if (fileId === currentFileId) setContent(updatedContent);
-              }}
-              onFileDelete={(fileId) => {
-                const updatedIdeas = ideas.filter(idea => idea.id !== fileId);
-                localStorage.setItem('ideas', JSON.stringify(updatedIdeas));
-                setIdeas(updatedIdeas);
-                const { [fileId]: _, ...remainingContents } = fileContents;
-                setFileContents(remainingContents);
-                if (fileId === currentFileId) {
-                  setCurrentFileId(null);
-                  setContent('');
-                  setCurrentFileName('Main Content');
-                }
-              }}
-            />
+            <div className={styles.fileTree}>
+              <FileTreeDemo
+                onFileSelect={handleFileSelect}
+                currentFileId={currentFileId}
+                onContentUpdate={(fileId, updatedContent) => {
+                  setFileContents({ ...fileContents, [fileId]: updatedContent });
+                  if (fileId === currentFileId) setContent(updatedContent);
+                }}
+                onFileDelete={(fileId) => {
+                  const updatedIdeas = ideas.filter(idea => idea.id !== fileId);
+                  localStorage.setItem('ideas', JSON.stringify(updatedIdeas));
+                  setIdeas(updatedIdeas);
+                  const { [fileId]: _, ...remainingContents } = fileContents;
+                  setFileContents(remainingContents);
+                  if (fileId === currentFileId) {
+                    setCurrentFileId(null);
+                    setContent('');
+                    setCurrentFileName('Main Content');
+                  }
+                }}
+              />
+            </div>
           </div>
+          
+          {/* Document Area */}
           <div className={styles.docSpace}>
+            {/* Document Header */}
             <div className={styles.docHeader}>
               <h2>{currentFileName}</h2>
+              
+              {/* Document Toolbar */}
               <div className={styles.docDock}>
-                <input
-                  type="number"
-                  value={currentFontSize}
-                  onChange={(e) => handleFontSizeChange(Number(e.target.value))}
-                  className={styles.fontSizeInput}
-                />
-                <button onClick={() => handleStyle('bold')}><FiBold /></button>
-                <button onClick={() => handleStyle('italic')}><FiItalic /></button>
-                <button onClick={() => handleStyle('underline')}><FiUnderline /></button>
-                <button onClick={handleUpload}><FiUpload /></button>
-                <button onClick={handleDownload}><FiDownload /></button>
-                <button onClick={isEditing ? handleSave : handleEnableEdit}>
+                {/* Font Size Controls */}
+                <div className={styles.fontSizeContainer}>
+                  <input
+                    type="number"
+                    value={currentFontSize}
+                    onChange={(e) => handleFontSizeChange(Number(e.target.value))}
+                    className={styles.fontSizeInput}
+                    onKeyDown={handleFontSizeInputKeyDown}
+                    onFocus={handleFontSizeInputFocus}
+                  />
+                  <div 
+                    id="fontSizeDropdown" 
+                    className={styles.fontSizeDropdown}
+                    onClick={toggleFontSizeDropdown}
+                  >
+                    <span className={styles.dropdownArrow}>▼</span>
+                  </div>
+                  <div 
+                    id="fontSizeOptions" 
+                    className={styles.fontSizeOptions} 
+                    style={{display: 'none'}}
+                    onMouseDown={(e) => e.preventDefault()}
+                  >
+                    {[8, 10, 12, 14, 16, 18, 20, 24, 28, 32].map((size) => (
+                      <div 
+                        key={size} 
+                        className={`${styles.fontSizeOption} ${currentFontSize === size ? styles.selected : ''}`}
+                        onMouseDown={(e) => {
+                          e.preventDefault();
+                          handleFontSizeChange(size);
+                          toggleFontSizeDropdown();
+                        }}
+                      >
+                        {size}
+                      </div>
+                    ))}
+                  </div>
+                </div>
+                
+                {/* Formatting Controls */}
+                <button className={styles.dockButton} onClick={() => handleStyle('bold')}>
+                  <FiBold />
+                </button>
+                <button className={styles.dockButton} onClick={() => handleStyle('italic')}>
+                  <FiItalic />
+                </button>
+                <button className={styles.dockButton} onClick={() => handleStyle('underline')}>
+                  <FiUnderline />
+                </button>
+                
+                {/* Document Actions */}
+                <button className={styles.dockButton} onClick={handleCopy}>
+                  <FiCopy />
+                </button>
+                <button className={styles.dockButton} onClick={handleUpload}>
+                  <FiUpload />
+                </button>
+                <button className={styles.dockButton} onClick={handleDownload}>
+                  <FiDownload />
+                </button>
+                <button className={styles.dockButton} onClick={isEditing ? handleSave : handleEnableEdit}>
                   {isEditing ? <FiCheck /> : <FiEdit />}
                 </button>
               </div>
             </div>
 
-            {/*Editor Area*/}
+            {/* Editor Content Area */}
             <div className={styles.docContent}>
               {isEditing ? (
                 <div 
@@ -427,6 +579,8 @@ const Repository = () => {
             </div>
           </div>
         </main>
+        
+        {/* Footer */}
         <footer className={styles.footer}>
           <p>© 2025 iHive · Entrepreneur | <Link href="/terms">Terms</Link> | <Link href="/Privacy">Privacy</Link></p>
         </footer>
