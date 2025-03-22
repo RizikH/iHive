@@ -6,9 +6,10 @@ import styles from '@/app/styles/file-tree.module.css';
 
 interface FileTreeDemoProps {
   onFileSelect: (fileId: string, content: string, fileName: string) => void;
-  onContentUpdate: (fileId: string, newContent: string) => void;
+  onContentUpdate: (fileId: string, content: string) => void;
   currentFileId: string | null;
   onFileDelete: (fileId: string) => void;
+  files?: Array<{ id: string; title: string; description: string }>;
   isPreview?: boolean;
 }
 
@@ -17,9 +18,10 @@ export default function FileTreeDemo({
   onContentUpdate, 
   currentFileId, 
   onFileDelete,
+  files: initialFiles,
   isPreview = false 
 }: FileTreeDemoProps) {
-  const [files, setFiles] = useState<FileContent[]>([]);
+  const [fileList, setFileList] = useState<FileContent[]>([]);
   const [editingId, setEditingId] = useState<string | null>(null);
   const [editingName, setEditingName] = useState('');
   const [isCreatingFile, setIsCreatingFile] = useState(false);
@@ -45,7 +47,7 @@ export default function FileTreeDemo({
         });
       };
 
-      setFiles(prevFiles => updateFileContent(prevFiles));
+      setFileList(prevFiles => updateFileContent(prevFiles));
     }
   }, [currentFileId, fileContentsMap]);
 
@@ -67,11 +69,19 @@ export default function FileTreeDemo({
         });
       };
 
-      findAndUpdateContent(files);
+      findAndUpdateContent(fileList);
     };
 
     handleContentUpdates();
-  }, [files]);
+  }, [fileList]);
+
+  useEffect(() => {
+    if (fileList) {
+      fileList.forEach(file => {
+        onContentUpdate(file.id, file.content || '');
+      });
+    }
+  }, [fileList]);
 
   const handleCreateFile = (parentId: string | null = null) => {
     if (!newFileName.trim()) {
@@ -88,7 +98,7 @@ export default function FileTreeDemo({
       parentId: parentId || undefined
     };
 
-    setFiles(prevFiles => {
+    setFileList(prevFiles => {
       if (!parentId) {
         return [...prevFiles, newFile];
       }
@@ -96,7 +106,6 @@ export default function FileTreeDemo({
       return prevFiles.map(item => updateFileStructure(item, parentId, newFile));
     });
 
-  
     setTimeout(() => {
       onFileSelect(newFileId, '', newFileName.trim());
     }, 0);
@@ -120,7 +129,7 @@ export default function FileTreeDemo({
       children: []
     };
 
-    setFiles(prevFiles => {
+    setFileList(prevFiles => {
       if (!parentId) {
         return [...prevFiles, newFolder];
       }
@@ -169,7 +178,7 @@ export default function FileTreeDemo({
   };
 
   const deleteFileOrFolder = (id: string) => {
-    setFiles(prevFiles => {
+    setFileList(prevFiles => {
       const deleteFromArray = (items: FileContent[]): FileContent[] => {
         return items.filter(item => {
           if (item.id === id) {
@@ -200,7 +209,7 @@ export default function FileTreeDemo({
 
   const handleRenameSubmit = (id: string, type: 'file' | 'folder') => {
     if (editingName.trim()) {
-      setFiles(prevFiles => {
+      setFileList(prevFiles => {
         const updateFileName = (items: FileContent[]): FileContent[] => {
           return items.map(item => {
             if (item.id === id) {
@@ -248,7 +257,7 @@ export default function FileTreeDemo({
 
     if (!draggedItem || draggedItem === targetId) return;
 
-    setFiles(prevFiles => {
+    setFileList(prevFiles => {
       let draggedItemData: FileContent | null = null;
       
       const removeItem = (items: FileContent[]): FileContent[] => {
@@ -537,10 +546,10 @@ export default function FileTreeDemo({
       <Tree
         className="w-full"
         initialSelectedId={currentFileId || undefined}
-        elements={files}
+        elements={fileList}
       >
-        {files.length > 0 ? (
-          renderFileTree(files)
+        {fileList.length > 0 ? (
+          renderFileTree(fileList)
         ) : (
           <div className={styles.emptyState}>
             <p>No files or folders yet</p>

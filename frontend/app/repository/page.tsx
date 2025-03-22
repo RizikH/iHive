@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import Head from 'next/head';
 import Link from 'next/link';
 import Image from 'next/image';
@@ -8,6 +8,7 @@ import styles from '../styles/repository.module.css';
 import '../styles/globals.css';
 import FileTreeDemo from '@/components/file-tree-demo';
 import { FiCopy, FiDownload, FiUpload, FiEdit, FiCheck, FiBold, FiItalic, FiUnderline } from 'react-icons/fi';
+import { ideaService } from '../../../backend/services/ideaService.js';
 
 const Repository = () => {
   const [isEditing, setIsEditing] = React.useState(false);
@@ -19,11 +20,39 @@ const Repository = () => {
   const [currentFileName, setCurrentFileName] = useState<string>('Main Content');
   const [content, setContent] = useState<string>('');
   const placeholderText = 'Welcome to iHive Editor! Click the Edit button to start editing.';
+  const [ideas, setIdeas] = useState<any[]>([]);
+  const [isLoading, setIsLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+  const editorRef = useRef<HTMLDivElement>(null);
 
- 
   useEffect(() => {
     setHasContent(content.trim() !== '');
   }, [content]);
+
+  useEffect(() => {
+    const fetchIdeas = async () => {
+      try {
+        setIsLoading(true);
+        const fetchedIdeas = await ideaService.getAllContents();
+        setIdeas(fetchedIdeas);
+        
+        // Populate file tree with existing ideas
+        const ideaContents: Record<string, string> = {};
+        fetchedIdeas.forEach((idea: any) => {
+          // Use the idea ID directly without the 'file-' prefix
+          ideaContents[idea.id] = idea.description;
+        });
+        setFileContents(ideaContents);
+      } catch (error) {
+        setError('Failed to fetch ideas');
+        console.error('Error fetching ideas:', error);
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    fetchIdeas();
+  }, []);
 
   const handleKeyDown = (e: React.KeyboardEvent) => {
     if (isEditing) {
@@ -122,11 +151,10 @@ const Repository = () => {
   };
 
   const handleEdit = () => {
-    const docBody = document.querySelector(`.${styles.docBody}`) as HTMLElement;
-    if (docBody) {
+    if (editorRef.current) {
       setIsEditing(!isEditing);
-      docBody.setAttribute('contenteditable', (!isEditing).toString());
-      docBody.focus();
+      editorRef.current.setAttribute('contenteditable', (!isEditing).toString());
+      editorRef.current.focus();
     }
   };
 
@@ -339,31 +367,62 @@ const Repository = () => {
   };
 
   const handleFileSelect = (fileId: string, fileContent: string, fileName: string) => {
-    setCurrentFileId(fileId);
+    // Remove the 'file-' prefix if it exists
+    const cleanFileId = fileId.replace(/^file-/, '');
+    setCurrentFileId(cleanFileId);
     setContent(fileContent);
     setCurrentFileName(fileName);
     setIsEditing(false);
     setHasContent(fileContent.trim() !== '');
+    
+    // Update the file contents map
+    setFileContents(prev => ({
+      ...prev,
+      [cleanFileId]: fileContent
+    }));
   };
 
   const handleContentUpdate = (fileId: string, newContent: string) => {
-    
     if (fileId) {
+      // Remove the 'file-' prefix if it exists
+      const cleanFileId = fileId.replace(/^file-/, '');
+      
+      // Only update the content display if this is the current file
+      if (cleanFileId === currentFileId) {
+        setContent(newContent);
+        setHasContent(newContent.trim() !== '');
+      }
+      
+      // Always update the file contents map
       setFileContents(prev => ({
         ...prev,
-        [fileId]: newContent
+        [cleanFileId]: newContent
       }));
     }
   };
 
   const handleInput = (e: React.FormEvent<HTMLDivElement>) => {
-    
     if (isEditing) {
       const newContent = e.currentTarget.innerHTML || '';
-      setContent(newContent);
-      setHasContent(newContent.trim() !== '');
       
-     
+      // Immediately update hasContent state based on current content
+      const contentExists = newContent.trim() !== '';
+      setHasContent(contentExists);
+      
+      // If this is the first character typed, make sure to remove placeholder styling
+      if (contentExists && !hasContent && editorRef.current) {
+        editorRef.current.classList.remove(styles.placeholder);
+      }
+      
+      // Update the file contents map for the current file
+      if (currentFileId) {
+        setFileContents(prev => ({
+          ...prev,
+          [currentFileId]: newContent
+        }));
+      }
+      
+      // Remove font size marker if empty
       const marker = document.getElementById('font-size-marker');
       if (marker && marker.textContent === '') {
         marker.remove();
@@ -392,16 +451,15 @@ const Repository = () => {
     setIsEditing(true);
     
     setTimeout(() => {
-      const docBody = document.querySelector(`.${styles.docBody}`) as HTMLElement;
-      if (docBody) {
+      if (editorRef.current) {
         // Always set the font size when enabling edit mode
-        docBody.style.fontSize = `${currentFontSize}px`;
+        editorRef.current.style.fontSize = `${currentFontSize}px`;
         
         // Set contentEditable attribute
-        docBody.setAttribute('contenteditable', 'true');
+        editorRef.current.setAttribute('contenteditable', 'true');
         
         // Focus the editor
-        docBody.focus();
+        editorRef.current.focus();
         
         // Set focus to the end of the content
         const selection = window.getSelection();
@@ -409,7 +467,7 @@ const Repository = () => {
           try {
             // Try to place cursor at the end of content
             const range = document.createRange();
-            const contentDiv = docBody.querySelector('div');
+            const contentDiv = editorRef.current.querySelector('div');
             if (contentDiv && contentDiv.childNodes.length > 0) {
               const lastNode = contentDiv.childNodes[contentDiv.childNodes.length - 1];
               if (lastNode.nodeType === Node.TEXT_NODE) {
@@ -418,7 +476,7 @@ const Repository = () => {
                 range.setStartAfter(lastNode);
               }
             } else {
-              range.setStart(docBody, 0);
+              range.setStart(editorRef.current, 0);
             }
             range.collapse(true);
             selection.removeAllRanges();
@@ -426,21 +484,33 @@ const Repository = () => {
           } catch (e) {
             console.error('Error setting cursor position:', e);
             // Fallback to just focusing the element
-            docBody.focus();
+            editorRef.current.focus();
           }
         }
       }
     }, 0);
   };
 
-  const handleSave = () => {
-    if (currentFileId) {
-      const docBody = document.querySelector(`.${styles.docBody}`) as HTMLElement;
-      if (docBody) {
-        const newContent = docBody.innerHTML;
+  const handleSave = async () => {
+    if (currentFileId && editorRef.current) {
+      const newContent = editorRef.current.innerHTML;
+      try {
+        setIsLoading(true);
+        await ideaService.saveContent({
+          title: currentFileName,
+          description: newContent,
+          category: 'document' // or any appropriate category
+        });
+
+        // Update local state only after successful save
         setContent(newContent);
         handleContentUpdate(currentFileId, newContent);
         setIsEditing(false);
+      } catch (error) {
+        setError('Failed to save content');
+        console.error('Error saving content:', error);
+      } finally {
+        setIsLoading(false);
       }
     } else {
       setIsEditing(false);
@@ -496,6 +566,27 @@ const Repository = () => {
     };
   }, [styles.fontSizeContainer]);
 
+  useEffect(() => {
+    // Initialize editor content when it changes
+    if (editorRef.current && !isEditing) {
+      editorRef.current.innerHTML = content;
+      
+      // Set hasContent correctly when initializing
+      setHasContent(content.trim() !== '');
+    }
+  }, [content, isEditing]);
+
+  // Add a new effect to apply CSS classes directly when hasContent changes
+  useEffect(() => {
+    if (editorRef.current) {
+      if (hasContent) {
+        editorRef.current.classList.remove(styles.placeholder);
+      } else if (!hasContent && !isEditing) {
+        editorRef.current.classList.add(styles.placeholder);
+      }
+    }
+  }, [hasContent, isEditing, styles.placeholder]);
+
   return (
   <>
   <Head>
@@ -528,6 +619,9 @@ const Repository = () => {
     </nav>
 
     <main className={styles.mainContent}>
+      {isLoading && <div className={styles.loading}>Loading...</div>}
+      {error && <div className={styles.error}>{error}</div>}
+
       {/* SideBar | FileTree */}
       <div className={styles.sideBar}>
         <h2>File Tree</h2>
@@ -664,12 +758,12 @@ const Repository = () => {
         <div className={styles.docContent}>
           {isEditing ? (
             <div 
+              ref={editorRef}
               className={`${styles.docBody} ${!hasContent ? styles.placeholder : ''}`}
               onKeyDown={handleKeyDown}
               onMouseUp={handleMouseUp}
               onInput={handleInput}
               contentEditable={true}
-              dangerouslySetInnerHTML={{ __html: content }}
             />
           ) : (
             <div className={`${styles.docBody} ${!hasContent ? styles.placeholder : ''}`}>
@@ -707,7 +801,7 @@ const Repository = () => {
     
   </div>
   </>
-  );
+);
 };
 
 export default Repository;
