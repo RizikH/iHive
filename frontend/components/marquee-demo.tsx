@@ -2,7 +2,7 @@ import Image from 'next/image';
 import { cn } from "@/lib/utils";
 import { Marquee } from "@/components/magicui/marquee";
 import Link from 'next/link';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import FileTreeDemo from '@/components/file-tree-demo';
 import { FiX } from 'react-icons/fi';
 import {
@@ -13,6 +13,11 @@ import {
 } from "../components/ui/dialog";
 import styles from '@/app/styles/repository-modal.module.css';
 
+// API URL
+const API_URL = process.env.NODE_ENV === "production" 
+  ? "https://ihive.onrender.com/api" 
+  : "http://localhost:5000/api";
+
 // =============================================
 // Repository Modal Component
 // =============================================
@@ -21,12 +26,12 @@ const RepositoryModal = ({
   isOpen,
   onClose,
   repoId,
-  name,
+  title,
 }: {
   isOpen: boolean;
   onClose: () => void;
   repoId: string;
-  name: string;
+  title: string;
 }) => {
   const [content, setContent] = useState<string>('');
   const [currentFileId, setCurrentFileId] = useState<string | null>(null);
@@ -78,70 +83,18 @@ const RepositoryModal = ({
 };
 
 // =============================================
-// Sample Repository Data
-// =============================================
-
-const reviews = [
-  {
-    name: "name",
-    username: "@username",
-    body: "Subtitle/short description for your repository.",
-    img: "https://avatar.vercel.sh/jack",
-    repoId: "1",
-  },
-  {
-    name: "name",
-    username: "@username",
-    body: "Subtitle/short description for your repository.",
-    img: "https://avatar.vercel.sh/jack",
-    repoId: "2",
-  },
-  {
-    name: "name",
-    username: "@username",
-    body: "Subtitle/short description for your repository.",
-    img: "https://avatar.vercel.sh/jack",
-    repoId: "3",
-  },
-  {
-    name: "name",
-    username: "@username",
-    body: "Subtitle/short description for your repository.",
-    img: "https://avatar.vercel.sh/jack",
-    repoId: "4",
-  },
-  {
-    name: "name",
-    username: "@username",
-    body: "Subtitle/short description for your repository.",
-    img: "https://avatar.vercel.sh/jack",
-    repoId: "5",
-  },
-  {
-    name: "name",
-    username: "@username",
-    body: "Subtitle/short description for your repository.",
-    img: "https://avatar.vercel.sh/jack",
-    repoId: "6",
-  },
-];
-
-const firstRow = reviews.slice(0, reviews.length / 2);
-const secondRow = reviews.slice(reviews.length / 2);
-
-// =============================================
 // Repository Card Component
 // =============================================
 
 const ReviewCard = ({
   img,
-  name,
+  ideaTitle,
   username,
   body,
   repoId,
 }: {
   img: string;
-  name: string;
+  ideaTitle: string;
   username: string;
   body: string;
   repoId: string;
@@ -174,7 +127,7 @@ const ReviewCard = ({
               src={img || "/placeholder.svg"}
             />
             <div className="flex flex-col">
-              <figcaption className="text-sm font-medium text-gray-900">{name}</figcaption>
+              <figcaption className="text-sm font-medium text-gray-900">{ideaTitle || "Untitled Idea"}</figcaption>
               <p className="text-xs font-medium text-gray-500">{username}</p>
             </div>
           </div>
@@ -189,7 +142,7 @@ const ReviewCard = ({
         isOpen={isModalOpen}
         onClose={() => setIsModalOpen(false)}
         repoId={repoId}
-        name={name}
+        title={ideaTitle}
       />
     </>
   );
@@ -200,19 +153,80 @@ const ReviewCard = ({
 // =============================================
 
 export default function MarqueeDemo() {
+  const [ideas, setIdeas] = useState<any[]>([]);
+  const [userAvatar, setUserAvatar] = useState('https://avatar.vercel.sh/jack');
+  
+  // Fetch ideas and user data
+  useEffect(() => {
+    // Get user avatar from localStorage if available
+    const savedAvatar = localStorage.getItem('userAvatar');
+    if (savedAvatar) {
+      setUserAvatar(savedAvatar);
+    }
+    
+    const fetchIdeas = async () => {
+      try {
+        const response = await fetch(`${API_URL}/ideas`);
+        if (response.ok) {
+          const data = await response.json();
+          setIdeas(data);
+        }
+      } catch (error) {
+        console.error("Failed to fetch ideas:", error);
+        // Fallback to localStorage
+        const savedIdeas = localStorage.getItem('ideas');
+        if (savedIdeas) {
+          setIdeas(JSON.parse(savedIdeas));
+        }
+      }
+    };
+    
+    fetchIdeas();
+  }, []);
+  
+  // Split ideas into two rows for the marquee
+  const firstRow = ideas.slice(0, Math.ceil(ideas.length / 2));
+  const secondRow = ideas.slice(Math.ceil(ideas.length / 2));
+  
+  const username = localStorage.getItem('username') || '@user';
+  
   return (
     <div className="relative flex h-[500px] w-full flex-col items-center justify-center overflow-hidden rounded-lg border bg-gray-100 shadow-xl">
       {/* Top Repository Row */}
       <Marquee pauseOnHover className="[--duration:20s]">
-        {firstRow.map((review) => (
-          <ReviewCard key={review.repoId} {...review} />
+        {firstRow.map((idea) => (
+          <ReviewCard 
+            key={idea.id} 
+            repoId={idea.id}
+            ideaTitle={idea.title || "Untitled Idea"} 
+            username={username}
+            body={idea.description ? 
+              (idea.description.length > 120 ? 
+                idea.description.replace(/<[^>]*>/g, '').substring(0, 120) + '...' : 
+                idea.description.replace(/<[^>]*>/g, '')
+              ) : 'No description'
+            }
+            img={userAvatar}
+          />
         ))}
       </Marquee>
 
       {/* Bottom Repository Row */}
       <Marquee reverse pauseOnHover className="[--duration:20s]">
-        {secondRow.map((review) => (
-          <ReviewCard key={review.repoId} {...review} />
+        {secondRow.map((idea) => (
+          <ReviewCard 
+            key={idea.id} 
+            repoId={idea.id}
+            ideaTitle={idea.title || "Untitled Idea"} 
+            username={username}
+            body={idea.description ? 
+              (idea.description.length > 120 ? 
+                idea.description.replace(/<[^>]*>/g, '').substring(0, 120) + '...' : 
+                idea.description.replace(/<[^>]*>/g, '')
+              ) : 'No description'
+            }
+            img={userAvatar}
+          />
         ))}
       </Marquee>
 
