@@ -27,6 +27,8 @@ const eslintConfig = [
 
       // Disable warnings for empty interfaces
       "@typescript-eslint/no-empty-interface": "off", // Allow empty interfaces
+
+      "@typescript-eslint/no-empty-object-types": "off", // Allow empty object types
     },
   },
 ];
