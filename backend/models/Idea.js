@@ -126,8 +126,25 @@ const advancedSearchTags = async (tags) => {
     return ideas;
 };
 
+const getAllByUserId = async (userId) => {
+    const { data, error } = await supabase
+        .from("ideas")
+        .select(`
+        *,
+        idea_tags (
+            *,
+            tags (*)
+        )
+    `)
+        .eq("user_id", userId)
+        .order("created_at", { ascending: false });
+
+    if (error) throw error;
+    return data;
+};
 module.exports = {
     getAllIdeas,
+    getAllByUserId,
     createIdea,
     updateIdea,
     deleteIdea,

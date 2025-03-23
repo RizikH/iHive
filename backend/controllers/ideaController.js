@@ -1,7 +1,7 @@
 const Idea = require("../models/Idea");
 const supabase = require("../config/db");
 
-// ✅ GET /api/ideas/all
+// ✅ GET /api/ideas
 const getAllIdeas = async (req, res) => {
     try {
         const ideas = await Idea.getAllIdeas();
@@ -11,7 +11,7 @@ const getAllIdeas = async (req, res) => {
     }
 };
 
-// ✅ GET /api/ideas/get/:id
+// ✅ GET /api/ideas/:id
 const getIdeaById = async (req, res) => {
     try {
         const idea = await Idea.getIdeaById(req.params.id);
@@ -24,29 +24,49 @@ const getIdeaById = async (req, res) => {
     }
 };
 
-// ✅ POST /api/ideas/ (Create Idea)
 const createIdea = async (req, res) => {
-    try {
-        const { title, description, category } = req.body;
-        const userId = req.user?.id; // Ensure user is authenticated
+  try {
+    console.log("📥 Incoming request body:", req.body);
 
-        if (!title || !description || !category) {
-            return res.status(400).json({ error: "All fields (title, description, category) are required." });
-        }
+    const { title, description, category } = req.body;
 
-        if (!userId) {
-            return res.status(401).json({ error: "Unauthorized: Missing user ID." });
-        }
+    // 🔍 Extract user info from decoded token set by middleware
+    const userTokenPayload = req.user;
+    console.log("🔐 Decoded user from token (req.user):", userTokenPayload);
 
-        const newIdea = await Idea.createIdea({ user_id: userId, title, description, category });
-        res.status(201).json({ message: "Idea created successfully!", idea: newIdea });
-    } catch (error) {
-        console.error("Create Idea Error:", error.message);
-        res.status(500).json({ error: error.message });
+    const userId = userTokenPayload?.sub;
+
+    // 🔒 Validate inputs
+    if (!title || !description || !category) {
+      console.warn("⚠️ Missing fields:", { title, description, category });
+      return res.status(400).json({ error: "All fields (title, description, category) are required." });
     }
+
+    if (!userId) {
+      console.warn("❌ No userId found in token payload");
+      return res.status(401).json({ error: "Unauthorized: Missing or invalid user token." });
+    }
+
+    // 💾 Create the idea in DB
+    console.log("📌 Creating idea for user:", userId);
+    const newIdea = await Idea.createIdea({
+      user_id: userId,
+      title,
+      description,
+      category
+    });
+
+    console.log("✅ Idea created successfully:", newIdea);
+    return res.status(201).json({ message: "Idea created successfully!", idea: newIdea });
+
+  } catch (error) {
+    console.error("❌ Error while creating idea:", error);
+    return res.status(500).json({ error: error.message || "Server error" });
+  }
 };
 
-// ✅ PUT /api/ideas/update/:id
+
+// ✅ PUT /api/ideas/:id
 const updateIdea = async (req, res) => {
     try {
         const { title, description, category, status } = req.body;
@@ -64,7 +84,7 @@ const updateIdea = async (req, res) => {
     }
 };
 
-// ✅ DELETE /api/ideas/delete/:id
+// ✅ DELETE /api/ideas/:id
 const deleteIdea = async (req, res) => {
     try {
         const ideaId = req.params.id;
@@ -84,7 +104,7 @@ const deleteIdea = async (req, res) => {
 // ✅ GET /api/ideas/search?title=...
 const searchIdeasByTitle = async (req, res) => {
     try {
-        const { title } = req.params;
+        const { title } = req.query;
         if (!title) {
             return res.status(400).json({ error: "Title parameter is required for search." });
         }
@@ -97,7 +117,7 @@ const searchIdeasByTitle = async (req, res) => {
     }
 };
 
-
+// ✅ POST /api/ideas/search/tags
 const advancedSearchTags = async (req, res) => {
     try {
         const { tags } = req.body;
@@ -113,9 +133,21 @@ const advancedSearchTags = async (req, res) => {
     }
 };
 
+const getAllByUserId = async (req, res) => {
+    try {
+        const userId = req.params.id;
+        const ideas = await Idea.getAllByUserId(userId);
+        res.json(ideas);
+    } catch (error) {
+        console.error("Get Ideas by User Error:", error.message);
+        res.status(500).json({ error: error.message });
+    }
+};
+
 module.exports = {
     getAllIdeas,
     getIdeaById,
+    getAllByUserId,
     createIdea,
     updateIdea,
     deleteIdea,

@@ -6,6 +6,7 @@ import Link from "next/link";
 import styles from "../styles/investor.module.css";
 import "../styles/globals.css";
 import Image from "next/image";
+import { fetcher } from "@/app/utils/fetcher"; // ✅ Import fetcher
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:5000/api";
 
@@ -36,20 +37,22 @@ const InvestorPage = () => {
     const [loadingIdeas, setLoadingIdeas] = useState(true);
     const [errorIdeas, setErrorIdeas] = useState<string | null>(null);
     const [searchTerm, setSearchTerm] = useState("");
-    const [tagsFilter, setTagsFilter] = useState<string[]>([]);
+    const [tagsFilter, setTagsFilter] = useState<Tag[]>([]);
     const [priceRange, setPriceRange] = useState<number[]>([0, 10000]);
     const [showFilterPopup, setShowFilterPopup] = useState(false);
     const [allTags, setAllTags] = useState<Tag[]>([]);
+    const [filteredTags, setFilteredTags] = useState<Tag[]>([]);
+    const [allIdeas, setAllIdeas] = useState<Idea[]>([]);
+    const [dropdownVisible, setDropdownVisible] = useState(false);
 
     useEffect(() => {
         const fetchIdeas = async () => {
             try {
-                const response = await fetch(`${API_URL}/ideas`);
-                if (!response.ok) throw new Error("Failed to fetch ideas");
-                const data = await response.json();
+                const data = await fetcher("/ideas");
+                setAllIdeas(data || []);
                 setIdeas(data || []);
-            } catch (err: unknown) {
-                setErrorIdeas(err instanceof Error ? err.message : "An unknown error occurred.");
+            } catch (err: any) {
+                setErrorIdeas(err.message || "An unknown error occurred.");
             } finally {
                 setLoadingIdeas(false);
             }
@@ -60,20 +63,14 @@ const InvestorPage = () => {
 
     useEffect(() => {
         const fetchSearchedIdeas = async () => {
-            if (searchTerm === "") {
-                const response = await fetch(`${API_URL}/ideas`);
-                const data = await response.json();
-                setIdeas(data || []);
-                return;
-            }
-
             try {
-                const response = await fetch(`${API_URL}/ideas/search/title/${searchTerm}`);
-                if (!response.ok) throw new Error("Failed to fetch search results");
-                const data = await response.json();
+                const data = searchTerm === ""
+                    ? await fetcher("/ideas")
+                    : await fetcher(`/ideas/search/title/${searchTerm}`);
+
                 setIdeas(data || []);
-            } catch (err: unknown) {
-                setErrorIdeas(err instanceof Error ? err.message : "An unknown error occurred.");
+            } catch (err: any) {
+                setErrorIdeas(err.message || "An unknown error occurred.");
             }
         };
 
@@ -83,11 +80,10 @@ const InvestorPage = () => {
     useEffect(() => {
         const fetchAllTags = async () => {
             try {
-                const response = await fetch(`${API_URL}/tags/all`);
-                if (!response.ok) throw new Error("Failed to fetch tags");
-                const data = await response.json();
+                const data = await fetcher("/tags/all");
                 setAllTags(data || []);
-            } catch (err: unknown) {
+                setFilteredTags(data || []);
+            } catch (err) {
                 console.error("Error fetching tags:", err);
             }
         };
@@ -95,25 +91,42 @@ const InvestorPage = () => {
         fetchAllTags();
     }, []);
 
-    const handleAddTag = (tag: string) => {
-        if (!tagsFilter.includes(tag) && allTags.some((t) => t.name === tag)) {
-            setTagsFilter((prevTags) => [...prevTags, tag]);
-        }
+    const handleTagSearch = (e: React.ChangeEvent<HTMLInputElement>) => {
+        const searchTerm = e.target.value.trim().toLowerCase();
+        setFilteredTags(
+            searchTerm === ""
+                ? allTags
+                : allTags.filter(tag => tag.name.toLowerCase().includes(searchTerm))
+        );
+        setDropdownVisible(true);
     };
 
-    const handleRemoveTag = (tag: string) => {
-        setTagsFilter((prevTags) => prevTags.filter((t) => t !== tag));
+    const handleInputFocus = () => setDropdownVisible(true);
+
+    const handleAddTag = (tag: Tag) => {
+        if (!tagsFilter.some(t => t.id === tag.id)) {
+            setTagsFilter(prev => [...prev, tag]);
+        }
+        setDropdownVisible(false);
     };
+
+    const handleRemoveTag = (tag: Tag) => {
+        setTagsFilter(prev => prev.filter(t => t.id !== tag.id));
+    };
+
+    const handleClearTags = () => setTagsFilter([]);
 
     const handleApplyFilters = () => {
-        const filteredIdeas = ideas.filter((idea) => {
-            const matchesTags = tagsFilter.every((tag) =>
-                idea.idea_tags?.some((t) => t.tags.name === tag)
-            );
+        const filteredIdeas = allIdeas.filter(idea => {
+            const matchesTags =
+                tagsFilter.length === 0 ||
+                tagsFilter.some(tag =>
+                    idea.idea_tags?.some(ideaTag => ideaTag.tags.id === tag.id)
+                );
+
             const matchesPrice =
-                idea.price !== undefined &&
-                idea.price >= priceRange[0] &&
-                idea.price <= priceRange[1];
+                idea.price === undefined ||
+                (idea.price >= priceRange[0] && idea.price <= priceRange[1]);
 
             return matchesTags && matchesPrice;
         });
@@ -122,6 +135,10 @@ const InvestorPage = () => {
         setShowFilterPopup(false);
     };
 
+    const toggleDropdownVisibility = () => {
+        setDropdownVisible(!dropdownVisible);
+    };
+    
     return (
         <>
             <Head>
@@ -143,7 +160,7 @@ const InvestorPage = () => {
                     <Link href="/">iHive-Investors</Link>
                 </div>
                 <div className={styles["nav-links"]}>
-                    <Link href="#investments">Investments</Link>
+                    <Link href="/investments">Investments</Link>
                     <Link href="#setting">Settings</Link>
                     <Link href="#get-started">Signout</Link>
                     <Link href="/investor-profile">
@@ -157,7 +174,6 @@ const InvestorPage = () => {
                     </Link>
                 </div>
 
-                {/* Search and Filter Section */}
                 <div className={styles.searchContainer}>
                     <input
                         type="text"
@@ -180,24 +196,28 @@ const InvestorPage = () => {
                         <div>
                             <input
                                 type="text"
-                                placeholder="Add a tag"
-                                list="tags"
-                                onKeyDown={(e) => {
-                                    if (e.key === "Enter" && e.currentTarget.value.trim()) {
-                                        handleAddTag(e.currentTarget.value.trim());
-                                        e.currentTarget.value = "";
-                                    }
-                                }}
+                                placeholder="Search tags"
+                                onChange={handleTagSearch}
+                                onFocus={handleInputFocus} // Add this to show dropdown on focus
                             />
-                            <datalist id="tags">
-                                {allTags.map((tag) => (
-                                    <option key={tag.id} value={tag.name} />
-                                ))}
-                            </datalist>
+                            {/* Button to clear all tags */}
+                            <button className={styles.clearTagsButton} onClick={handleClearTags}>
+                                Clear All Tags
+                            </button>
+
+                            {dropdownVisible && filteredTags.length > 0 && (
+                                <ul className={styles.tagDropdown}>
+                                    {filteredTags.map((tag) => (
+                                        <li key={tag.id} onClick={() => handleAddTag(tag)}>
+                                            {tag.name}
+                                        </li>
+                                    ))}
+                                </ul>
+                            )}
                             <div>
-                                {tagsFilter.map((tag, index) => (
-                                    <span key={index} className={styles.tag}>
-                                        {tag} <button onClick={() => handleRemoveTag(tag)}>x</button>
+                                {tagsFilter.map((tag) => (
+                                    <span key={tag.id} className={styles.tag}>
+                                        {tag.name} <button onClick={() => handleRemoveTag(tag)}>x</button>
                                     </span>
                                 ))}
                             </div>

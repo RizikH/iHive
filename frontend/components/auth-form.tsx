@@ -30,6 +30,7 @@ export const AuthForm = ({ initialView = "login", onClose }: AuthFormProps) => {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState<string | null>(null);
+  
 
   // Form State
   const [formData, setFormData] = useState({
@@ -99,6 +100,7 @@ export const AuthForm = ({ initialView = "login", onClose }: AuthFormProps) => {
               }
             : { email: formData.email, password: formData.password }
         ),
+        credentials: "include", // Ensure the cookie is included in the request
       });
 
       const data = await response.json();
@@ -108,14 +110,19 @@ export const AuthForm = ({ initialView = "login", onClose }: AuthFormProps) => {
       setSuccess(isActive ? "Registration successful! You can now log in." : "Login successful!");
 
       if (!isActive) {
-        localStorage.setItem("token", data.token); // ✅ Store JWT token
-        localStorage.setItem("username", data.username); // ✅ Store username
-        localStorage.setItem("role", data.role); // ✅ Store user role
+        // ✅ Save token in a cookie (so backend authMiddleware can read it)
+        if (data.token) {
+          document.cookie = `token=${data.token}; path=/; SameSite=Lax`;
+        }
+      
+        // ✅ Redirect after short delay
         setTimeout(() => {
           hideForm();
-          router.push("/"); // ✅ Redirect to main app page after login
+          router.push("/");
         }, 1000);
       }
+      
+      
     } catch (error: unknown) {
       if (error instanceof Error) {
         setError(error.message);

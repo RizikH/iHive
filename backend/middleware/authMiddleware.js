@@ -1,27 +1,30 @@
-const supabase = require("../config/db");
+const jwt = require("jsonwebtoken");
 
-const authMiddleware = async (req, res, next) => {
-    const token = req.header("Authorization");
+const SUPABASE_JWT_SECRET = process.env.SUPABASE_JWT_SECRET;
 
-    if (!token) {
-        return res.status(401).json({ message: "Access Denied. No token provided." });
-    }
+const authenticate = (req, res, next) => {
+  let token;
 
-    try {
-        // Validate Supabase Auth token
-        const { data, error } = await supabase.auth.getUser(token.replace("Bearer ", ""));
+  const authHeader = req.headers.authorization;
+  if (authHeader?.startsWith("Bearer ")) {
+    token = authHeader.split(" ")[1];
+  } else if (req.cookies?.token) {
+    token = req.cookies.token;
+  }
 
-        if (error || !data || !data.user) {
-            return res.status(401).json({ message: "Invalid or expired token.", error });
-        }
+  if (!token) {
+    return res.status(401).json({ error: "Unauthorized: No token provided" });
+  }
 
-        // Attach authenticated user to request
-        req.user = data.user;
-        next();
-    } catch (err) {
-        console.error("Error verifying token:", err);
-        res.status(400).json({ message: "Invalid Token" });
-    }
+  try {
+    const decoded = jwt.verify(token, SUPABASE_JWT_SECRET);
+    console.log("🔐 Decoded token:", decoded);
+    req.user = decoded;
+    next();
+  } catch (err) {
+    console.error("❌ JWT verification failed:", err.message);
+    return res.status(401).json({ error: "Unauthorized: Invalid token" });
+  }
 };
 
-module.exports = authMiddleware;
+module.exports = authenticate;
