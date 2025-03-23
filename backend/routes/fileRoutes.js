@@ -1,25 +1,20 @@
-// routes/fileRoutes.js
-
 const express = require('express');
 const router = express.Router();
 const fileController = require('../controllers/fileController');
+const fileUpload = require('express-fileupload');
+const authenticate = require('../middleware/authMiddleware');
 
-// GET /api/files?idea_id=123
+// Enable file upload middleware
+router.use(fileUpload());
+
+// 🔓 Public Routes
 router.get('/', fileController.getFiles);
-
-// GET /api/files/:id
 router.get('/:id', fileController.getFileById);
 
-// POST /api/files
-router.post('/', fileController.createFile);
-
-// PUT /api/files/:id
-router.put('/:id', fileController.updateFile);
-
-// DELETE /api/files/:id
-router.delete('/:id', fileController.deleteFile);
-
-// POST /api/files/upload
-router.post('/upload', fileController.uploadFile);
+// 🔐 Protected Routes
+router.post('/', authenticate, fileController.createFile);
+router.put('/:id', authenticate, fileController.updateFile);
+router.delete('/:id', authenticate, fileController.deleteFile);
+router.post('/upload', authenticate, fileController.uploadFile);
 
 module.exports = router;

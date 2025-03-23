@@ -3,21 +3,28 @@
     "version": "1.0.0",
     "private": true,
     "scripts": {
-      "dev": "nodemon server.js",
-      "start": "node server.js"
+        "predev": "npx kill-port 5000",
+        "dev": "nodemon server.js",
+        "start": "node server.js"
     },
     "dependencies": {
         "@radix-ui/react-slot": "^1.1.2",
+        "@radix-ui/react-visually-hidden": "^1.1.2",
         "@supabase/supabase-js": "latest",
         "@tabler/icons-react": "^3.30.0",
+        "aws-sdk": "^2.1692.0",
+        "axios": "^1.8.4",
         "body-parser": "latest",
         "class-variance-authority": "^0.7.1",
         "clsx": "^2.1.1",
+        "cookie-parser": "^1.4.7",
         "cors": "latest",
         "dotenv": "^16.4.7",
         "express": "latest",
+        "express-fileupload": "^1.5.1",
         "framer-motion": "^12.4.2",
         "jsonwebtoken": "latest",
+        "jwks-rsa": "^3.2.0",
         "motion": "^12.4.2",
         "next": "latest",
         "nodemon": "^3.1.9",
@@ -26,10 +33,11 @@
         "react-dom": "^19.0.0",
         "react-icons": "^5.5.0",
         "socket.io": "^4.8.1",
-        "tailwind-merge": "^3.0.1"
+        "tailwind-merge": "^3.0.1",
+        "uuid": "^11.1.0"
     },
     "devDependencies": {
-      "supertest": "^7.1.0"
+        "kill-port": "^2.0.1",
+        "supertest": "^7.1.0"
     }
-  }
-  
+}

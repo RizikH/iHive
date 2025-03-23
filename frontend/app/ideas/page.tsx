@@ -1,44 +1,42 @@
 "use client";
 
-import React, { useState, useEffect } from 'react';
-import Link from 'next/link';
-import Head from 'next/head';
-import { FiPlus, FiSearch, FiFilter } from 'react-icons/fi';
-import NavBar from '@/components/nav-bar';
-import styles from '../styles/ideas.module.css';
-
-// API URL
-const API_URL = process.env.NODE_ENV === "production" 
-  ? "https://ihive.onrender.com/api" 
-  : "http://localhost:5000/api";
+import React, { useState, useEffect } from "react";
+import Link from "next/link";
+import Head from "next/head";
+import { FiPlus, FiSearch, FiFilter } from "react-icons/fi";
+import NavBar from "@/components/nav-bar";
+import styles from "../styles/ideas.module.css";
+import { fetcher } from "@/app/utils/fetcher";
 
 const IdeasPage = () => {
-  // =============================================
-  // State Management
-  // =============================================
   const [ideas, setIdeas] = useState<any[]>([]);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const [searchTerm, setSearchTerm] = useState('');
-  const [filter, setFilter] = useState('all');
+  const [searchTerm, setSearchTerm] = useState("");
+  const [filter, setFilter] = useState("all");
+  const [userId, setUserId] = useState<string | null>(null);
+  const [showForm, setShowForm] = useState(false);
 
-  // =============================================
-  // Effects
-  // =============================================
+  const [formData, setFormData] = useState({
+    title: "",
+    description: "",
+    category: "document",
+  });
+
   useEffect(() => {
+    const storedId = localStorage.getItem("user_id");
+    if (storedId) setUserId(storedId);
+
     const fetchIdeas = async () => {
       try {
         setIsLoading(true);
-        const response = await fetch(`${API_URL}/ideas`);
-        if (!response.ok) throw new Error('Failed to fetch ideas');
-        
-        const fetchedIdeas = await response.json();
+        const fetchedIdeas = await fetcher("/ideas");
         setIdeas(fetchedIdeas);
       } catch (error) {
-        console.error('Error fetching ideas:', error);
-        setError('Failed to load ideas');
-        // Fallback to localStorage if API fails
-        const savedIdeas = localStorage.getItem('ideas');
+        console.error("Error fetching ideas:", error);
+        setError("Failed to load ideas");
+
+        const savedIdeas = localStorage.getItem("ideas");
         if (savedIdeas) {
           setIdeas(JSON.parse(savedIdeas));
         }
@@ -46,122 +44,116 @@ const IdeasPage = () => {
         setIsLoading(false);
       }
     };
-    
+
     fetchIdeas();
   }, []);
 
-  // =============================================
-  // Helper Functions
-  // =============================================
-  const filteredIdeas = ideas.filter(idea => {
-    // First apply text search
-    const matchesSearch = 
-      searchTerm === '' || 
+  const filteredIdeas = ideas.filter((idea) => {
+    const matchesSearch =
+      searchTerm === "" ||
       idea.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      (idea.description && idea.description.toLowerCase().includes(searchTerm.toLowerCase()));
-    
-    // Then apply category filter
-    const matchesFilter = filter === 'all' || idea.category === filter;
-    
+      (idea.description &&
+        idea.description.toLowerCase().includes(searchTerm.toLowerCase()));
+
+    const matchesFilter = filter === "all" || idea.category === filter;
     return matchesSearch && matchesFilter;
   });
-  
+
   const getCategories = () => {
-    const categories = ideas.map(idea => idea.category).filter(Boolean);
-    return ['all', ...new Set(categories)];
-  };
-  
-  const getPreviewText = (description: string) => {
-    // Strip HTML tags and limit to 100 characters
-    const textOnly = description.replace(/<[^>]*>/g, '');
-    return textOnly.length > 100 ? textOnly.substring(0, 100) + '...' : textOnly;
+    const categories = ideas.map((idea) => idea.category).filter(Boolean);
+    return ["all", ...new Set(categories)];
   };
 
-  const handleCreateNewIdea = async () => {
+  const getPreviewText = (description: string) => {
+    const textOnly = description.replace(/<[^>]*>/g, "");
+    return textOnly.length > 100
+      ? textOnly.substring(0, 100) + "..."
+      : textOnly;
+  };
+
+  const handleCreateNewIdea = () => {
+    if (!userId) {
+      alert("Please log in to create an idea.");
+      return;
+    }
+    setShowForm(true);
+  };
+
+  const handleFormSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (
+      !formData.title ||
+      !formData.description ||
+      !formData.category
+    ) {
+      setError("All fields are required.");
+      return;
+    }
+
     try {
       setIsLoading(true);
-      
-      const newIdea = {
-        title: 'New Idea',
-        description: 'Click to edit this idea',
-        category: 'document'
-      };
-      
-      const response = await fetch(`${API_URL}/ideas`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(newIdea)
+      const savedIdea = await fetcher("/ideas", {
+        method: "POST",
+        body: JSON.stringify({
+          ...formData,
+          user_id: userId,
+        }),
       });
-      
-      if (!response.ok) throw new Error('Failed to create new idea');
-      
-      const savedIdea = await response.json();
-      setIdeas(prev => [...prev, savedIdea.idea || savedIdea]);
-      
+
+      setIdeas((prev) => [...prev, savedIdea.idea || savedIdea]);
+      setShowForm(false);
+      setFormData({ title: "", description: "", category: "document" });
     } catch (error) {
-      console.error('Error creating idea:', error);
-      setError('Failed to create new idea');
+      console.error("Error creating idea:", error);
+      setError("Failed to create new idea");
     } finally {
       setIsLoading(false);
     }
   };
 
-  // =============================================
-  // Render Component
-  // =============================================
   return (
     <>
       <Head>
         <title>Ideas Repository</title>
         <link rel="icon" href="/Images/iHive.png" />
       </Head>
-      
+
       <div className={styles.pageContainer}>
-        {/* Navigation */}
-        <NavBar 
-          title="iHive-Entrepreneur" 
-          links={[
-            { href: "/entrepreneur", label: "Profile" },
-            { href: "/sponsors", label: "Sponsors" },
-            { href: "/setting", label: "Setting" },
-            { href: "/get-started", label: "Sign Out" }
-          ]}
-        />
-        
+        <NavBar title="iHive-Entrepreneur" />
+
         <main className={styles.mainContent}>
-          {/* Status Indicators */}
           {isLoading && <div className={styles.loading}>Loading...</div>}
           {error && <div className={styles.error}>{error}</div>}
-          
-          {/* Controls Section */}
+
+          {/* Filter + Search + New Button */}
           <div className={styles.controlsSection}>
             <div className={styles.searchBar}>
               <FiSearch className={styles.searchIcon} />
-              <input 
-                type="text" 
-                placeholder="Search ideas..." 
+              <input
+                type="text"
+                placeholder="Search ideas..."
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
                 className={styles.searchInput}
               />
             </div>
-            
+
             <div className={styles.filterContainer}>
               <FiFilter className={styles.filterIcon} />
-              <select 
-                value={filter} 
+              <select
+                value={filter}
                 onChange={(e) => setFilter(e.target.value)}
                 className={styles.filterSelect}
               >
-                {getCategories().map(category => (
+                {getCategories().map((category) => (
                   <option key={category} value={category}>
                     {category.charAt(0).toUpperCase() + category.slice(1)}
                   </option>
                 ))}
               </select>
             </div>
-            
-            <button 
+
+            <button
               className={styles.newIdeaButton}
               onClick={handleCreateNewIdea}
               disabled={isLoading}
@@ -169,34 +161,87 @@ const IdeasPage = () => {
               <FiPlus /> New Idea
             </button>
           </div>
-          
-          {/* Ideas Grid */}
+
+          {/* New Idea Form */}
+          {showForm && (
+            <form onSubmit={handleFormSubmit} className={styles.form}>
+              <input
+                type="text"
+                placeholder="Title"
+                value={formData.title}
+                onChange={(e) =>
+                  setFormData({ ...formData, title: e.target.value })
+                }
+                required
+              />
+              <textarea
+                placeholder="Description"
+                value={formData.description}
+                onChange={(e) =>
+                  setFormData({ ...formData, description: e.target.value })
+                }
+                required
+              />
+              <select
+                value={formData.category}
+                onChange={(e) =>
+                  setFormData({ ...formData, category: e.target.value })
+                }
+              >
+                <option value="document">Document</option>
+                <option value="startup">Startup</option>
+                <option value="tech">Tech</option>
+                <option value="art">Art</option>
+              </select>
+              <div className={styles.formButtons}>
+                <button type="submit">Submit</button>
+                <button
+                  type="button"
+                  onClick={() => setShowForm(false)}
+                >
+                  Cancel
+                </button>
+              </div>
+            </form>
+          )}
+
+          {/* Idea Grid */}
           <div className={styles.ideasGrid}>
             {filteredIdeas.length > 0 ? (
-              filteredIdeas.map(idea => (
-                <Link href={`/repository?id=${idea.id}`} key={idea.id} className={styles.ideaCard}>
+              filteredIdeas.map((idea) => (
+                <Link
+                  href={`/repository?id=${idea.id}`}
+                  key={idea.id}
+                  className={styles.ideaCard}
+                >
                   <h3 className={styles.ideaTitle}>{idea.title}</h3>
                   {idea.category && (
-                    <span className={styles.ideaCategory}>{idea.category}</span>
+                    <span className={styles.ideaCategory}>
+                      {idea.category}
+                    </span>
                   )}
                   <p className={styles.ideaPreview}>
-                    {idea.description ? getPreviewText(idea.description) : 'No content'}
+                    {idea.description
+                      ? getPreviewText(idea.description)
+                      : "No content"}
                   </p>
                   <div className={styles.ideaFooter}>
                     <span className={styles.ideaDate}>
-                      {idea.updatedAt ? new Date(idea.updatedAt).toLocaleDateString() : 'Not saved'}
+                      {idea.updatedAt
+                        ? new Date(idea.updatedAt).toLocaleDateString()
+                        : "Not saved"}
                     </span>
                   </div>
                 </Link>
               ))
             ) : (
               <div className={styles.noIdeas}>
-                {searchTerm || filter !== 'all' ? (
+                {searchTerm || filter !== "all" ? (
                   <p>No ideas match your search criteria.</p>
                 ) : (
                   <div>
                     <p>You haven't created any ideas yet.</p>
-                    <button 
+                    <button
                       className={styles.createFirstButton}
                       onClick={handleCreateNewIdea}
                     >
@@ -208,14 +253,17 @@ const IdeasPage = () => {
             )}
           </div>
         </main>
-        
-        {/* Footer */}
+
         <footer className={styles.footer}>
-          <p>© 2025 iHive · Entrepreneur | <Link href="/terms">Terms</Link> | <Link href="/privacy">Privacy</Link></p>
+          <p>
+            © 2025 iHive · Entrepreneur |{" "}
+            <Link href="/terms">Terms</Link> |{" "}
+            <Link href="/privacy">Privacy</Link>
+          </p>
         </footer>
       </div>
     </>
   );
 };
 
-export default IdeasPage; 
+export default IdeasPage;

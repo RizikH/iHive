@@ -1,58 +1,88 @@
 "use client";
 
-import React from 'react';
+import React, { useEffect, useState } from "react";
+import Link from "next/link";
+import Image from "next/image";
+import styles from "@/app/styles/nav-bar.module.css";
+import { fetcher } from "@/app/utils/fetcher"; // ✅ import your fetcher utility
 
-// Next.js
-import Link from 'next/link';
-import Image from 'next/image';
-
-// Styles
-import styles from '@/app/styles/nav-bar.module.css';
-
-// =============================================
-// Types
-// =============================================
 interface NavBarProps {
   title?: string;
   logoPath?: string;
-  links?: { href: string; label: string }[];
+  links?: { href: string; label: string; onClick?: () => void }[];
 }
 
-// =============================================
-// Component
-// =============================================
 const NavBar = ({
   title = "iHive",
   logoPath = "/Images/iHive.png",
-  links = [
-    { href: "/setting", label: "Setting" },
-    { href: "/get-started", label: "Sign Out" }
-  ]
+  links,
 }: NavBarProps) => {
+  const [userId, setUserId] = useState<string | null>(null);
+
+  useEffect(() => {
+    const fetchUser = async () => {
+      try {
+        const data = await fetcher("/users/me");
+        setUserId(data.id); // Supabase user ID
+      } catch (err) {
+        console.warn("User not logged in");
+        setUserId(null);
+      }
+    };
+
+    fetchUser();
+  }, []);
+
+  const handleSignOut = () => {
+    document.cookie =
+      "access_token=; path=/; expires=Thu, 01 Jan 1970 00:00:00 GMT";
+    setUserId(null);
+    window.location.href = "/";
+  };
+
+  const computedLinks =
+    links ??
+    (userId
+      ? [
+          { href: `/setting`, label: "Settings" },
+          { href: `/repository/${userId}`, label: "My Repositories" },
+          { href: "#", label: "Sign Out", onClick: handleSignOut },
+        ]
+      : [
+          { href: "/get-started", label: "Login" },
+          { href: "/register", label: "Register" },
+        ]);
+
   return (
     <nav className={styles.navContainer}>
       {/* Logo and Title */}
       <Link href="/" className={styles.logo}>
-        <Image 
-          src={logoPath} 
-          alt="Logo" 
-          width={35} 
-          height={35} 
-          className={styles.logoImage} 
+        <Image
+          src={logoPath}
+          alt="Logo"
+          width={35}
+          height={35}
+          className={styles.logoImage}
         />
         <span>{title}</span>
       </Link>
-      
+
       {/* Navigation Links */}
       <div className={styles.navLinks}>
-        {links.map((link, index) => (
-          <Link key={index} href={link.href}>
-            {link.label}
-          </Link>
-        ))}
+        {computedLinks.map((link, index) =>
+          link.onClick ? (
+            <button key={index} onClick={link.onClick} className={styles.navButton}>
+              {link.label}
+            </button>
+          ) : (
+            <Link key={index} href={link.href}>
+              {link.label}
+            </Link>
+          )
+        )}
       </div>
     </nav>
   );
 };
 
-export default NavBar; 
+export default NavBar;

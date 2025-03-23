@@ -10,10 +10,7 @@ import FileTree, { FileItem } from "@/components/file-tree";
 import FileEditor from "@/components/file-editor";
 import FileViewer from "@/components/file-viewer";
 
-const API_URL =
-  process.env.NODE_ENV === "production"
-    ? "https://ihive.onrender.com/api"
-    : "http://localhost:5000/api";
+import { fetcher } from "@/app/utils/fetcher"; // ✅ global fetcher import
 
 export default function Repository() {
   const [files, setFiles] = useState<FileItem[]>([]);
@@ -27,10 +24,8 @@ export default function Repository() {
   const fetchFiles = async () => {
     try {
       setLoading(true);
-      const url = ideaId ? `${API_URL}/files?idea_id=${ideaId}` : `${API_URL}/files`;
-      const res = await fetch(url);
-      if (!res.ok) throw new Error("Failed to load files");
-      const data = await res.json();
+      const path = ideaId ? `/files?idea_id=${ideaId}` : "/files";
+      const data = await fetcher(path); // ✅ now using fetcher
       setFiles(data);
     } catch (err) {
       if (err instanceof Error) {
@@ -87,6 +82,8 @@ export default function Repository() {
               onSelect={handleSelectFile}
               onRefresh={fetchFiles}
               selectedId={currentFile?.id || null}
+              ideaId={Number(ideaId) || 0}
+              userId={""}
             />
           </div>
 
@@ -100,7 +97,9 @@ export default function Repository() {
             ) : (
               <div className={styles.placeholderContent}>
                 <h3>Select a file to view or edit</h3>
-                <p>You can also create a new file or folder from the file tree.</p>
+                <p>
+                  You can also create a new file or folder from the file tree.
+                </p>
               </div>
             )}
           </div>
@@ -108,7 +107,8 @@ export default function Repository() {
 
         <footer className={styles.footer}>
           <p>
-            © 2025 iHive · Entrepreneur | <a href="/terms">Terms</a> | <a href="/Privacy">Privacy</a>
+            © 2025 iHive · Entrepreneur | <a href="/terms">Terms</a> |{" "}
+            <a href="/Privacy">Privacy</a>
           </p>
         </footer>
       </div>
