@@ -7,6 +7,8 @@ const { initializeSocket } = require("./services/socketService");
 const userRoutes = require("./routes/userRoutes");
 const ideaRoutes = require("./routes/ideaRoutes");
 const tagRoutes = require("./routes/tagRoutes");
+const fileRoutes = require('./routes/fileRoutes');
+
 
 const app = express();
 const server = http.createServer(app);
@@ -49,6 +51,7 @@ app.use(express.urlencoded({ extended: true }));
 app.use("/api/users", userRoutes);
 app.use("/api/ideas", ideaRoutes);
 app.use("/api/tags", tagRoutes);
+app.use('/api/files', fileRoutes);
 
 /**
  * 🔹 Root Endpoint
