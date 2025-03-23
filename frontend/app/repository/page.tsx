@@ -2,8 +2,9 @@
 
 import React, { useEffect, useState } from "react";
 import Head from "next/head";
+import { useSearchParams } from "next/navigation";
 import NavBar from "@/components/nav-bar";
-import styles from "@/app/styles/repository.module.css";
+import styles from "../styles/repository.module.css";
 
 import FileTree, { FileItem } from "@/components/file-tree";
 import FileEditor from "@/components/file-editor";
@@ -20,10 +21,14 @@ export default function Repository() {
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
 
+  const searchParams = useSearchParams();
+  const ideaId = searchParams.get("id");
+
   const fetchFiles = async () => {
     try {
       setLoading(true);
-      const res = await fetch(`${API_URL}/files`);
+      const url = ideaId ? `${API_URL}/files?idea_id=${ideaId}` : `${API_URL}/files`;
+      const res = await fetch(url);
       if (!res.ok) throw new Error("Failed to load files");
       const data = await res.json();
       setFiles(data);
@@ -40,7 +45,7 @@ export default function Repository() {
 
   useEffect(() => {
     fetchFiles();
-  }, []);
+  }, [ideaId]);
 
   const handleSelectFile = (file: FileItem) => {
     setCurrentFile(file);
