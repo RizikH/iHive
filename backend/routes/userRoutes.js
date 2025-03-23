@@ -2,6 +2,7 @@ const express = require("express");
 const router = express.Router();
 const controller = require("../controllers/userController");
 const authMiddleware = require("../middleware/authMiddleware");
+const rateLimit = require("express-rate-limit");
 
 // ✅ Public Routes (Authentication)
 router.post("/register", controller.addUser);
@@ -14,7 +15,11 @@ router.put("/update/:id", authMiddleware, controller.updateUser);
 router.delete("/delete/:id", authMiddleware, controller.deleteUser);
 
 // ✅ NEW: Get current user info from token
-router.get("/me", authMiddleware, (req, res) => {
+const authRateLimiter = rateLimit({
+    windowMs: 15 * 60 * 1000, // 15 minutes
+    max: 100, // max 100 requests per windowMs
+});
+router.get("/me", authRateLimiter, authMiddleware, (req, res) => {
     const user = req.user;
     res.json({
       id: user.sub,
