@@ -33,6 +33,9 @@ ChartJS.register(ArcElement, Tooltip, Legend);
 // Main Component
 // =============================================
 const Sponsors = () => {
+  // Profile state
+  const [currentAvatar, setCurrentAvatar] = React.useState('https://avatar.vercel.sh/jack');
+
   // =============================================
   // Chart Configuration
   // =============================================
@@ -91,9 +94,8 @@ const Sponsors = () => {
           <div className={styles.profileSection}>
             <div className={styles.profileImage}>
               <Image
-                src="/Images/sample.jpeg"
-                alt="Profile"
-                title="Change your Avatar"
+                src={currentAvatar}
+                alt="Avatar"
                 width={150}
                 height={150}
                 style={{ objectFit: 'cover', borderRadius: '50%' }}
