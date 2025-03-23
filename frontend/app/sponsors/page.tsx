@@ -78,7 +78,7 @@ const Sponsors = () => {
         <NavBar 
           title="iHive-Entrepreneur"
           links={[
-            { href: "/repository", label: "Repository" },
+            { href: "/ideas", label: "Repositories" },
             { href: "/setting", label: "Setting" },
             { href: "/entrepreneur", label: "Profile" },
             { href: "/get-started", label: "Sign Out" }

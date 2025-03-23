@@ -36,6 +36,7 @@ export const AuthForm = ({ initialView = "login", onClose }: AuthFormProps) => {
     username: "",
     email: "",
     password: "",
+    role: "entrepreneur", // Default role
     rememberMe: false,
     termsAccepted: false,
   });
@@ -90,7 +91,12 @@ export const AuthForm = ({ initialView = "login", onClose }: AuthFormProps) => {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(
           isActive
-            ? { username: formData.username, email: formData.email, password: formData.password }
+            ? { 
+                username: formData.username, 
+                email: formData.email, 
+                password: formData.password,
+                role: formData.role 
+              }
             : { email: formData.email, password: formData.password }
         ),
       });
@@ -104,6 +110,7 @@ export const AuthForm = ({ initialView = "login", onClose }: AuthFormProps) => {
       if (!isActive) {
         localStorage.setItem("token", data.token); // ✅ Store JWT token
         localStorage.setItem("username", data.username); // ✅ Store username
+        localStorage.setItem("role", data.role); // ✅ Store user role
         setTimeout(() => {
           hideForm();
           router.push("/"); // ✅ Redirect to main app page after login
@@ -202,6 +209,34 @@ export const AuthForm = ({ initialView = "login", onClose }: AuthFormProps) => {
               <FiLock className={styles.icon} />
               <input type="password" name="password" value={formData.password} onChange={handleChange} required />
               <label>Password</label>
+            </div>
+            
+            {/*Role Selection*/}
+            <div className={styles.roleSelection}>
+              <p className={styles.roleTitle}>Select your role:</p>
+              <div className={styles.roleOptions}>
+                <label className={`${styles.roleOption} ${formData.role === 'entrepreneur' ? styles.selectedRole : ''}`}>
+                  <input 
+                    type="radio" 
+                    name="role" 
+                    value="entrepreneur" 
+                    checked={formData.role === 'entrepreneur'} 
+                    onChange={handleChange} 
+                  />
+                  <span>Entrepreneur</span>
+                </label>
+                <label className={`${styles.roleOption} ${formData.role === 'investor' ? styles.selectedRole : ''}`}>
+                  <input 
+                    type="radio" 
+                    name="role" 
+                    value="investor" 
+                    checked={formData.role === 'investor'} 
+                    onChange={handleChange} 
+                  />
+                  <span>Investor</span>
+                </label>
+              </div>
+              <p className={styles.roleWarning}><strong>Note:</strong> Once registered, your role cannot be changed.</p>
             </div>
             
             {/*Terms and Conditions*/}

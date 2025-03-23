@@ -62,7 +62,7 @@ const EntrepreneurProfile = () => {
         <NavBar 
           title="iHive-Entrepreneur" 
           links={[
-            { href: "/repository", label: "Repository" },
+            { href: "/ideas", label: "Repositories" },
             { href: "/setting", label: "Setting" },
             { href: "/sponsors", label: "Sponsors" },
             { href: "/get-started", label: "Sign Out" }

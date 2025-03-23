@@ -31,7 +31,7 @@
 }
 
 .wrapper.active {
-  height: 520px;
+  height: 620px;
 }
 
 /* =============================================
@@ -176,6 +176,82 @@
   font-size: 1em;
   color: #fff;
   font-weight: 500;
+}
+
+/* =============================================
+   Role Selection
+   ============================================= */
+.roleSelection {
+  margin: 15px 0;
+}
+
+.roleTitle {
+  font-size: 0.95em;
+  font-weight: 500;
+  color: #1a1a1a;
+  margin-bottom: 8px;
+}
+
+.roleOptions {
+  display: flex;
+  gap: 15px;
+  margin-bottom: 10px;
+}
+
+.roleOption {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  padding: 10px;
+  border: 2px solid rgba(26, 26, 26, 0.3);
+  border-radius: 6px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.roleOption:hover {
+  border-color: #1a1a1a;
+}
+
+.selectedRole {
+  border-color: #1a1a1a;
+  background-color: rgba(26, 26, 26, 0.05);
+}
+
+.roleOption input {
+  margin: 0;
+  accent-color: #1a1a1a;
+}
+
+.roleOption span {
+  font-weight: 500;
+  font-size: 0.95em;
+}
+
+.roleWarning {
+  font-size: 0.85em;
+  color: #e74c3c;
+  margin-top: 5px;
+  text-align: center;
+}
+
+/* =============================================
+   Success & Error Messages
+   ============================================= */
+.error {
+  color: #e74c3c;
+  font-size: 0.85em;
+  text-align: center;
+  margin-bottom: 10px;
+}
+
+.success {
+  color: #2ecc71;
+  font-size: 0.85em;
+  text-align: center;
+  margin-bottom: 10px;
 }
 
 .loginRegister {

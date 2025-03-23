@@ -1,0 +1,290 @@
+/* =============================================
+   Container and Layout
+   ============================================= */
+.pageContainer {
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
+  background-color: #f8f9fa;
+}
+
+.mainContent {
+  flex: 1;
+  padding: 2rem;
+  max-width: 1400px;
+  margin: 0 auto;
+  width: 100%;
+}
+
+/* =============================================
+   Status Indicators
+   ============================================= */
+.loading, .error {
+  text-align: center;
+  padding: 1rem;
+  margin-bottom: 1rem;
+  border-radius: 8px;
+}
+
+.loading {
+  background-color: rgba(66, 139, 202, 0.1);
+  color: #428bca;
+}
+
+.error {
+  background-color: rgba(231, 76, 60, 0.1);
+  color: #e74c3c;
+}
+
+/* =============================================
+   Controls Section
+   ============================================= */
+.controlsSection {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 2rem;
+  flex-wrap: wrap;
+  gap: 1rem;
+}
+
+.searchBar {
+  flex: 2;
+  position: relative;
+  max-width: 500px;
+}
+
+.searchIcon {
+  position: absolute;
+  left: 12px;
+  top: 50%;
+  transform: translateY(-50%);
+  color: #666;
+}
+
+.searchInput {
+  width: 100%;
+  padding: 0.75rem 1rem 0.75rem 2.5rem;
+  border: 1px solid #ddd;
+  border-radius: 8px;
+  font-size: 1rem;
+  outline: none;
+  transition: border-color 0.3s;
+}
+
+.searchInput:focus {
+  border-color: #1a1a1a;
+}
+
+.filterContainer {
+  position: relative;
+  flex: 1;
+  max-width: 200px;
+}
+
+.filterIcon {
+  position: absolute;
+  left: 12px;
+  top: 50%;
+  transform: translateY(-50%);
+  color: #666;
+}
+
+.filterSelect {
+  width: 100%;
+  padding: 0.75rem 1rem 0.75rem 2.5rem;
+  border: 1px solid #ddd;
+  border-radius: 8px;
+  font-size: 1rem;
+  background-color: white;
+  outline: none;
+  appearance: none;
+  cursor: pointer;
+  transition: border-color 0.3s;
+}
+
+.filterSelect:focus {
+  border-color: #1a1a1a;
+}
+
+.newIdeaButton {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.75rem 1.25rem;
+  background-color: #1a1a1a;
+  color: white;
+  border: none;
+  border-radius: 8px;
+  font-size: 1rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: background-color 0.3s;
+}
+
+.newIdeaButton:hover {
+  background-color: #333;
+}
+
+.newIdeaButton:disabled {
+  background-color: #999;
+  cursor: not-allowed;
+}
+
+/* =============================================
+   Ideas Grid
+   ============================================= */
+.ideasGrid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+  gap: 1.5rem;
+}
+
+.ideaCard {
+  background-color: white;
+  border-radius: 10px;
+  padding: 1.5rem;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
+  transition: transform 0.3s, box-shadow 0.3s;
+  display: flex;
+  flex-direction: column;
+  text-decoration: none;
+  color: inherit;
+  height: 220px;
+  position: relative;
+  overflow: hidden;
+}
+
+.ideaCard:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 10px 15px rgba(0, 0, 0, 0.1);
+}
+
+.ideaTitle {
+  font-size: 1.25rem;
+  margin: 0 0 0.5rem;
+  color: #1a1a1a;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.ideaCategory {
+  display: inline-block;
+  background-color: rgba(26, 26, 26, 0.1);
+  color: #1a1a1a;
+  padding: 0.25rem 0.5rem;
+  border-radius: 4px;
+  font-size: 0.75rem;
+  margin-bottom: 1rem;
+  text-transform: capitalize;
+}
+
+.ideaPreview {
+  color: #666;
+  font-size: 0.9rem;
+  line-height: 1.5;
+  margin: 0;
+  flex-grow: 1;
+  overflow: hidden;
+  display: -webkit-box;
+  -webkit-line-clamp: 3;
+  -webkit-box-orient: vertical;
+}
+
+.ideaFooter {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-top: 1rem;
+  padding-top: 0.75rem;
+  border-top: 1px solid #eee;
+}
+
+.ideaDate {
+  font-size: 0.8rem;
+  color: #999;
+}
+
+/* =============================================
+   Empty State
+   ============================================= */
+.noIdeas {
+  grid-column: 1 / -1;
+  text-align: center;
+  padding: 3rem;
+  background-color: rgba(26, 26, 26, 0.02);
+  border-radius: 10px;
+  border: 1px dashed #ddd;
+}
+
+.noIdeas p {
+  color: #666;
+  margin-bottom: 1.5rem;
+}
+
+.createFirstButton {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.75rem 1.5rem;
+  background-color: #1a1a1a;
+  color: white;
+  border: none;
+  border-radius: 8px;
+  font-size: 1rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: background-color 0.3s;
+}
+
+.createFirstButton:hover {
+  background-color: #333;
+}
+
+/* =============================================
+   Footer
+   ============================================= */
+.footer {
+  text-align: center;
+  padding: 1.5rem;
+  color: #666;
+  border-top: 1px solid #eee;
+  margin-top: 2rem;
+}
+
+.footer a {
+  color: #1a1a1a;
+  text-decoration: none;
+}
+
+.footer a:hover {
+  text-decoration: underline;
+}
+
+/* =============================================
+   Responsive Adjustments
+   ============================================= */
+@media (max-width: 768px) {
+  .mainContent {
+    padding: 1rem;
+  }
+  
+  .controlsSection {
+    flex-direction: column;
+    align-items: stretch;
+  }
+  
+  .searchBar, .filterContainer {
+    max-width: 100%;
+  }
+  
+  .ideasGrid {
+    grid-template-columns: 1fr;
+  }
+  
+  .ideaCard {
+    height: auto;
+    min-height: 180px;
+  }
+} 

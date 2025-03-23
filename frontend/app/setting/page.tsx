@@ -38,9 +38,7 @@ const Setting = () => {
                 <NavBar 
                     title="iHive"
                     links={[
-                        { href: "/repository", label: "Repository" },
                         { href: "/entrepreneur", label: "Profile" },
-                        { href: "/sponsors", label: "Sponsors" },
                         { href: "/get-started", label: "Sign Out" }
                     ]}
                 />
