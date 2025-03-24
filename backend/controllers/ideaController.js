@@ -28,18 +28,17 @@ const createIdea = async (req, res) => {
   try {
     console.log("📥 Incoming request body:", req.body);
 
-    const { title, description, category } = req.body;
+    const { title, description } = req.body;
 
     // 🔍 Extract user info from decoded token set by middleware
     const userTokenPayload = req.user;
-    console.log("🔐 Decoded user from token (req.user):", userTokenPayload);
 
     const userId = userTokenPayload?.sub;
 
     // 🔒 Validate inputs
-    if (!title || !description || !category) {
-      console.warn("⚠️ Missing fields:", { title, description, category });
-      return res.status(400).json({ error: "All fields (title, description, category) are required." });
+    if (!title || !description) {
+      console.warn("⚠️ Missing fields:", { title, description});
+      return res.status(400).json({ error: "Fields (title, description) are required." });
     }
 
     if (!userId) {
@@ -48,15 +47,12 @@ const createIdea = async (req, res) => {
     }
 
     // 💾 Create the idea in DB
-    console.log("📌 Creating idea for user:", userId);
     const newIdea = await Idea.createIdea({
       user_id: userId,
       title,
       description,
-      category
     });
 
-    console.log("✅ Idea created successfully:", newIdea);
     return res.status(201).json({ message: "Idea created successfully!", idea: newIdea });
 
   } catch (error) {

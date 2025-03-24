@@ -1,11 +1,12 @@
 import React, { useState } from "react";
 import styles from "@/app/styles/file-tree.module.css";
 import { JSX } from "react/jsx-runtime";
+import { fetcher } from "@/app/utils/fetcher";
 
 export type FileItem = {
   id: string;
   name: string;
-  type: 'folder' | 'text' | 'upload';
+  type: "folder" | "text" | "upload";
   parent_id: string | null;
   content?: string;
   path?: string;
@@ -13,69 +14,73 @@ export type FileItem = {
   children?: FileItem[];
 };
 
-const API_URL =
-  process.env.NODE_ENV === "production"
-    ? "https://ihive.onrender.com/api"
-    : "http://localhost:5000/api";
-
 type FileTreeProps = {
   files: FileItem[];
   onSelect: (file: FileItem) => void;
   onRefresh: () => void;
   selectedId: string | null;
   ideaId: number;
-  userId: string;
 };
 
-const FileTree = ({ files, onSelect, onRefresh, selectedId, ideaId, userId }: FileTreeProps) => {
+const FileTree = ({ files, onSelect, onRefresh, selectedId, ideaId }: FileTreeProps) => {
   const [expanded, setExpanded] = useState<Record<string, boolean>>({});
+
+  const selectedFile = files.find((f) => f.id === selectedId) || null;
 
   const toggleExpand = (id: string) => {
     setExpanded((prev) => ({ ...prev, [id]: !prev[id] }));
   };
 
-  const handleCreateFolder = async (parentId: string | null = null) => {
-    const name = prompt("Enter folder name:");
+  const handleCreate = async (type: "folder" | "text") => {
+    if (!selectedFile || selectedFile.type !== "folder") {
+      alert("Select a folder to create inside.");
+      return;
+    }
+    const name = prompt(`Enter ${type} name:`);
     if (!name) return;
-    const res = await fetch(`${API_URL}/files`, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ name, type: "folder", idea_id: ideaId, user_id: userId, parent_id: parentId }),
-    });
-    if (res.ok) onRefresh();
-    else alert("Failed to create folder.");
+
+    try {
+      await fetcher("/files", "POST", {
+        name,
+        type,
+        idea_id: ideaId,
+        parent_id: selectedFile.id,
+        content: type === "text" ? "" : undefined,
+      });
+      onRefresh();
+    } catch (err: any) {
+      alert(`Failed to create ${type}: ` + (err.info?.error || err.message));
+    }
   };
 
-  const handleCreateTextFile = async (parentId: string | null = null) => {
-    const name = prompt("Enter file name:");
-    if (!name) return;
-    const res = await fetch(`${API_URL}/files`, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ name, type: "text", idea_id: ideaId, user_id: userId, parent_id: parentId, content: "" }),
-    });
-    if (res.ok) onRefresh();
-    else alert("Failed to create text file.");
-  };
-
-  const handleUpload = async (e: React.ChangeEvent<HTMLInputElement>, parentId: string | null = null) => {
+  const handleUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
-    if (!file) return;
+    if (!file || !selectedFile || selectedFile.type !== "folder") return;
 
     const formData = new FormData();
     formData.append("file", file);
     formData.append("name", file.name);
     formData.append("type", "upload");
     formData.append("idea_id", ideaId.toString());
-    formData.append("user_id", userId);
-    formData.append("parent_id", parentId || "");
+    formData.append("parent_id", selectedFile.id);
 
-    const res = await fetch(`${API_URL}/files/upload`, {
-      method: "POST",
-      body: formData,
-    });
-    if (res.ok) onRefresh();
-    else alert("Failed to upload file.");
+    try {
+      await fetcher("/files/upload", "POST", formData);
+      onRefresh();
+    } catch (err: any) {
+      alert("Failed to upload file: " + (err.info?.error || err.message));
+    }
+  };
+
+  const handleDelete = async (fileId: string) => {
+    const confirmDelete = confirm("Are you sure you want to delete this file?");
+    if (!confirmDelete) return;
+    try {
+      await fetcher(`/files/${fileId}`, "DELETE");
+      onRefresh();
+    } catch (err: any) {
+      alert("Failed to delete: " + (err.info?.error || err.message));
+    }
   };
 
   const buildTree = (items: FileItem[], parentId: string | null = null): FileItem[] => {
@@ -83,48 +88,37 @@ const FileTree = ({ files, onSelect, onRefresh, selectedId, ideaId, userId }: Fi
       .filter((item) => item.parent_id === parentId)
       .map((item) => ({
         ...item,
-        children: buildTree(items, item.id)
+        children: buildTree(items, item.id),
       }));
   };
 
   const renderTree = (nodes: FileItem[], depth: number = 0): JSX.Element[] => {
     return nodes.map((item) => (
-      <div key={item.id} className={styles.treeItem} style={{ paddingLeft: depth * 16 }}>
-        <div className={styles.treeRow}>
+      <div key={item.id} className={`${styles.treeItem} ${selectedId === item.id ? styles.selected : ""}`}> 
+        <div className={styles.fileItem}>
           {item.type === "folder" && (
             <span onClick={() => toggleExpand(item.id)} className={styles.toggleIcon}>
               {expanded[item.id] ? "▾" : "▸"}
             </span>
           )}
           <span
+            className={styles.fileItemName}
             onClick={() => {
-              if (item.type === 'upload' && item.path) {
-                window.open(item.path, '_blank');
+              if (item.type === "upload" && item.path) {
+                window.open(item.path, "_blank");
               } else {
                 onSelect(item);
               }
             }}
-            className={`${styles.treeLabel} ${selectedId === item.id ? styles.selected : ''}`}
           >
             {item.type === "folder" ? "📁" : item.type === "upload" ? "📎" : "📄"} {item.name}
           </span>
-          {item.mime_type && (
-            <small className={styles.fileDetails}>{item.mime_type}</small>
+          {selectedId === item.id && (
+            <button onClick={() => handleDelete(item.id)} className={styles.deleteBtn}>✕</button>
           )}
         </div>
-
         {expanded[item.id] && item.children && (
-          <div className={styles.treeChildren}>
-            <div className={styles.treeActionsInline}>
-              <button onClick={() => handleCreateFolder(item.id)}>+ Folder</button>
-              <button onClick={() => handleCreateTextFile(item.id)}>+ Text</button>
-              <label>
-                Upload
-                <input type="file" style={{ display: "none" }} onChange={(e) => handleUpload(e, item.id)} />
-              </label>
-            </div>
-            {renderTree(item.children, depth + 1)}
-          </div>
+          <div className={`folderContent depth-${depth}`}>{renderTree(item.children, depth + 1)}</div>
         )}
       </div>
     ));
@@ -135,14 +129,22 @@ const FileTree = ({ files, onSelect, onRefresh, selectedId, ideaId, userId }: Fi
   return (
     <div className={styles.fileTreeContainer}>
       <div className={styles.treeActionsTop}>
-        <button onClick={() => handleCreateFolder(null)}>New Folder</button>
-        <button onClick={() => handleCreateTextFile(null)}>New File</button>
+        <button onClick={() => handleCreate("folder")}>+ Folder</button>
+        <button onClick={() => handleCreate("text")}>+ Text</button>
         <label>
-          Upload File
-          <input type="file" style={{ display: "none" }} onChange={(e) => handleUpload(e)} />
+          Upload
+          <input type="file" onChange={handleUpload} />
         </label>
       </div>
-      <div className={styles.fileTreeList}>{renderTree(treeData)}</div>
+
+      <div className={styles.fileTreeList}>
+        {treeData.length ? renderTree(treeData) : (
+          <div className={styles.emptyState}>
+            <p>No files yet</p>
+            <p>Start by creating a folder or file above</p>
+          </div>
+        )}
+      </div>
     </div>
   );
 };

@@ -38,6 +38,36 @@ async function generateTags(title, description) {
   }
 }
 
+async function generateCategory(title, description) {
+  try {
+    const response = await openai.chat.completions.create({
+      model: "gpt-4o-mini",
+      temperature: 0.1,
+      response_format: { type: "text" },
+      messages: [
+        {
+          role: "system",
+          content: `You are an AI that strictly returns JSON. Your task is to generate exactly 1 relevant one-word category for a given idea. 
+          Respond ONLY with a valid JSON object in this format: {"category": "category"}. 
+          No additional text, explanations, or formatting.`,
+        },
+        {
+          role: "user",
+          content: `Title: "${title}"\nDescription: "${description}"`,
+        },
+      ],
+    });
+
+    const category = JSON.parse(response.choices[0].message.content)?.category || "";
+
+    return category.toLowerCase().trim(); // Normalize category
+  } catch (error) {
+    console.error("❌ Error generating category:", error?.message || error);
+    return [];
+  }
+}
+
 module.exports = { 
-  generateTags 
+  generateTags,
+  generateCategory
 };

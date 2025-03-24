@@ -19,8 +19,7 @@ const IdeasPage = () => {
 
   const [formData, setFormData] = useState({
     title: "",
-    description: "",
-    category: "document",
+    description: ""
   });
 
   useEffect(() => {
@@ -81,12 +80,8 @@ const IdeasPage = () => {
 
   const handleFormSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (
-      !formData.title ||
-      !formData.description ||
-      !formData.category
-    ) {
-      setError("All fields are required.");
+    if (!formData.title || !formData.description) {
+      setError("Title and description are required.");
       return;
     }
 
@@ -96,13 +91,13 @@ const IdeasPage = () => {
         method: "POST",
         body: JSON.stringify({
           ...formData,
-          user_id: userId,
-        }),
+          user_id: userId
+        })
       });
 
       setIdeas((prev) => [...prev, savedIdea.idea || savedIdea]);
       setShowForm(false);
-      setFormData({ title: "", description: "", category: "document" });
+      setFormData({ title: "", description: "" });
     } catch (error) {
       console.error("Error creating idea:", error);
       setError("Failed to create new idea");
@@ -182,17 +177,6 @@ const IdeasPage = () => {
                 }
                 required
               />
-              <select
-                value={formData.category}
-                onChange={(e) =>
-                  setFormData({ ...formData, category: e.target.value })
-                }
-              >
-                <option value="document">Document</option>
-                <option value="startup">Startup</option>
-                <option value="tech">Tech</option>
-                <option value="art">Art</option>
-              </select>
               <div className={styles.formButtons}>
                 <button type="submit">Submit</button>
                 <button
