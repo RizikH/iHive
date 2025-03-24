@@ -3,14 +3,21 @@
 import React, { useEffect, useState } from "react";
 import Head from "next/head";
 import { useSearchParams } from "next/navigation";
-import NavBar from "@/components/nav-bar";
-import styles from "../styles/repository.module.css";
 
+import NavBar from "@/components/nav-bar";
 import FileTree, { FileItem } from "@/components/file-tree";
 import FileEditor from "@/components/file-editor";
 import FileViewer from "@/components/file-viewer";
 
-import { fetcher } from "@/app/utils/fetcher"; // ✅ global fetcher import
+import {
+  FiCopy,
+  FiDownload,
+  FiUpload,
+  FiEdit,
+} from "react-icons/fi";
+
+import styles from "../styles/repository.module.css";
+import { fetcher } from "@/app/utils/fetcher";
 
 export default function Repository() {
   const [files, setFiles] = useState<FileItem[]>([]);
@@ -25,14 +32,11 @@ export default function Repository() {
     try {
       setLoading(true);
       const path = ideaId ? `/files?idea_id=${ideaId}` : "/files";
-      const data = await fetcher(path); // ✅ now using fetcher
+      const data = await fetcher(path);
       setFiles(data);
     } catch (err) {
-      if (err instanceof Error) {
-        setError(err.message);
-      } else {
-        setError("An unknown error occurred");
-      }
+      if (err instanceof Error) setError(err.message);
+      else setError("An unknown error occurred");
     } finally {
       setLoading(false);
     }
@@ -83,23 +87,46 @@ export default function Repository() {
               onRefresh={fetchFiles}
               selectedId={currentFile?.id || null}
               ideaId={Number(ideaId) || 0}
-              userId={""}
             />
           </div>
 
           <div className={styles.docSpace}>
             {currentFile ? (
-              currentFile.type === "text" ? (
-                <FileEditor file={currentFile} onUpdate={handleUpdate} />
-              ) : (
-                <FileViewer file={currentFile} />
-              )
+              <>
+                <div className={styles.docHeader}>
+                  <h2>{currentFile.name}</h2>
+                  <div className={styles.docDock}>
+                    <button className={styles.dockButton}><FiCopy /></button>
+                    <button className={styles.dockButton}><FiUpload /></button>
+                    <button className={styles.dockButton}><FiDownload /></button>
+                    <button className={styles.dockButton}><FiEdit /></button>
+                  </div>
+                </div>
+
+                <div className={styles.docContent}>
+                  {currentFile.type === "text" ? (
+                    <FileEditor file={currentFile} onUpdate={handleUpdate} />
+                  ) : (
+                    <FileViewer file={currentFile} />
+                  )}
+                </div>
+              </>
             ) : (
               <div className={styles.placeholderContent}>
-                <h3>Select a file to view or edit</h3>
-                <p>
-                  You can also create a new file or folder from the file tree.
-                </p>
+                <h3>Welcome to iHive Editor!</h3>
+                <p>Select or create a file to begin editing.</p>
+                <div className={styles.shortcuts}>
+                  <p>Helpful shortcuts:</p>
+                  <ul>
+                    <li><kbd>Ctrl</kbd> + <kbd>B</kbd> - Bold text</li>
+                    <li><kbd>Ctrl</kbd> + <kbd>I</kbd> - Italic text</li>
+                    <li><kbd>Ctrl</kbd> + <kbd>U</kbd> - Underline text</li>
+                    <li><kbd>Ctrl</kbd> + <kbd>C</kbd> - Copy text</li>
+                    <li><kbd>Ctrl</kbd> + <kbd>S</kbd> - Save changes</li>
+                    <li><kbd>Shift</kbd> + <kbd>Enter</kbd> - New line</li>
+                    <li><kbd>Enter</kbd> - Save and exit edit mode</li>
+                  </ul>
+                </div>
               </div>
             )}
           </div>

@@ -4,7 +4,13 @@ const openAI = require("../services/chatgptService");
 const getAllIdeas = async () => {
     const { data, error } = await supabase
         .from("ideas")
-        .select("*, idea_tags(*, tags(*))")
+        .select(`
+            *,
+            idea_tags (
+                *,
+                tags (*)
+            )
+        `)
         .order("created_at", { ascending: false });
 
     if (error) {
@@ -19,12 +25,21 @@ const createIdea = async (ideaData) => {
         .from("ideas")
         .insert([ideaData])
         .select()
-        .single();
+        .single(); 
 
     if (error) throw error;
 
-    // Generate tags using OpenAI
+    // Generate tags and category using OpenAI
     const generatedTags = await openAI.generateTags(data.title, data.description);
+    const generatedCategory = await openAI.generateCategory(data.title, data.description);
+
+    // Update the idea with the generated category
+    const { error: updateError } = await supabase
+        .from("ideas")
+        .update({ category: generatedCategory })
+        .eq("id", data.id);
+
+    if (updateError) throw updateError;
 
     // Insert tags into the `tags` table and link them
     const insertedTags = [];
@@ -119,7 +134,13 @@ const advancedSearchTags = async (tags) => {
     const ideaIds = ideaTags.map((ideaTag) => ideaTag.idea_id);
     const { data: ideas, error: ideaError } = await supabase
         .from("ideas")
-        .select("*")
+        .select(`
+            *,
+            idea_tags (
+                *,
+                tags (*)
+            )
+        `)
         .in("id", ideaIds)
         .order("created_at", { ascending: false });
     if (ideaError) throw ideaError;

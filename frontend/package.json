@@ -3,6 +3,7 @@
   "version": "0.1.0",
   "private": true,
   "scripts": {
+    "predev": "npx kill-port 3000",
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
@@ -36,6 +37,7 @@
     "tailwindcss-animate": "^1.0.7"
   },
   "devDependencies": {
+    "kill-port": "^2.0.1",
     "@eslint/eslintrc": "^3",
     "@types/dompurify": "^3.2.0",
     "@types/node": "^22",

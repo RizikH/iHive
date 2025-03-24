@@ -1,11 +1,7 @@
 import React, { useEffect, useRef, useState } from "react";
 import styles from "@/app/styles/repository.module.css";
 import { FileItem } from "./file-tree";
-
-const API_URL =
-  process.env.NODE_ENV === "production"
-    ? "https://ihive.onrender.com/api"
-    : "http://localhost:5000/api";
+import { fetcher } from "@/app/utils/fetcher";
 
 type Props = {
   file: FileItem;
@@ -15,10 +11,12 @@ type Props = {
 const FileEditor = ({ file, onUpdate }: Props) => {
   const [content, setContent] = useState(file.content || "");
   const [isSaving, setIsSaving] = useState(false);
+  const [isEditing, setIsEditing] = useState(false);
   const editorRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     setContent(file.content || "");
+    setIsEditing(false); // Reset editing when switching files
   }, [file]);
 
   const handleInput = (e: React.FormEvent<HTMLDivElement>) => {
@@ -29,16 +27,14 @@ const FileEditor = ({ file, onUpdate }: Props) => {
     if (!file.id) return;
     setIsSaving(true);
     try {
-      const res = await fetch(`${API_URL}/files/${file.id}`, {
-        method: "PUT",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ ...file, content }),
+      const updated = await fetcher(`/files/${file.id}`, "PUT", {
+        ...file,
+        content,
       });
-      if (!res.ok) throw new Error("Failed to save file");
-      const updated = await res.json();
       onUpdate(updated);
-    } catch (err) {
-      alert("Error saving file");
+      setIsEditing(false);
+    } catch (err: any) {
+      alert("Error saving file: " + err.message);
     } finally {
       setIsSaving(false);
     }
@@ -48,16 +44,22 @@ const FileEditor = ({ file, onUpdate }: Props) => {
     <div className={styles.editorWrapper}>
       <div className={styles.editorHeader}>
         <h3>{file.name}</h3>
-        <button onClick={handleSave} disabled={isSaving}>
-          {isSaving ? "Saving..." : "Save"}
-        </button>
+        {!isEditing ? (
+          <button onClick={() => setIsEditing(true)}>Edit</button>
+        ) : (
+          <button onClick={handleSave} disabled={isSaving}>
+            {isSaving ? "Saving..." : "Save"}
+          </button>
+        )}
       </div>
       <div
         ref={editorRef}
         className={styles.docBody}
-        contentEditable
+        contentEditable={isEditing}
         suppressContentEditableWarning
         onInput={handleInput}
+        dir="ltr"
+        style={{ border: isEditing ? "1px solid #ccc" : "none", padding: "8px" }}
       >
         {content}
       </div>
