@@ -133,13 +133,13 @@ const EntrepreneurProfile = () => {
             </div>
             <div className={styles.socialLinks}>
               <Link href={socialLinks.github} title="GitHub">
-                <FontAwesomeIcon icon={faGithub} />
+                <FontAwesomeIcon icon={faGithub} className={styles.socialIcon} />
               </Link>
               <Link href={socialLinks.linkedin} title="LinkedIn">
-                <FontAwesomeIcon icon={faLinkedin} />
+                <FontAwesomeIcon icon={faLinkedin} className={styles.socialIcon} />
               </Link>
               <Link href={socialLinks.twitter} title="X">
-                <FontAwesomeIcon icon={faXTwitter} />
+                <FontAwesomeIcon icon={faXTwitter} className={styles.socialIcon} />
               </Link>
             </div>
           </div>

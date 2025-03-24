@@ -155,8 +155,19 @@ export default function MarqueeDemo() {
   useEffect(() => {
     const fetchUserIdeas = async () => {
       try {
-        const data = await fetcher("/ideas/"); // 🔐 Auth-required route
-        setIdeas(data);
+        // Define API URL with proper base path
+        const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000/api';
+        const data = await fetcher(`${API_URL}/ideas`); // Use full API path
+        
+        if (Array.isArray(data) && data.length > 0) {
+          setIdeas(data);
+        } else {
+          // Fallback to localStorage if API returns empty data
+          const savedIdeas = localStorage.getItem('ideas');
+          if (savedIdeas) {
+            setIdeas(JSON.parse(savedIdeas));
+          }
+        }
 
         // Try to get user info from localStorage
         const savedUsername = localStorage.getItem("username");
@@ -166,6 +177,11 @@ export default function MarqueeDemo() {
         if (savedAvatar) setUserAvatar(savedAvatar);
       } catch (err) {
         console.error("Error loading user ideas:", err);
+        // Fallback to localStorage on API error
+        const savedIdeas = localStorage.getItem('ideas');
+        if (savedIdeas) {
+          setIdeas(JSON.parse(savedIdeas));
+        }
       }
     };
 
