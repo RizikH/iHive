@@ -4,7 +4,13 @@ const openAI = require("../services/chatgptService");
 const getAllIdeas = async () => {
     const { data, error } = await supabase
         .from("ideas")
-        .select("*, idea_tags(*, tags(*))")
+        .select(`
+            *,
+            idea_tags (
+                *,
+                tags (*)
+            )
+        `)
         .order("created_at", { ascending: false });
 
     if (error) {
@@ -119,7 +125,13 @@ const advancedSearchTags = async (tags) => {
     const ideaIds = ideaTags.map((ideaTag) => ideaTag.idea_id);
     const { data: ideas, error: ideaError } = await supabase
         .from("ideas")
-        .select("*")
+        .select(`
+            *,
+            idea_tags (
+                *,
+                tags (*)
+            )
+        `)
         .in("id", ideaIds)
         .order("created_at", { ascending: false });
     if (ideaError) throw ideaError;

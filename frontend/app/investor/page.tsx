@@ -63,11 +63,14 @@ const InvestorPage = () => {
 
     useEffect(() => {
         const fetchSearchedIdeas = async () => {
+
+            console.log("Search Term:", searchTerm);
             try {
                 const data = searchTerm === ""
                     ? await fetcher("/ideas")
-                    : await fetcher(`/ideas/search/title/${searchTerm}`);
+                    : await fetcher(`/ideas/search/title/${encodeURIComponent(searchTerm)}`);
 
+                console.log("Fetched Ideas:", data);
                 setIdeas(data || []);
             } catch (err: any) {
                 setErrorIdeas(err.message || "An unknown error occurred.");
@@ -138,7 +141,7 @@ const InvestorPage = () => {
     const toggleDropdownVisibility = () => {
         setDropdownVisible(!dropdownVisible);
     };
-    
+
     return (
         <>
             <Head>
@@ -204,6 +207,7 @@ const InvestorPage = () => {
                             <button className={styles.clearTagsButton} onClick={handleClearTags}>
                                 Clear All Tags
                             </button>
+
 
                             {dropdownVisible && filteredTags.length > 0 && (
                                 <ul className={styles.tagDropdown}>

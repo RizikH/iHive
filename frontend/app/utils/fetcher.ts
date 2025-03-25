@@ -5,6 +5,7 @@ const API_URL =
     : "http://localhost:5000/api";
 
 export const fetcher = async (path: string, options: RequestInit = {}) => {
+  console.log("Requesting:", `${API_URL}${path}`);
   const res = await fetch(`${API_URL}${path}`, {
     credentials: "include", // 🔐 Automatically include cookies
     ...options,
