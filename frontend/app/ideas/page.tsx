@@ -87,13 +87,14 @@ const IdeasPage = () => {
 
     try {
       setIsLoading(true);
-      const savedIdea = await fetcher("/ideas", {
-        method: "POST",
-        body: JSON.stringify({
+      const savedIdea = await fetcher(
+        "/ideas", 
+        "POST", 
+        {
           ...formData,
           user_id: userId
-        })
-      });
+        }
+      );
 
       setIdeas((prev) => [...prev, savedIdea.idea || savedIdea]);
       setShowForm(false);
