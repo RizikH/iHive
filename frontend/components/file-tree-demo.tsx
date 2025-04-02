@@ -21,6 +21,7 @@ interface FileTreeDemoProps {
   onFileDelete: (fileId: string) => void;
   files?: Array<{ id: string; title: string; description: string }>;
   isPreview?: boolean;
+  repoId?: string;
 }
 
 // =============================================
@@ -33,7 +34,8 @@ export default function FileTreeDemo({
   currentFileId, 
   onFileDelete,
   files: initialFiles,
-  isPreview = false 
+  isPreview = false,
+  repoId
 }: FileTreeDemoProps) {
   // =============================================
   // State Management

@@ -32,6 +32,37 @@ const RepositoryModal = ({
   const [content, setContent] = useState<string>("");
   const [currentFileId, setCurrentFileId] = useState<string | null>(null);
   const [currentFileName, setCurrentFileName] = useState<string>("Main Content");
+  const [repoDetails, setRepoDetails] = useState<any>(null);
+  const [isLoading, setIsLoading] = useState<boolean>(false);
+  const [error, setError] = useState<string | null>(null);
+
+  useEffect(() => {
+    if (isOpen && repoId) {
+      fetchRepoDetails();
+    }
+  }, [isOpen, repoId]);
+
+  const fetchRepoDetails = async () => {
+    try {
+      setIsLoading(true);
+      setError(null);
+      const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000/api';
+      const data = await fetcher(`${API_URL}/ideas/${repoId}`);
+      setRepoDetails(data);
+    } catch (err) {
+      console.error("Error fetching repository details:", err);
+      setError("Failed to load repository details");
+      // Try to get from localStorage as fallback
+      const savedIdeas = localStorage.getItem('ideas');
+      if (savedIdeas) {
+        const ideas = JSON.parse(savedIdeas);
+        const idea = ideas.find((idea: any) => idea.id === repoId);
+        if (idea) setRepoDetails(idea);
+      }
+    } finally {
+      setIsLoading(false);
+    }
+  };
 
   const handleFileSelect = (fileId: string, fileContent: string, fileName: string) => {
     setCurrentFileId(fileId);
@@ -47,33 +78,67 @@ const RepositoryModal = ({
       </VisuallyHidden>
       <DialogContent className={styles["modal-content"]}>
         <div className={styles["modal-container"]}>
-          <div className={styles.sidebar}>
-            <h3 className={styles["sidebar-title"]}>Files</h3>
-            <div className={styles["file-tree-container"]}>
-              <FileTreeDemo
-                onFileSelect={handleFileSelect}
-                currentFileId={currentFileId}
-                onContentUpdate={() => { }}
-                onFileDelete={() => { }}
-                isPreview={true}
-              />
+          {isLoading ? (
+            <div className="flex items-center justify-center w-full h-64">
+              <p>Loading repository details...</p>
             </div>
-          </div>
-
-          <div className={styles["content-area"]}>
-            <div className={styles["content-header"]}>
-              <h3 className={styles["content-title"]}>{currentFileName}</h3>
+          ) : error ? (
+            <div className="flex items-center justify-center w-full h-64 text-red-500">
+              <p>{error}</p>
             </div>
-            <div className={styles["content-body"]}>
-              {content ? (
-                <div dangerouslySetInnerHTML={{ __html: content }} />
-              ) : (
-                <div className={styles["content-placeholder"]}>
-                  <p>Select a file from the file tree to view its contents.</p>
+          ) : (
+            <>
+              <div className={styles.sidebar}>
+                <h3 className={styles["sidebar-title"]}>Files</h3>
+                <div className={styles["file-tree-container"]}>
+                  <FileTreeDemo
+                    onFileSelect={handleFileSelect}
+                    currentFileId={currentFileId}
+                    onContentUpdate={() => { }}
+                    onFileDelete={() => { }}
+                    isPreview={true}
+                    repoId={repoId}
+                  />
                 </div>
-              )}
-            </div>
-          </div>
+              </div>
+
+              <div className={styles["content-area"]}>
+                <div className={styles["content-header"]}>
+                  <h3 className={styles["content-title"]}>{currentFileName}</h3>
+                </div>
+                <div className={styles["content-body"]}>
+                  {repoDetails && (
+                    <div className="mb-4 p-4 bg-gray-50 rounded-md">
+                      <h2 className="text-xl font-bold">{repoDetails.title}</h2>
+                      {repoDetails.category && (
+                        <span className="inline-block px-2 py-1 mt-2 text-xs font-medium text-gray-700 bg-gray-200 rounded-full">
+                          {repoDetails.category}
+                        </span>
+                      )}
+                      {repoDetails.description && (
+                        <div className="mt-3 text-sm text-gray-600">
+                          {repoDetails.description.replace(/<[^>]*>/g, "")}
+                        </div>
+                      )}
+                      <div className="mt-3 text-xs text-gray-500">
+                        {repoDetails.updatedAt && (
+                          <span>Last updated: {new Date(repoDetails.updatedAt).toLocaleDateString()}</span>
+                        )}
+                      </div>
+                    </div>
+                  )}
+                  
+                  {content ? (
+                    <div dangerouslySetInnerHTML={{ __html: content }} />
+                  ) : (
+                    <div className={styles["content-placeholder"]}>
+                      <p>Select a file from the file tree to view its contents.</p>
+                    </div>
+                  )}
+                </div>
+              </div>
+            </>
+          )}
         </div>
       </DialogContent>
     </Dialog>
@@ -119,7 +184,7 @@ const ReviewCard = ({
               className="rounded-full"
               width="32"
               height="32"
-              alt=""
+              alt={`${username}'s avatar`}
               src={img || "/placeholder.svg"}
             />
             <div className="flex flex-col">
