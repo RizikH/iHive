@@ -126,13 +126,7 @@ const Sponsors = () => {
         </main>
 
         {/* Footer */}
-        <Footer 
-          role="Entrepreneur"
-          links={[
-            { href: "/terms", label: "Terms" },
-            { href: "/privacy", label: "Privacy" }
-          ]}
-        />
+        <Footer role="Entrepreneur" />
       </div>
     </>
   );
