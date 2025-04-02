@@ -9,6 +9,7 @@ import Image from 'next/image';
 
 // Components
 import NavBar from '@/components/nav-bar';
+import Footer from '@/components/footer';
 import AvatarCirclesDemo from '@/components/avatar-circles-demo';
 import AnimatedListDemo from "@/components/animated-list-demo";
 
@@ -125,11 +126,13 @@ const Sponsors = () => {
         </main>
 
         {/* Footer */}
-        <footer className={styles.footer}>
-          <p>
-            © 2025 iHive · Entrepreneur | <Link href="/terms" target='_blank'>Terms</Link> | <Link href="/Privacy" target='_blank'>Privacy</Link>
-          </p>
-        </footer>
+        <Footer 
+          role="Entrepreneur"
+          links={[
+            { href: "/terms", label: "Terms" },
+            { href: "/privacy", label: "Privacy" }
+          ]}
+        />
       </div>
     </>
   );

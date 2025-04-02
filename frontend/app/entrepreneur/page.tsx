@@ -11,6 +11,7 @@ import Image from 'next/image';
 import NavBar from '@/components/nav-bar';
 import MarqueeDemo from '@/components/marquee-demo';
 import ChangeAvatar from '@/components/change-avatar';
+import Footer from '@/components/footer';
 
 // Libraries
 import DOMPurify from 'dompurify';
@@ -152,12 +153,13 @@ const EntrepreneurProfile = () => {
         </main>
 
         {/* Footer */}
-        <footer className={styles.footer}>
-          <p>
-            © 2025 iHive · Entrepreneur | <Link href="/terms">Terms</Link> |{' '}
-            <Link href="/Privacy">Privacy</Link>
-          </p>
-        </footer>
+        <Footer 
+          role="Entrepreneur"
+          links={[
+            { href: "/terms", label: "Terms" },
+            { href: "/privacy", label: "Privacy" }
+          ]}
+        />
       </div>
     </>
   );

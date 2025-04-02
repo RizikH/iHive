@@ -8,6 +8,7 @@ import NavBar from "@/components/nav-bar";
 import FileTree, { FileItem } from "@/components/file-tree";
 import FileEditor from "@/components/file-editor";
 import FileViewer from "@/components/file-viewer";
+import Footer from '@/components/footer';
 
 import {
   FiCopy,
@@ -122,12 +123,14 @@ export default function Repository() {
           </div>
         </main>
 
-        <footer className={styles.footer}>
-          <p>
-            © 2025 iHive · Entrepreneur | <a href="/terms">Terms</a> |{" "}
-            <a href="/Privacy">Privacy</a>
-          </p>
-        </footer>
+        {/* Footer */}
+        <Footer 
+          role="Entrepreneur"
+          links={[
+            { href: "/terms", label: "Terms" },
+            { href: "/privacy", label: "Privacy" }
+          ]}
+        />
       </div>
     </>
   );

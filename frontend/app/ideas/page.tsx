@@ -5,6 +5,7 @@ import Link from "next/link";
 import Head from "next/head";
 import { FiPlus, FiSearch, FiFilter } from "react-icons/fi";
 import NavBar from "@/components/nav-bar";
+import Footer from "@/components/footer";
 import styles from "../styles/ideas.module.css";
 import { fetcher } from "@/app/utils/fetcher";
 
@@ -239,13 +240,14 @@ const IdeasPage = () => {
           </div>
         </main>
 
-        <footer className={styles.footer}>
-          <p>
-            © 2025 iHive · Entrepreneur |{" "}
-            <Link href="/terms">Terms</Link> |{" "}
-            <Link href="/privacy">Privacy</Link>
-          </p>
-        </footer>
+        {/* Footer */}
+        <Footer 
+          role="Entrepreneur"
+          links={[
+            { href: "/terms", label: "Terms" },
+            { href: "/privacy", label: "Privacy" }
+          ]}
+        />
       </div>
     </>
   );
