@@ -93,16 +93,6 @@ export default function Repository() {
           <div className={styles.docSpace}>
             {currentFile ? (
               <>
-                <div className={styles.docHeader}>
-                  <h2>{currentFile.name}</h2>
-                  <div className={styles.docDock}>
-                    <button className={styles.dockButton}><FiCopy /></button>
-                    <button className={styles.dockButton}><FiUpload /></button>
-                    <button className={styles.dockButton}><FiDownload /></button>
-                    <button className={styles.dockButton}><FiEdit /></button>
-                  </div>
-                </div>
-
                 <div className={styles.docContent}>
                   {currentFile.type === "text" ? (
                     <FileEditor file={currentFile} onUpdate={handleUpdate} />
