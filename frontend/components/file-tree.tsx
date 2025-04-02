@@ -2,6 +2,20 @@ import React, { useState } from "react";
 import styles from "@/app/styles/file-tree.module.css";
 import { JSX } from "react/jsx-runtime";
 import { fetcher } from "@/app/utils/fetcher";
+import { 
+  FiFolder, 
+  FiFolderPlus, 
+  FiFile, 
+  FiFileText, 
+  FiFilePlus,
+  FiUpload, 
+  FiTrash2, 
+  FiChevronRight, 
+  FiChevronDown,
+  FiImage,
+  FiFileText as FiFilePdf,
+  FiCode
+} from "react-icons/fi";
 
 export type FileItem = {
   id: string;
@@ -22,8 +36,44 @@ type FileTreeProps = {
   ideaId: number;
 };
 
+// Helper function to get appropriate icon based on file name/type
+const getFileIcon = (file: FileItem) => {
+  if (file.type === "folder") return <FiFolder className={styles.folderIcon} />;
+  
+  if (file.type === "upload" && file.mime_type) {
+    if (file.mime_type.startsWith("image/")) return <FiImage />;
+    if (file.mime_type.startsWith("application/pdf")) return <FiFilePdf />;
+  }
+  
+  // Check file extension
+  if (file.name) {
+    const ext = file.name.split('.').pop()?.toLowerCase();
+    if (ext === 'md') return <FiFileText />;
+    if (['js', 'jsx', 'ts', 'tsx', 'html', 'css', 'json', 'py', 'java', 'php'].includes(ext || '')) {
+      return <FiCode />;
+    }
+  }
+  
+  return file.type === "text" ? <FiFileText /> : <FiFile />;
+};
+
 const FileTree = ({ files, onSelect, onRefresh, selectedId, ideaId }: FileTreeProps) => {
   const [expanded, setExpanded] = useState<Record<string, boolean>>({});
+  const [draggedItem, setDraggedItem] = useState<string | null>(null);
+  const [dropTarget, setDropTarget] = useState<string | null>(null);
+
+  // Auto-expand first level folders at first load
+  React.useEffect(() => {
+    const topLevelFolders = files
+      .filter(f => f.type === "folder" && f.parent_id === null)
+      .map(f => f.id);
+      
+    if (topLevelFolders.length > 0) {
+      const newExpanded: Record<string, boolean> = {};
+      topLevelFolders.forEach(id => { newExpanded[id] = true; });
+      setExpanded(prev => ({...prev, ...newExpanded}));
+    }
+  }, [files]);
 
   const selectedFile = files.find((f) => f.id === selectedId) || null;
 
@@ -32,10 +82,11 @@ const FileTree = ({ files, onSelect, onRefresh, selectedId, ideaId }: FileTreePr
   };
 
   const handleCreate = async (type: "folder" | "text") => {
-    if (!selectedFile || selectedFile.type !== "folder") {
-      alert("Select a folder to create inside.");
-      return;
-    }
+    // Parent ID logic - use selected folder or root
+    const parentId = selectedFile && selectedFile.type === "folder" 
+      ? selectedFile.id 
+      : null;
+
     const name = prompt(`Enter ${type} name:`);
     if (!name) return;
 
@@ -44,10 +95,15 @@ const FileTree = ({ files, onSelect, onRefresh, selectedId, ideaId }: FileTreePr
         name,
         type,
         idea_id: ideaId,
-        parent_id: selectedFile.id,
+        parent_id: parentId,
         content: type === "text" ? "" : undefined,
       });
       onRefresh();
+      
+      // Expand the parent folder if it exists
+      if (parentId) {
+        setExpanded(prev => ({ ...prev, [parentId]: true }));
+      }
     } catch (err: any) {
       alert(`Failed to create ${type}: ` + (err.info?.error || err.message));
     }
@@ -55,18 +111,28 @@ const FileTree = ({ files, onSelect, onRefresh, selectedId, ideaId }: FileTreePr
 
   const handleUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
-    if (!file || !selectedFile || selectedFile.type !== "folder") return;
+    if (!file) return;
+    
+    // Parent ID logic - use selected folder or root
+    const parentId = selectedFile && selectedFile.type === "folder" 
+      ? selectedFile.id 
+      : null;
 
     const formData = new FormData();
     formData.append("file", file);
     formData.append("name", file.name);
     formData.append("type", "upload");
     formData.append("idea_id", ideaId.toString());
-    formData.append("parent_id", selectedFile.id);
+    formData.append("parent_id", parentId || "");
 
     try {
       await fetcher("/files/upload", "POST", formData);
       onRefresh();
+      
+      // Expand the parent folder if it exists
+      if (parentId) {
+        setExpanded(prev => ({ ...prev, [parentId]: true }));
+      }
     } catch (err: any) {
       alert("Failed to upload file: " + (err.info?.error || err.message));
     }
@@ -83,9 +149,54 @@ const FileTree = ({ files, onSelect, onRefresh, selectedId, ideaId }: FileTreePr
     }
   };
 
+  const handleDragStart = (e: React.DragEvent, id: string) => {
+    setDraggedItem(id);
+    e.dataTransfer.setData('text/plain', id);
+    e.dataTransfer.effectAllowed = 'move';
+  };
+
+  const handleDragOver = (e: React.DragEvent, id: string, type: string) => {
+    e.preventDefault();
+    if (type === "folder" && draggedItem !== id) {
+      setDropTarget(id);
+    }
+  };
+
+  const handleDragLeave = () => {
+    setDropTarget(null);
+  };
+
+  const handleDrop = async (e: React.DragEvent, targetId: string) => {
+    e.preventDefault();
+    setDropTarget(null);
+    
+    if (!draggedItem || draggedItem === targetId) return;
+    
+    const draggedFile = files.find(f => f.id === draggedItem);
+    if (!draggedFile) return;
+    
+    try {
+      await fetcher(`/files/${draggedItem}/move`, "PUT", {
+        parent_id: targetId
+      });
+      onRefresh();
+      setExpanded(prev => ({ ...prev, [targetId]: true }));
+    } catch (err: any) {
+      alert("Failed to move file: " + (err.info?.error || err.message));
+    }
+    
+    setDraggedItem(null);
+  };
+
   const buildTree = (items: FileItem[], parentId: string | null = null): FileItem[] => {
     return items
       .filter((item) => item.parent_id === parentId)
+      .sort((a, b) => {
+        // Sort folders first, then by name
+        if (a.type === "folder" && b.type !== "folder") return -1;
+        if (a.type !== "folder" && b.type === "folder") return 1;
+        return a.name.localeCompare(b.name);
+      })
       .map((item) => ({
         ...item,
         children: buildTree(items, item.id),
@@ -94,45 +205,74 @@ const FileTree = ({ files, onSelect, onRefresh, selectedId, ideaId }: FileTreePr
 
   const renderTree = (nodes: FileItem[], depth: number = 0): JSX.Element[] => {
     return nodes.map((item) => (
-      <div key={item.id} className={`${styles.treeItem} ${selectedId === item.id ? styles.selected : ""}`}> 
+      <div 
+        key={item.id} 
+        className={`${styles.treeItem} ${selectedId === item.id ? styles.selected : ""} ${dropTarget === item.id ? styles.dropTarget : ""}`}
+        draggable={!isPreviewMode}
+        onDragStart={(e) => handleDragStart(e, item.id)}
+        onDragOver={(e) => handleDragOver(e, item.id, item.type)}
+        onDragLeave={handleDragLeave}
+        onDrop={(e) => handleDrop(e, item.id)}
+      > 
         <div className={styles.fileItem}>
-          {item.type === "folder" && (
-            <span onClick={() => toggleExpand(item.id)} className={styles.toggleIcon}>
-              {expanded[item.id] ? "▾" : "▸"}
+          <div className={styles.fileItemLeft}>
+            {item.type === "folder" && (
+              <span 
+                onClick={() => toggleExpand(item.id)} 
+                className={styles.toggleIcon}
+              >
+                {expanded[item.id] ? <FiChevronDown /> : <FiChevronRight />}
+              </span>
+            )}
+            {/* Indentation for non-folder items */}
+            {item.type !== "folder" && (
+              <span className={styles.fileIndent}></span>
+            )}
+            <span
+              className={styles.fileItemName}
+              onClick={() => {
+                if (item.type === "upload" && item.path) {
+                  window.open(item.path, "_blank");
+                } else {
+                  onSelect(item);
+                  if (item.type === "folder") {
+                    toggleExpand(item.id);
+                  }
+                }
+              }}
+            >
+              {getFileIcon(item)} {item.name}
             </span>
-          )}
-          <span
-            className={styles.fileItemName}
-            onClick={() => {
-              if (item.type === "upload" && item.path) {
-                window.open(item.path, "_blank");
-              } else {
-                onSelect(item);
-              }
-            }}
-          >
-            {item.type === "folder" ? "📁" : item.type === "upload" ? "📎" : "📄"} {item.name}
-          </span>
-          {selectedId === item.id && (
-            <button onClick={() => handleDelete(item.id)} className={styles.deleteBtn}>✕</button>
+          </div>
+          {!isPreviewMode && selectedId === item.id && (
+            <button onClick={() => handleDelete(item.id)} className={styles.deleteBtn}>
+              <FiTrash2 size={14} />
+            </button>
           )}
         </div>
-        {expanded[item.id] && item.children && (
-          <div className={`folderContent depth-${depth}`}>{renderTree(item.children, depth + 1)}</div>
+        {expanded[item.id] && item.children && item.children.length > 0 && (
+          <div className={`${styles.folderContent} ${styles[`depth-${Math.min(depth, 3)}`]}`}>
+            {renderTree(item.children, depth + 1)}
+          </div>
         )}
       </div>
     ));
   };
 
   const treeData = buildTree(files);
-
+  const isPreviewMode = false; // Set this based on your needs
+  
   return (
     <div className={styles.fileTreeContainer}>
       <div className={styles.treeActionsTop}>
-        <button onClick={() => handleCreate("folder")}>+ Folder</button>
-        <button onClick={() => handleCreate("text")}>+ Text</button>
-        <label>
-          Upload
+        <button onClick={() => handleCreate("folder")} title="Create new folder">
+          <FiFolderPlus /> Folder
+        </button>
+        <button onClick={() => handleCreate("text")} title="Create new file">
+          <FiFilePlus /> File
+        </button>
+        <label title="Upload a file">
+          <FiUpload /> Upload
           <input type="file" onChange={handleUpload} />
         </label>
       </div>
