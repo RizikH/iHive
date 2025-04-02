@@ -20,6 +20,8 @@ import {
 import styles from "../styles/repository.module.css";
 import { fetcher } from "@/app/utils/fetcher";
 
+const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000/api';
+
 export default function Repository() {
   const [files, setFiles] = useState<FileItem[]>([]);
   const [currentFile, setCurrentFile] = useState<FileItem | null>(null);
@@ -33,9 +35,12 @@ export default function Repository() {
     try {
       setLoading(true);
       const path = ideaId ? `/files?idea_id=${ideaId}` : "/files";
+      console.log("Fetching files from:", path);
       const data = await fetcher(path);
+      console.log("Files response:", data);
       setFiles(data);
     } catch (err) {
+      console.error("Error fetching files:", err);
       if (err instanceof Error) setError(err.message);
       else setError("An unknown error occurred");
     } finally {
