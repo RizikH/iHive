@@ -210,7 +210,7 @@ const FileTree = ({ files, onSelect, onRefresh, selectedId, ideaId }: FileTreePr
     return items
       .filter((item) => item.parent_id === parentId)
       .sort((a, b) => {
-        // Sort folders first, then by name
+        // Sorter
         if (a.type === "folder" && b.type !== "folder") return -1;
         if (a.type !== "folder" && b.type === "folder") return 1;
         return a.name.localeCompare(b.name);
@@ -236,7 +236,10 @@ const FileTree = ({ files, onSelect, onRefresh, selectedId, ideaId }: FileTreePr
           <div className={styles.fileItemLeft}>
             {item.type === "folder" && (
               <span 
-                onClick={() => toggleExpand(item.id)} 
+                onClick={(e) => {
+                  e.stopPropagation();
+                  toggleExpand(item.id);
+                }} 
                 className={styles.toggleIcon}
               >
                 {expanded[item.id] ? <FiChevronDown /> : <FiChevronRight />}
@@ -248,7 +251,8 @@ const FileTree = ({ files, onSelect, onRefresh, selectedId, ideaId }: FileTreePr
             )}
             <span
               className={styles.fileItemName}
-              onClick={() => {
+              onClick={(e) => {
+                e.stopPropagation();
                 if (item.type === "upload" && item.path) {
                   window.open(item.path, "_blank");
                 } else {
@@ -263,7 +267,13 @@ const FileTree = ({ files, onSelect, onRefresh, selectedId, ideaId }: FileTreePr
             </span>
           </div>
           {!isPreviewMode && selectedId === item.id && (
-            <button onClick={() => handleDelete(item.id)} className={styles.deleteBtn}>
+            <button 
+              onClick={(e) => {
+                e.stopPropagation();
+                handleDelete(item.id);
+              }} 
+              className={styles.deleteBtn}
+            >
               <FiTrash2 size={14} />
             </button>
           )}
@@ -278,7 +288,15 @@ const FileTree = ({ files, onSelect, onRefresh, selectedId, ideaId }: FileTreePr
   };
 
   const treeData = buildTree(files);
-  const isPreviewMode = false; // Set this based on your needs
+  const isPreviewMode = false;
+  
+  // Handler to deselect when clicking on empty space in the tree
+  const handleTreeClick = (e: React.MouseEvent) => {
+    if ((e.target as HTMLElement).className === styles.fileTreeList || 
+        (e.target as HTMLElement).className === styles.fileTreeContainer) {
+      onSelect({ id: "", name: "", type: "text", parent_id: null });
+    }
+  };
   
   return (
     <div className={styles.fileTreeContainer} ref={fileTreeRef}>
@@ -295,7 +313,7 @@ const FileTree = ({ files, onSelect, onRefresh, selectedId, ideaId }: FileTreePr
         </label>
       </div>
 
-      <div className={styles.fileTreeList}>
+      <div className={styles.fileTreeList} onClick={handleTreeClick}>
         {treeData.length ? renderTree(treeData) : (
           <div className={styles.emptyState}>
             <p>No files yet</p>
