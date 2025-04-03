@@ -31,8 +31,10 @@ const EntrepreneurProfile = () => {
   const [isAvatarModalOpen, setIsAvatarModalOpen] = useState(false);
   const [currentAvatar, setCurrentAvatar] = useState('https://avatar.vercel.sh/jack');
   const [username, setUsername] = useState('user');
+  const [userId, setUserId] = useState<string | null>(null);
   const [jobTitle, setJobTitle] = useState('');
   const [skills, setSkills] = useState('');
+  const [bio, setBio] = useState('');
   const [socialLinks, setSocialLinks] = useState({
     github: 'https://github.com',
     linkedin: 'https://linkedin.com',
@@ -42,34 +44,6 @@ const EntrepreneurProfile = () => {
   const [error, setError] = useState<string | null>(null);
 
   // =============================================
-  // Event Handlers
-  // =============================================
-  const handleAvatarChange = async (newAvatarUrl: string) => {
-    if (currentAvatar.startsWith('blob:')) URL.revokeObjectURL(currentAvatar);
-    const sanitizedUrl = DOMPurify.sanitize(newAvatarUrl);
-    
-    if (sanitizedUrl.startsWith('blob:')) {
-      setCurrentAvatar(sanitizedUrl);
-      
-      // Save to backend
-      try {
-        // Create a FormData instance for the image upload
-        const formData = new FormData();
-        const blob = await fetch(sanitizedUrl).then(r => r.blob());
-        formData.append('avatar', blob, 'avatar.jpg');
-        
-        await fetcher('/users/avatar', 'POST', formData);
-      } catch (err) {
-        console.error('Failed to save avatar:', err);
-      }
-    } else {
-      console.error('Invalid avatar URL');
-    }
-    
-    setIsAvatarModalOpen(false);
-  };
-
-  // =============================================
   // API Functions
   // =============================================
   const fetchUserProfile = async () => {
@@ -77,42 +51,89 @@ const EntrepreneurProfile = () => {
     setError(null);
     
     try {
-      const userData = await fetcher('/users/profile');
+      // Get user ID from localStorage (set during login)
+      const storedUserId = localStorage.getItem('user_id');
+      
+      // Log information for debugging
+      console.log('Attempting to fetch profile with user_id:', storedUserId);
+      
+      if (!storedUserId) {
+        console.log('No user_id found in localStorage, falling back to local data');
+        loadFromLocalStorage();
+        return;
+      }
+      
+      setUserId(storedUserId);
+      
+      // Fetch user data from API using the GET /api/users/get/:id endpoint
+      console.log('Fetching from API endpoint:', `/users/get/${storedUserId}`);
+      const userData = await fetcher(`/users/get/${storedUserId}`);
+      
+      console.log('Received user data:', userData);
       
       // Update state with API data
       if (userData) {
         setUsername(userData.username || 'user');
-        setJobTitle(userData.jobTitle || '');
+        setJobTitle(userData.job_title || '');
         setSkills(userData.skills || '');
+        setBio(userData.bio || '');
         
-        // User avatar
-        if (userData.avatar) {
-          setCurrentAvatar(userData.avatar);
+        // User avatar (assuming there's an avatar field in the response)
+        if (userData.avatar_url) {
+          setCurrentAvatar(userData.avatar_url);
         }
         
-        // Social links
+        // Social links (assuming these fields exist in the user data)
         setSocialLinks({
-          github: userData.github || 'https://github.com',
-          linkedin: userData.linkedin || 'https://linkedin.com',
-          twitter: userData.twitter || 'https://twitter.com'
+          github: userData.github_url || 'https://github.com',
+          linkedin: userData.linkedin_url || 'https://linkedin.com',
+          twitter: userData.twitter_url || 'https://twitter.com'
         });
         
         // Also update localStorage for offline access
         localStorage.setItem('username', userData.username || 'user');
-        localStorage.setItem('jobTitle', userData.jobTitle || '');
+        localStorage.setItem('jobTitle', userData.job_title || '');
         localStorage.setItem('skills', userData.skills || '');
-        localStorage.setItem('github', userData.github || 'https://github.com');
-        localStorage.setItem('linkedin', userData.linkedin || 'https://linkedin.com');
-        localStorage.setItem('twitter', userData.twitter || 'https://twitter.com');
+        localStorage.setItem('bio', userData.bio || '');
+        localStorage.setItem('github', userData.github_url || 'https://github.com');
+        localStorage.setItem('linkedin', userData.linkedin_url || 'https://linkedin.com');
+        localStorage.setItem('twitter', userData.twitter_url || 'https://twitter.com');
       }
     } catch (err) {
       console.error('Error fetching profile:', err);
-      setError('Failed to load profile data');
+      
+      // More detailed error logging
+      if (err instanceof Error) {
+        setError(`Failed to load profile data: ${err.message}`);
+      } else {
+        setError('Failed to load profile data: Unknown error');
+      }
       
       // Fallback to localStorage if API fails
+      console.log('Falling back to localStorage due to API error');
       loadFromLocalStorage();
     } finally {
       setIsLoading(false);
+    }
+  };
+  
+  const updateUserProfile = async (data: any) => {
+    if (!userId) return;
+    
+    try {
+      // Use the PUT /api/users/update/:id endpoint
+      await fetcher(`/users/update/${userId}`, 'PUT', data);
+      
+      // Update local storage
+      Object.entries(data).forEach(([key, value]) => {
+        localStorage.setItem(key, value as string);
+      });
+      
+      // Refresh user data
+      fetchUserProfile();
+    } catch (err) {
+      console.error('Error updating profile:', err);
+      setError('Failed to update profile');
     }
   };
   
@@ -121,6 +142,7 @@ const EntrepreneurProfile = () => {
     const storedUsername = localStorage.getItem('username');
     const storedJobTitle = localStorage.getItem('jobTitle');
     const storedSkills = localStorage.getItem('skills');
+    const storedBio = localStorage.getItem('bio');
     const storedGithub = localStorage.getItem('github');
     const storedLinkedin = localStorage.getItem('linkedin');
     const storedTwitter = localStorage.getItem('twitter');
@@ -137,6 +159,10 @@ const EntrepreneurProfile = () => {
       setSkills(storedSkills);
     }
     
+    if (storedBio) {
+      setBio(storedBio);
+    }
+    
     // Update social links if available in localStorage
     setSocialLinks(prev => ({
       github: storedGithub || prev.github,
@@ -146,10 +172,44 @@ const EntrepreneurProfile = () => {
   };
 
   // =============================================
+  // Event Handlers
+  // =============================================
+  const handleAvatarChange = async (newAvatarUrl: string) => {
+    if (currentAvatar.startsWith('blob:')) URL.revokeObjectURL(currentAvatar);
+    const sanitizedUrl = DOMPurify.sanitize(newAvatarUrl);
+    
+    if (sanitizedUrl.startsWith('blob:')) {
+      setCurrentAvatar(sanitizedUrl);
+      
+      // Save to backend
+      try {
+        // Since there's no specific avatar update endpoint in userController.js,
+        // we'll need to update this once the backend has that functionality
+        // For now, just update the UI
+        
+        // Ideally, we'd do something like:
+        // const formData = new FormData();
+        // const blob = await fetch(sanitizedUrl).then(r => r.blob());
+        // formData.append('avatar', blob, 'avatar.jpg');
+        // await fetcher('/users/avatar', 'POST', formData);
+      } catch (err) {
+        console.error('Failed to save avatar:', err);
+      }
+    } else {
+      console.error('Invalid avatar URL');
+    }
+    
+    setIsAvatarModalOpen(false);
+  };
+
+  // =============================================
   // Effects
   // =============================================
   useEffect(() => {
-    // Fetch user data from API
+    // Try to load from localStorage first for immediate display
+    loadFromLocalStorage();
+    
+    // Then fetch from API to get the latest data
     fetchUserProfile();
     
     return () => {
@@ -211,6 +271,7 @@ const EntrepreneurProfile = () => {
                 <div className={styles.titles}>
                   <p>{jobTitle || 'Job Title'}</p>
                   <p>{skills || 'Skills'}</p>
+                  {bio && <p className={styles.bio}>{bio}</p>}
                 </div>
                 <div className={styles.socialLinks}>
                   <Link href={socialLinks.github} title="GitHub" target="_blank" rel="noopener noreferrer">
@@ -223,6 +284,7 @@ const EntrepreneurProfile = () => {
                     <FontAwesomeIcon icon={faXTwitter} className={styles.socialIcon} />
                   </Link>
                 </div>
+                
               </div>
 
               {/* Repository Showcase */}
