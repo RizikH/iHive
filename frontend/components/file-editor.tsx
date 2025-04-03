@@ -26,7 +26,7 @@ const FileEditor = ({ file, onUpdate }: Props) => {
   
   // Get language for syntax highlighting
   const getLanguage = (filename: string): string => {
-    const ext = filename.split(".").pop()?.toLowerCase() || "";
+    const ext = filename.split(".").pop()?.toLowerCase();
     switch (ext) {
       case "js":
       case "jsx":
@@ -38,6 +38,12 @@ const FileEditor = ({ file, onUpdate }: Props) => {
         return "python";
       case "java":
         return "java";
+      case "c":
+        return "c";
+      case "cpp":
+      case "cc":
+      case "cxx":
+        return "cpp";
       case "css":
         return "css";
       case "html":
@@ -50,11 +56,13 @@ const FileEditor = ({ file, onUpdate }: Props) => {
         return "sql";
       case "sh":
         return "bash";
+      case "php":
+        return "php";
       default:
         return "text";
     }
   };
-
+  
   useEffect(() => {
     setContent(file.content || "");
     setIsEditing(false); // Reset editing when switching files

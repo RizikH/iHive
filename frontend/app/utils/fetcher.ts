@@ -7,7 +7,8 @@ export const fetcher = async (
   path: string,
   method: string = "GET",
   body?: any,
-  customHeaders?: Record<string, string>
+  customHeaders?: Record<string, string>,
+  responseType: "json" | "blob" = "json"  // ✅ NEW PARAM
 ) => {
   const isFormData = body instanceof FormData;
 
@@ -26,9 +27,13 @@ export const fetcher = async (
   });
 
   if (!res.ok) {
-    const error = await res.json().catch(() => ({}));
-    throw new Error(error.message || "Something went wrong");
+    try {
+      const error = await res.json();
+      throw new Error(error.message || "Something went wrong");
+    } catch {
+      throw new Error("Something went wrong");
+    }
   }
 
-  return res.json();
+  return responseType === "blob" ? res.blob() : res.json();
 };

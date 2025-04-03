@@ -223,16 +223,13 @@ const FileTree = ({ files, onSelect, onRefresh, selectedId, ideaId }: FileTreePr
           className={styles.fileItem}
           onClick={(e) => {
             e.stopPropagation();
-            if (item.type === "upload" && item.path) {
-              window.open(item.path, "_blank");
-            } else {
-              onSelect(item);
-              if (item.type === "folder") {
-                toggleExpand(item.id);
-              }
+            onSelect(item);
+            if (item.type === "folder") {
+              toggleExpand(item.id);
             }
           }}
         >
+
           <div className={styles.fileItemLeft}>
             {item.type === "folder" && (
               <span
