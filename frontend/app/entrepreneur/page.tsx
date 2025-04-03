@@ -87,10 +87,10 @@ const EntrepreneurProfile = () => {
       }
       
       // Fetch user data from API
-      console.log('Fetching from API endpoint:', `users/get/${storedUserId}`);
+      console.log('Fetching from API endpoint:', `/users/get/${storedUserId}`);
       
       setDebugInfo('Attempting to fetch user data...');
-      const userData = await fetcher(`users/get/${storedUserId}`, 'GET', undefined, headers);
+      const userData = await fetcher(`/users/get/${storedUserId}`, 'GET', undefined, headers);
       
       console.log('Received user data:', userData);
       setDebugInfo(null); // Clear debug info on success
