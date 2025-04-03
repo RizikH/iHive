@@ -3,6 +3,10 @@ const API_URL =
     ? "https://ihive.onrender.com/api"
     : "http://localhost:5000/api";
 
+
+export const fetcher = async (path: string, options: RequestInit = {}) => {
+  console.log("Requesting:", `${API_URL}${path}`);
+
 export const fetcher = async (
   path: string,
   method: string = "GET",
@@ -11,6 +15,7 @@ export const fetcher = async (
   responseType: "json" | "blob" = "json"  // ✅ NEW PARAM
 ) => {
   const isFormData = body instanceof FormData;
+
 
   const res = await fetch(`${API_URL}${path}`, {
     method,
@@ -37,3 +42,4 @@ export const fetcher = async (
 
   return responseType === "blob" ? res.blob() : res.json();
 };
+}
