@@ -76,22 +76,8 @@ const FileTree = ({ files, onSelect, onRefresh, selectedId, ideaId }: FileTreePr
     }
   }, [files]);
 
-  // Add click outside listener to deselect folders and files
-  useEffect(() => {
-    const handleClickOutside = (event: MouseEvent) => {
-      if (fileTreeRef.current && !fileTreeRef.current.contains(event.target as Node)) {
-        // Click is outside the file tree - deselect the current file
-        if (selectedId) {
-          onSelect({ id: "", name: "", type: "text", parent_id: null });
-        }
-      }
-    };
-
-    document.addEventListener('mousedown', handleClickOutside);
-    return () => {
-      document.removeEventListener('mousedown', handleClickOutside);
-    };
-  }, [selectedId, onSelect]);
+  // REMOVE the global click outside listener that was causing issues
+  // We'll handle deselection only when clicking on empty areas of the tree
 
   const selectedFile = files.find((f) => f.id === selectedId) || null;
 
@@ -292,15 +278,21 @@ const FileTree = ({ files, onSelect, onRefresh, selectedId, ideaId }: FileTreePr
   
   // Handler to deselect when clicking on empty space in the tree
   const handleTreeClick = (e: React.MouseEvent) => {
-    if ((e.target as HTMLElement).className === styles.fileTreeList || 
-        (e.target as HTMLElement).className === styles.fileTreeContainer) {
+    const target = e.target as HTMLElement;
+    
+    // Only deselect if clicking directly on the empty space (not on a file/folder item)
+    if (
+      target.classList.contains(styles.fileTreeList) || 
+      target.classList.contains(styles.fileTreeContainer)
+    ) {
+      // Clear selection by passing empty file
       onSelect({ id: "", name: "", type: "text", parent_id: null });
     }
   };
   
   return (
-    <div className={styles.fileTreeContainer} ref={fileTreeRef}>
-      <div className={styles.treeActionsTop}>
+    <div className={styles.fileTreeContainer} ref={fileTreeRef} onClick={handleTreeClick}>
+      <div className={styles.treeActionsTop} onClick={(e) => e.stopPropagation()}>
         <button onClick={() => handleCreate("folder")} title="Create new folder">
           <FiFolderPlus /> Folder
         </button>
@@ -313,7 +305,7 @@ const FileTree = ({ files, onSelect, onRefresh, selectedId, ideaId }: FileTreePr
         </label>
       </div>
 
-      <div className={styles.fileTreeList} onClick={handleTreeClick}>
+      <div className={styles.fileTreeList}>
         {treeData.length ? renderTree(treeData) : (
           <div className={styles.emptyState}>
             <p>No files yet</p>
