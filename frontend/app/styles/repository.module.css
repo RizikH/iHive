@@ -480,11 +480,29 @@
 }
 
 .emptyFile {
-    padding: 16px;
-    color: #57606a;
-    font-style: italic;
+    padding: 24px;
+    color: #999;
     text-align: center;
-    background-color: #f6f8fa;
+    background-color: #f9f9f9;
+    min-height: 200px;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    font-size: 14px;
+    line-height: 1.6;
+}
+
+.emptyFile h3 {
+    color: #999;
+    margin-bottom: 16px;
+    font-size: 20px;
+    font-weight: 500;
+}
+
+.emptyFile p {
+    margin-bottom: 12px;
+    color: #999;
 }
 
 /* Remove or update older styles that conflict */

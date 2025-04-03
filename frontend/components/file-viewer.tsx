@@ -136,7 +136,7 @@ const FileViewer = ({ file }: Props) => {
       wrapLines
       customStyle={{ borderRadius: "8px", padding: "1rem" }}
     >
-      {file.content || "// Empty file"}
+      {file.content || "// Welcome to iHive Editor! Start adding content to this file."}
     </SyntaxHighlighter>
   );
 

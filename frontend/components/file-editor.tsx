@@ -187,7 +187,8 @@ const FileEditor = ({ file, onUpdate }: Props) => {
             </SyntaxHighlighter>
           ) : (
             <div className={styles.emptyFile}>
-              Empty file
+              <h3>Welcome to iHive Editor!</h3>
+              <p>Select or create a file to begin editing.</p>
             </div>
           )}
         </div>
