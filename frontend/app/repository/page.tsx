@@ -111,18 +111,6 @@ export default function Repository() {
               <div className={styles.placeholderContent}>
                 <h3>Welcome to iHive Editor!</h3>
                 <p>Select or create a file to begin editing.</p>
-                <div className={styles.shortcuts}>
-                  <p>Helpful shortcuts:</p>
-                  <ul>
-                    <li><kbd>Ctrl</kbd> + <kbd>B</kbd> - Bold text</li>
-                    <li><kbd>Ctrl</kbd> + <kbd>I</kbd> - Italic text</li>
-                    <li><kbd>Ctrl</kbd> + <kbd>U</kbd> - Underline text</li>
-                    <li><kbd>Ctrl</kbd> + <kbd>C</kbd> - Copy text</li>
-                    <li><kbd>Ctrl</kbd> + <kbd>S</kbd> - Save changes</li>
-                    <li><kbd>Shift</kbd> + <kbd>Enter</kbd> - New line</li>
-                    <li><kbd>Enter</kbd> - Save and exit edit mode</li>
-                  </ul>
-                </div>
               </div>
             )}
           </div>

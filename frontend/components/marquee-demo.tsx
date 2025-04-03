@@ -52,13 +52,7 @@ const RepositoryModal = ({
     } catch (err) {
       console.error("Error fetching repository details:", err);
       setError("Failed to load repository details");
-      // Try to get from localStorage as fallback
-      const savedIdeas = localStorage.getItem('ideas');
-      if (savedIdeas) {
-        const ideas = JSON.parse(savedIdeas);
-        const idea = ideas.find((idea: any) => idea.id === repoId);
-        if (idea) setRepoDetails(idea);
-      }
+      setRepoDetails(null);
     } finally {
       setIsLoading(false);
     }
@@ -225,14 +219,10 @@ export default function MarqueeDemo() {
         if (Array.isArray(data) && data.length > 0) {
           setIdeas(data);
         } else {
-          // Fallback to localStorage if API returns empty data
-          const savedIdeas = localStorage.getItem('ideas');
-          if (savedIdeas) {
-            setIdeas(JSON.parse(savedIdeas));
-          }
+          setIdeas([]);
         }
 
-        // Try to get user info from localStorage
+        // Get user info from localStorage (this is still needed for profile display)
         const savedUsername = localStorage.getItem("username");
         const savedAvatar = localStorage.getItem("userAvatar");
 
@@ -240,11 +230,7 @@ export default function MarqueeDemo() {
         if (savedAvatar) setUserAvatar(savedAvatar);
       } catch (err) {
         console.error("Error loading user ideas:", err);
-        // Fallback to localStorage on API error
-        const savedIdeas = localStorage.getItem('ideas');
-        if (savedIdeas) {
-          setIdeas(JSON.parse(savedIdeas));
-        }
+        setIdeas([]);
       }
     };
 

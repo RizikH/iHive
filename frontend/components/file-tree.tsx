@@ -82,7 +82,7 @@ const FileTree = ({ files, onSelect, onRefresh, selectedId, ideaId }: FileTreePr
       if (fileTreeRef.current && !fileTreeRef.current.contains(event.target as Node)) {
         // Click is outside the file tree - deselect the current file
         if (selectedId) {
-          onSelect({ id: "", name: "", type: "text", parent_id: null });
+          onSelect(null as any);
         }
       }
     };
@@ -292,9 +292,14 @@ const FileTree = ({ files, onSelect, onRefresh, selectedId, ideaId }: FileTreePr
   
   // Handler to deselect when clicking on empty space in the tree
   const handleTreeClick = (e: React.MouseEvent) => {
-    if ((e.target as HTMLElement).className === styles.fileTreeList || 
-        (e.target as HTMLElement).className === styles.fileTreeContainer) {
-      onSelect({ id: "", name: "", type: "text", parent_id: null });
+    // Only deselect if clicking directly on the fileTreeList or fileTreeContainer
+    // (not on a file/folder item or button)
+    if (
+      (e.target as HTMLElement).className === styles.fileTreeList ||
+      (e.target as HTMLElement).className === styles.fileTreeContainer
+    ) {
+      // Pass null instead of an empty file object to show the placeholder content
+      onSelect(null as any);
     }
   };
   

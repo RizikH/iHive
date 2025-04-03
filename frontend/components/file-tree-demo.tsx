@@ -50,6 +50,7 @@ export default function FileTreeDemo({
   const [dropTarget, setDropTarget] = useState<string | null>(null);
   const [openFolders, setOpenFolders] = useState<Set<string>>(new Set());
   const [fileContentsMap, setFileContentsMap] = useState<Record<string, string>>({});
+  const fileTreeRef = useRef<HTMLDivElement>(null);
 
   // Initialize file list from props
   useEffect(() => {
@@ -64,7 +65,7 @@ export default function FileTreeDemo({
       
       setFileList(files);
       
-      // Initialize fileContentsMap
+      // Initialize fileContentsMap directly from initialFiles without localStorage
       const contentsMap: Record<string, string> = {};
       initialFiles.forEach(idea => {
         contentsMap[idea.id.toString()] = idea.description;

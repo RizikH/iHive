@@ -42,6 +42,7 @@ const EntrepreneurProfile = () => {
   });
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [debugInfo, setDebugInfo] = useState<string | null>(null);
 
   // =============================================
   // API Functions
@@ -49,6 +50,7 @@ const EntrepreneurProfile = () => {
   const fetchUserProfile = async () => {
     setIsLoading(true);
     setError(null);
+    setDebugInfo(null);
     
     try {
       // Get user ID from localStorage (set during login)
@@ -57,11 +59,22 @@ const EntrepreneurProfile = () => {
       
       // Log information for debugging
       console.log('Attempting to fetch profile with user_id:', storedUserId);
-      console.log('Auth token available:', !!token);
       
       if (!storedUserId) {
         console.log('No user_id found in localStorage, falling back to local data');
-        loadFromLocalStorage();
+        // Add debug info
+        setDebugInfo(JSON.stringify({
+          message: 'No user_id in localStorage',
+          localStorage: {
+            username: localStorage.getItem('username'),
+            jobTitle: localStorage.getItem('jobTitle'),
+            skills: localStorage.getItem('skills'),
+            token: token ? 'Present (not shown)' : 'Not present'
+          }
+        }, null, 2));
+        
+        // Only load essential profile data from localStorage
+        loadEssentialProfileData();
         return;
       }
       
@@ -73,11 +86,14 @@ const EntrepreneurProfile = () => {
         headers['Authorization'] = `Bearer ${token}`;
       }
       
-      // Fetch user data from API using the GET /api/users/get/:id endpoint
-      console.log('Fetching from API endpoint:', `/users/get/${storedUserId}`);
-      const userData = await fetcher(`/users/get/${storedUserId}`, 'GET', undefined, headers);
+      // Fetch user data from API
+      console.log('Fetching from API endpoint:', `users/get/${storedUserId}`);
+      
+      setDebugInfo('Attempting to fetch user data...');
+      const userData = await fetcher(`users/get/${storedUserId}`, 'GET', undefined, headers);
       
       console.log('Received user data:', userData);
+      setDebugInfo(null); // Clear debug info on success
       
       // Update state with API data based on the actual backend schema
       if (userData) {
@@ -100,14 +116,8 @@ const EntrepreneurProfile = () => {
           twitter: userData.twitter_url || userData.twitterUrl || userData.twitter || 'https://twitter.com'
         });
         
-        // Also update localStorage for offline access
-        localStorage.setItem('username', userData.username || 'user');
-        localStorage.setItem('jobTitle', userData.job_title || userData.jobTitle || '');
-        localStorage.setItem('skills', userData.skills || '');
-        localStorage.setItem('bio', userData.bio || '');
-        localStorage.setItem('github', userData.github_url || userData.githubUrl || userData.github || 'https://github.com');
-        localStorage.setItem('linkedin', userData.linkedin_url || userData.linkedinUrl || userData.linkedin || 'https://linkedin.com');
-        localStorage.setItem('twitter', userData.twitter_url || userData.twitterUrl || userData.twitter || 'https://twitter.com');
+        // Store only essential data in localStorage for faster loading on next visit
+        storeEssentialProfileData(userData);
       }
     } catch (err) {
       console.error('Error fetching profile:', err);
@@ -115,13 +125,26 @@ const EntrepreneurProfile = () => {
       // More detailed error logging
       if (err instanceof Error) {
         setError(`Failed to load profile data: ${err.message}`);
+        // Add detailed debug info
+        setDebugInfo(JSON.stringify({
+          error: err.message,
+          stack: err.stack,
+          userId: localStorage.getItem('user_id'),
+          hasToken: !!localStorage.getItem('token'),
+          localStorage: {
+            username: localStorage.getItem('username'),
+            jobTitle: localStorage.getItem('jobTitle'),
+            skills: localStorage.getItem('skills')
+          }
+        }, null, 2));
       } else {
         setError('Failed to load profile data: Unknown error');
+        setDebugInfo(JSON.stringify(err, null, 2));
       }
       
-      // Fallback to localStorage if API fails
-      console.log('Falling back to localStorage due to API error');
-      loadFromLocalStorage();
+      // Load only essential profile data as fallback
+      console.log('Falling back to essential profile data due to API error');
+      loadEssentialProfileData();
     } finally {
       setIsLoading(false);
     }
@@ -147,7 +170,17 @@ const EntrepreneurProfile = () => {
     }
   };
   
-  const loadFromLocalStorage = () => {
+  // Store only essential profile data in localStorage
+  const storeEssentialProfileData = (userData: any) => {
+    // Only store minimal data required for UI rendering when offline
+    localStorage.setItem('username', userData.username || 'user');
+    localStorage.setItem('jobTitle', userData.job_title || userData.jobTitle || '');
+    localStorage.setItem('skills', userData.skills || '');
+    // Don't store large data like complete user profile or ideas
+  };
+  
+  // Load minimal essential profile data from localStorage
+  const loadEssentialProfileData = () => {
     // Get user data from localStorage
     const storedUsername = localStorage.getItem('username');
     const storedJobTitle = localStorage.getItem('jobTitle');
@@ -211,7 +244,7 @@ const EntrepreneurProfile = () => {
   // Effects
   // =============================================
   useEffect(() => {
-    loadFromLocalStorage();
+    loadEssentialProfileData();
     
     fetchUserProfile();
     
