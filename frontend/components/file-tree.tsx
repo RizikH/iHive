@@ -2,15 +2,15 @@ import React, { useState, useRef, useEffect } from "react";
 import styles from "@/app/styles/file-tree.module.css";
 import { JSX } from "react/jsx-runtime";
 import { fetcher } from "@/app/utils/fetcher";
-import { 
-  FiFolder, 
-  FiFolderPlus, 
-  FiFile, 
-  FiFileText, 
+import {
+  FiFolder,
+  FiFolderPlus,
+  FiFile,
+  FiFileText,
   FiFilePlus,
-  FiUpload, 
-  FiTrash2, 
-  FiChevronRight, 
+  FiUpload,
+  FiTrash2,
+  FiChevronRight,
   FiChevronDown,
   FiImage,
   FiFileText as FiFilePdf,
@@ -30,21 +30,22 @@ export type FileItem = {
 
 type FileTreeProps = {
   files: FileItem[];
-  onSelect: (file: FileItem) => void;
+  onSelect: (file: FileItem | null) => void; // ← allow null
   onRefresh: () => void;
   selectedId: string | null;
   ideaId: number;
 };
 
+
 // Helper function to get appropriate icon based on file name/type
 const getFileIcon = (file: FileItem) => {
   if (file.type === "folder") return <FiFolder className={styles.folderIcon} />;
-  
+
   if (file.type === "upload" && file.mime_type) {
     if (file.mime_type.startsWith("image/")) return <FiImage />;
     if (file.mime_type.startsWith("application/pdf")) return <FiFilePdf />;
   }
-  
+
   // Check file extension
   if (file.name) {
     const ext = file.name.split('.').pop()?.toLowerCase();
@@ -53,7 +54,7 @@ const getFileIcon = (file: FileItem) => {
       return <FiCode />;
     }
   }
-  
+
   return file.type === "text" ? <FiFileText /> : <FiFile />;
 };
 
@@ -68,11 +69,11 @@ const FileTree = ({ files, onSelect, onRefresh, selectedId, ideaId }: FileTreePr
     const topLevelFolders = files
       .filter(f => f.type === "folder" && f.parent_id === null)
       .map(f => f.id);
-      
+
     if (topLevelFolders.length > 0) {
       const newExpanded: Record<string, boolean> = {};
       topLevelFolders.forEach(id => { newExpanded[id] = true; });
-      setExpanded(prev => ({...prev, ...newExpanded}));
+      setExpanded(prev => ({ ...prev, ...newExpanded }));
     }
   }, [files]);
 
@@ -87,8 +88,8 @@ const FileTree = ({ files, onSelect, onRefresh, selectedId, ideaId }: FileTreePr
 
   const handleCreate = async (type: "folder" | "text") => {
     // Parent ID logic - use selected folder or root
-    const parentId = selectedFile && selectedFile.type === "folder" 
-      ? selectedFile.id 
+    const parentId = selectedFile && selectedFile.type === "folder"
+      ? selectedFile.id
       : null;
 
     const name = prompt(`Enter ${type} name:`);
@@ -103,7 +104,7 @@ const FileTree = ({ files, onSelect, onRefresh, selectedId, ideaId }: FileTreePr
         content: type === "text" ? "" : undefined,
       });
       onRefresh();
-      
+
       // Expand the parent folder if it exists
       if (parentId) {
         setExpanded(prev => ({ ...prev, [parentId]: true }));
@@ -116,10 +117,10 @@ const FileTree = ({ files, onSelect, onRefresh, selectedId, ideaId }: FileTreePr
   const handleUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (!file) return;
-    
+
     // Parent ID logic - use selected folder or root
-    const parentId = selectedFile && selectedFile.type === "folder" 
-      ? selectedFile.id 
+    const parentId = selectedFile && selectedFile.type === "folder"
+      ? selectedFile.id
       : null;
 
     const formData = new FormData();
@@ -132,7 +133,7 @@ const FileTree = ({ files, onSelect, onRefresh, selectedId, ideaId }: FileTreePr
     try {
       await fetcher("/files/upload", "POST", formData);
       onRefresh();
-      
+
       // Expand the parent folder if it exists
       if (parentId) {
         setExpanded(prev => ({ ...prev, [parentId]: true }));
@@ -173,12 +174,12 @@ const FileTree = ({ files, onSelect, onRefresh, selectedId, ideaId }: FileTreePr
   const handleDrop = async (e: React.DragEvent, targetId: string) => {
     e.preventDefault();
     setDropTarget(null);
-    
+
     if (!draggedItem || draggedItem === targetId) return;
-    
+
     const draggedFile = files.find(f => f.id === draggedItem);
     if (!draggedFile) return;
-    
+
     try {
       await fetcher(`/files/${draggedItem}/move`, "PUT", {
         parent_id: targetId
@@ -188,7 +189,7 @@ const FileTree = ({ files, onSelect, onRefresh, selectedId, ideaId }: FileTreePr
     } catch (err: any) {
       alert("Failed to move file: " + (err.info?.error || err.message));
     }
-    
+
     setDraggedItem(null);
   };
 
@@ -209,61 +210,62 @@ const FileTree = ({ files, onSelect, onRefresh, selectedId, ideaId }: FileTreePr
 
   const renderTree = (nodes: FileItem[], depth: number = 0): JSX.Element[] => {
     return nodes.map((item) => (
-      <div 
-        key={item.id} 
+      <div
+        key={item.id}
         className={`${styles.treeItem} ${selectedId === item.id ? styles.selected : ""} ${dropTarget === item.id ? styles.dropTarget : ""}`}
         draggable={!isPreviewMode}
         onDragStart={(e) => handleDragStart(e, item.id)}
         onDragOver={(e) => handleDragOver(e, item.id, item.type)}
         onDragLeave={handleDragLeave}
         onDrop={(e) => handleDrop(e, item.id)}
-      > 
-        <div className={styles.fileItem}>
+      >
+        <div
+          className={styles.fileItem}
+          onClick={(e) => {
+            e.stopPropagation();
+            if (item.type === "upload" && item.path) {
+              window.open(item.path, "_blank");
+            } else {
+              onSelect(item);
+              if (item.type === "folder") {
+                toggleExpand(item.id);
+              }
+            }
+          }}
+        >
           <div className={styles.fileItemLeft}>
             {item.type === "folder" && (
-              <span 
+              <span
                 onClick={(e) => {
-                  e.stopPropagation();
+                  e.stopPropagation(); // prevent selection, just toggle
                   toggleExpand(item.id);
-                }} 
+                }}
                 className={styles.toggleIcon}
               >
                 {expanded[item.id] ? <FiChevronDown /> : <FiChevronRight />}
               </span>
             )}
-            {/* Indentation for non-folder items */}
             {item.type !== "folder" && (
               <span className={styles.fileIndent}></span>
             )}
-            <span
-              className={styles.fileItemName}
-              onClick={(e) => {
-                e.stopPropagation();
-                if (item.type === "upload" && item.path) {
-                  window.open(item.path, "_blank");
-                } else {
-                  onSelect(item);
-                  if (item.type === "folder") {
-                    toggleExpand(item.id);
-                  }
-                }
-              }}
-            >
+            <span className={styles.fileItemName}>
               {getFileIcon(item)} {item.name}
             </span>
           </div>
+
           {!isPreviewMode && selectedId === item.id && (
-            <button 
+            <button
               onClick={(e) => {
                 e.stopPropagation();
                 handleDelete(item.id);
-              }} 
+              }}
               className={styles.deleteBtn}
             >
               <FiTrash2 size={14} />
             </button>
           )}
         </div>
+
         {expanded[item.id] && item.children && item.children.length > 0 && (
           <div className={`${styles.folderContent} ${styles[`depth-${Math.min(depth, 3)}`]}`}>
             {renderTree(item.children, depth + 1)}
@@ -273,23 +275,23 @@ const FileTree = ({ files, onSelect, onRefresh, selectedId, ideaId }: FileTreePr
     ));
   };
 
+
   const treeData = buildTree(files);
   const isPreviewMode = false;
-  
+
   // Handler to deselect when clicking on empty space in the tree
   const handleTreeClick = (e: React.MouseEvent) => {
     const target = e.target as HTMLElement;
-    
-    // Only deselect if clicking directly on the empty space (not on a file/folder item)
+
     if (
-      target.classList.contains(styles.fileTreeList) || 
+      target.classList.contains(styles.fileTreeList) ||
       target.classList.contains(styles.fileTreeContainer)
     ) {
-      // Clear selection by passing empty file
-      onSelect({ id: "", name: "", type: "text", parent_id: null });
+      onSelect(null); // ✅ use null instead of dummy object
     }
   };
-  
+
+
   return (
     <div className={styles.fileTreeContainer} ref={fileTreeRef} onClick={handleTreeClick}>
       <div className={styles.treeActionsTop} onClick={(e) => e.stopPropagation()}>
