@@ -10,7 +10,6 @@ const authenticate = (req, res, next) => {
     token = authHeader.split(" ")[1];
   } else if (req.cookies?.token) {
     token = req.cookies.token;
-    console.log("🍪 Cookie token found:", token);
   }
 
   if (!token) {
@@ -20,7 +19,6 @@ const authenticate = (req, res, next) => {
   try {
     const decoded = jwt.verify(token, SUPABASE_JWT_SECRET);
     req.user = decoded;
-    console.log("✅ JWT verification successful:", decoded);
     next();
   } catch (err) {
     console.error("❌ JWT verification failed:", err.message);
