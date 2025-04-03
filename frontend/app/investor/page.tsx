@@ -63,19 +63,19 @@ const InvestorPage = () => {
 
     useEffect(() => {
         const fetchSearchedIdeas = async () => {
+            if (!searchTerm || searchTerm.trim().length < 1) {
+                setIdeas(allIdeas);
+                return;
+            }
 
-            console.log("Search Term:", searchTerm);
             try {
-                const data = searchTerm === ""
-                    ? await fetcher("/ideas")
-                    : await fetcher(`/ideas/search/title/${encodeURIComponent(searchTerm)}`);
-
-                console.log("Fetched Ideas:", data);
+                const data = await fetcher(`/ideas/search/title/${encodeURIComponent(searchTerm)}`);
                 setIdeas(data || []);
             } catch (err: any) {
                 setErrorIdeas(err.message || "An unknown error occurred.");
             }
         };
+
 
         fetchSearchedIdeas();
     }, [searchTerm]);

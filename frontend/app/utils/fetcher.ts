@@ -7,8 +7,8 @@ export const fetcher = async (
   path: string,
   method: string = "GET",
   body?: any,
-  customHeaders?: Record<string, string>,
-  responseType: "json" | "blob" = "json"  // ✅ NEW PARAM
+  customHeaders: Record<string, string> = {},
+  responseType: "json" | "blob" = "json"
 ) => {
   const isFormData = body instanceof FormData;
 
