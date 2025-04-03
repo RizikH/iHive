@@ -47,8 +47,6 @@ const RepositoryModal = ({
       setIsLoading(true);
       setError(null);
       
-      // IMPORTANT: Just provide the path - the fetcher utility will add the API URL
-      // Don't use full URLs like `${API_URL}/ideas/${repoId}` to avoid duplication
       const data = await fetcher(`/ideas/${repoId}`);
       setRepoDetails(data);
     } catch (err) {
