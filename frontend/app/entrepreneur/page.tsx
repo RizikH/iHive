@@ -18,6 +18,9 @@ import DOMPurify from 'dompurify';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faGithub, faLinkedin, faXTwitter } from '@fortawesome/free-brands-svg-icons';
 
+// Utils
+import { fetcher } from '@/app/utils/fetcher';
+
 // Styles
 import styles from '../styles/entrepreneur-profile.module.css';
 
@@ -35,22 +38,85 @@ const EntrepreneurProfile = () => {
     linkedin: 'https://linkedin.com',
     twitter: 'https://twitter.com'
   });
+  const [isLoading, setIsLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
 
   // =============================================
   // Event Handlers
   // =============================================
-  const handleAvatarChange = (newAvatarUrl: string) => {
+  const handleAvatarChange = async (newAvatarUrl: string) => {
     if (currentAvatar.startsWith('blob:')) URL.revokeObjectURL(currentAvatar);
     const sanitizedUrl = DOMPurify.sanitize(newAvatarUrl);
-    if (sanitizedUrl.startsWith('blob:')) setCurrentAvatar(sanitizedUrl);
-    else console.error('Invalid avatar URL');
+    
+    if (sanitizedUrl.startsWith('blob:')) {
+      setCurrentAvatar(sanitizedUrl);
+      
+      // Save to backend
+      try {
+        // Create a FormData instance for the image upload
+        const formData = new FormData();
+        const blob = await fetch(sanitizedUrl).then(r => r.blob());
+        formData.append('avatar', blob, 'avatar.jpg');
+        
+        await fetcher('/users/avatar', 'POST', formData);
+      } catch (err) {
+        console.error('Failed to save avatar:', err);
+      }
+    } else {
+      console.error('Invalid avatar URL');
+    }
+    
     setIsAvatarModalOpen(false);
   };
 
   // =============================================
-  // Effects
+  // API Functions
   // =============================================
-  useEffect(() => {
+  const fetchUserProfile = async () => {
+    setIsLoading(true);
+    setError(null);
+    
+    try {
+      const userData = await fetcher('/users/profile');
+      
+      // Update state with API data
+      if (userData) {
+        setUsername(userData.username || 'user');
+        setJobTitle(userData.jobTitle || '');
+        setSkills(userData.skills || '');
+        
+        // User avatar
+        if (userData.avatar) {
+          setCurrentAvatar(userData.avatar);
+        }
+        
+        // Social links
+        setSocialLinks({
+          github: userData.github || 'https://github.com',
+          linkedin: userData.linkedin || 'https://linkedin.com',
+          twitter: userData.twitter || 'https://twitter.com'
+        });
+        
+        // Also update localStorage for offline access
+        localStorage.setItem('username', userData.username || 'user');
+        localStorage.setItem('jobTitle', userData.jobTitle || '');
+        localStorage.setItem('skills', userData.skills || '');
+        localStorage.setItem('github', userData.github || 'https://github.com');
+        localStorage.setItem('linkedin', userData.linkedin || 'https://linkedin.com');
+        localStorage.setItem('twitter', userData.twitter || 'https://twitter.com');
+      }
+    } catch (err) {
+      console.error('Error fetching profile:', err);
+      setError('Failed to load profile data');
+      
+      // Fallback to localStorage if API fails
+      loadFromLocalStorage();
+    } finally {
+      setIsLoading(false);
+    }
+  };
+  
+  const loadFromLocalStorage = () => {
     // Get user data from localStorage
     const storedUsername = localStorage.getItem('username');
     const storedJobTitle = localStorage.getItem('jobTitle');
@@ -77,11 +143,19 @@ const EntrepreneurProfile = () => {
       linkedin: storedLinkedin || prev.linkedin,
       twitter: storedTwitter || prev.twitter
     }));
+  };
+
+  // =============================================
+  // Effects
+  // =============================================
+  useEffect(() => {
+    // Fetch user data from API
+    fetchUserProfile();
     
     return () => {
       if (currentAvatar.startsWith('blob:')) URL.revokeObjectURL(currentAvatar);
     };
-  }, [currentAvatar]);
+  }, []);
 
   // =============================================
   // Render Component
@@ -107,49 +181,57 @@ const EntrepreneurProfile = () => {
 
         {/* Main Content */}
         <main className={styles.main}>
-          {/* Profile Section */}
-          <div className={styles.profileSection}>
-            <div
-              className={styles.profileImage}
-              onClick={() => setIsAvatarModalOpen(true)}
-            >
-              <Image
-                src={currentAvatar}
-                alt="Avatar"
-                width={150}
-                height={150}
-                style={{ objectFit: 'cover', borderRadius: '50%' }}
-              />
-            </div>
-            <ChangeAvatar
-              isOpen={isAvatarModalOpen}
-              onClose={() => setIsAvatarModalOpen(false)}
-              onAvatarChange={handleAvatarChange}
-              currentAvatar={currentAvatar}
-            />
-            <h1 className={styles.name}>{username}</h1>
-            <div className={styles.titles}>
-              <p>{jobTitle || 'Job Title'}</p>
-              <p>{skills || 'Skills'}</p>
-            </div>
-            <div className={styles.socialLinks}>
-              <Link href={socialLinks.github} title="GitHub">
-                <FontAwesomeIcon icon={faGithub} className={styles.socialIcon} />
-              </Link>
-              <Link href={socialLinks.linkedin} title="LinkedIn">
-                <FontAwesomeIcon icon={faLinkedin} className={styles.socialIcon} />
-              </Link>
-              <Link href={socialLinks.twitter} title="X">
-                <FontAwesomeIcon icon={faXTwitter} className={styles.socialIcon} />
-              </Link>
-            </div>
-          </div>
+          {isLoading ? (
+            <div className={styles.loading}>Loading profile...</div>
+          ) : error ? (
+            <div className={styles.error}>{error}</div>
+          ) : (
+            <>
+              {/* Profile Section */}
+              <div className={styles.profileSection}>
+                <div
+                  className={styles.profileImage}
+                  onClick={() => setIsAvatarModalOpen(true)}
+                >
+                  <Image
+                    src={currentAvatar}
+                    alt="Avatar"
+                    width={150}
+                    height={150}
+                    style={{ objectFit: 'cover', borderRadius: '50%' }}
+                  />
+                </div>
+                <ChangeAvatar
+                  isOpen={isAvatarModalOpen}
+                  onClose={() => setIsAvatarModalOpen(false)}
+                  onAvatarChange={handleAvatarChange}
+                  currentAvatar={currentAvatar}
+                />
+                <h1 className={styles.name}>{username}</h1>
+                <div className={styles.titles}>
+                  <p>{jobTitle || 'Job Title'}</p>
+                  <p>{skills || 'Skills'}</p>
+                </div>
+                <div className={styles.socialLinks}>
+                  <Link href={socialLinks.github} title="GitHub" target="_blank" rel="noopener noreferrer">
+                    <FontAwesomeIcon icon={faGithub} className={styles.socialIcon} />
+                  </Link>
+                  <Link href={socialLinks.linkedin} title="LinkedIn" target="_blank" rel="noopener noreferrer">
+                    <FontAwesomeIcon icon={faLinkedin} className={styles.socialIcon} />
+                  </Link>
+                  <Link href={socialLinks.twitter} title="X" target="_blank" rel="noopener noreferrer">
+                    <FontAwesomeIcon icon={faXTwitter} className={styles.socialIcon} />
+                  </Link>
+                </div>
+              </div>
 
-          {/* Repository Showcase */}
-          <div className={styles.marquee}>
-            <h2 className={styles.marqueeTitle}>Popular Repositories</h2>
-            <MarqueeDemo />
-          </div>
+              {/* Repository Showcase */}
+              <div className={styles.marquee}>
+                <h2 className={styles.marqueeTitle}>Popular Repositories</h2>
+                <MarqueeDemo />
+              </div>
+            </>
+          )}
         </main>
 
         {/* Footer */}
