@@ -202,3 +202,9 @@
     background: rgba(255, 255, 255, 0.1);
   }
   
+  /* Hide file creation buttons in read-only modal - more specific selectors */
+  .modal-content .sidebar .file-tree-container > div > div:first-child,
+  .modal-content .file-tree-container :global(.treeActionsTop) {
+    display: none !important;
+  }
+  
