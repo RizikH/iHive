@@ -131,16 +131,67 @@ const createFile = async (req, res) => {
 // Update text file or rename
 const updateFile = async (req, res) => {
   try {
-    const { name, content, parent_id, type, idea_id } = req.body;
-    const updatedFields = { name, content, parent_id, type, idea_id };
+    const { name, content, parent_id, type, idea_id, is_public } = req.body;
 
-    const file = await File.update(req.params.id, updatedFields);
-    res.json(file);
+    const file = await File.getById(req.params.id);
+    const userId = req.user?.sub;
+
+    if (!file || file.user_id !== userId) {
+      return res.status(403).json({ error: "Not authorized to update this file." });
+    }
+
+    const updatedFields = {
+      name,
+      content,
+      parent_id,
+      type,
+      idea_id,
+      is_public
+    };
+
+    const updatedFile = await File.update(req.params.id, updatedFields);
+    res.json(updatedFile);
   } catch (err) {
     console.error("❌ Error in updateFile:", err);
     res.status(400).json({ error: err.message });
   }
 };
+
+
+// Stream a file from S3
+const streamFile = async (req, res) => {
+  try {
+    const file = await File.getById(req.params.id);
+    const userId = req.user?.sub;
+
+    if (!file || file.type !== "upload") {
+      return res.status(404).json({ error: "File not found or not an upload" });
+    }
+
+    const isOwner = file.user_id === userId;
+    const isPublic = file.is_public === true || file.is_public === "true";
+
+    if (!isOwner && !isPublic) {
+      return res.status(403).json({ error: "You do not have access to this file." });
+    }
+
+    const key = path.basename(file.path);
+    const s3Stream = s3.getObject({
+      Bucket: BUCKET_NAME,
+      Key: key,
+    }).createReadStream();
+
+    res.setHeader("Content-Type", file.mime_type || "application/octet-stream");
+    res.setHeader("Content-Disposition", `inline; filename="${file.name}"`);
+
+    s3Stream.pipe(res);
+  } catch (err) {
+    console.error("❌ Error streaming file:", err);
+    res.status(500).json({ error: "Failed to stream file." });
+  }
+};
+
+
 
 module.exports = {
   uploadFile,
@@ -149,4 +200,5 @@ module.exports = {
   getFileById,
   createFile,
   updateFile,
+  streamFile
 };

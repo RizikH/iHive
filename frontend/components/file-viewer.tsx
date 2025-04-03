@@ -11,95 +11,17 @@ type Props = {
 };
 
 const FileViewer = ({ file }: Props) => {
-  const [imagePath, setImagePath] = useState<string>("");
-  const [isLoading, setIsLoading] = useState<boolean>(true);
-
-  const getSignedUrl = async (path: string) => {
-    try {
-      // Request a signed URL from your backend
-      const response = await fetch(`${API_URL}/get-signed-url?path=${encodeURIComponent(path)}`);
-      if (!response.ok) throw new Error('Failed to get signed URL');
-      const data = await response.json();
-      return data.signedUrl;
-    } catch (error) {
-      console.error('Error getting signed URL:', error);
-      return path; // Fall back to original path
-    }
-  };
-
-  // Function to get complete image path with authentication
-  const getFilePath = async (path: string | undefined) => {
-    if (!path) return '';
-    
-    // If it looks like an S3 path or contains your bucket name
-    if (path.includes('amazonaws.com') || path.includes('your-bucket-name')) {
-      return await getSignedUrl(path);
-    }
-    
-    // If the path is already a full URL, return it
-    if (path.startsWith('http://') || path.startsWith('https://')) {
-      return path;
-    }
-    
-    // If it's a relative path, add the API_URL
-    if (path.startsWith('/')) {
-      return `${API_URL}${path}`;
-    }
-    
-    // Otherwise add API_URL with a slash
-    return `${API_URL}/${path}`;
-  };
+  const [fileUrl, setFileUrl] = useState<string>("");
 
   useEffect(() => {
-    const loadFilePath = async () => {
-      setIsLoading(true);
-      if (file.path) {
-        const path = await getFilePath(file.path);
-        setImagePath(path);
-      }
-      setIsLoading(false);
-    };
-    
-    loadFilePath();
-  }, [file.path]);
-
-  const renderUploadPreview = () => {
-    const isImage = file.path?.match(/\.(jpeg|jpg|png|gif|bmp|webp)$/i);
-    const isPdf = file.path?.match(/\.pdf$/i);
-
-    if (isLoading) {
-      return <div className={styles.loading}>Loading file...</div>;
+    if (file.type === "upload" && file.id) {
+      // Use backend proxy route to fetch and serve the file
+      setFileUrl(`${API_URL}/files/${file.id}/view`);
     }
-
-    return (
-      <>
-        {isImage ? (
-          <div className={styles.imageContainer}>
-            <img 
-              src={imagePath} 
-              alt={file.name} 
-              className={styles.uploadedImage} 
-              crossOrigin="anonymous"
-              onError={(e) => {
-                console.error("Image failed to load:", imagePath);
-                e.currentTarget.src = "/placeholder-image.png";
-                e.currentTarget.alt = "Image failed to load";
-              }}
-            />
-          </div>
-        ) : isPdf ? (
-          <iframe src={imagePath} title={file.name} className={styles.pdfViewer} />
-        ) : (
-          <a href={imagePath} download>
-            📎 Download {file.name}
-          </a>
-        )}
-      </>
-    );
-  };
+  }, [file]);
 
   const getLanguage = (filename: string): string => {
-    const ext = filename.split(".").pop();
+    const ext = filename.split(".").pop()?.toLowerCase();
     switch (ext) {
       case "js":
       case "jsx":
@@ -128,6 +50,35 @@ const FileViewer = ({ file }: Props) => {
     }
   };
 
+  const renderUploadPreview = () => {
+    const isImage = file.mime_type?.startsWith("image/");
+    const isPdf = file.mime_type === "application/pdf";
+
+    return (
+      <>
+        {isImage ? (
+          <div className={styles.imageContainer}>
+            <img
+              src={fileUrl}
+              alt={file.name}
+              className={styles.uploadedImage}
+              onError={(e) => {
+                console.error("Image failed to load:", fileUrl);
+                e.currentTarget.src = "/placeholder-image.png";
+              }}
+            />
+          </div>
+        ) : isPdf ? (
+          <iframe src={fileUrl} title={file.name} className={styles.pdfViewer} />
+        ) : (
+          <a href={fileUrl} download>
+            📎 Download {file.name}
+          </a>
+        )}
+      </>
+    );
+  };
+
   const renderTextFile = () => (
     <SyntaxHighlighter
       language={getLanguage(file.name)}
@@ -143,7 +94,7 @@ const FileViewer = ({ file }: Props) => {
   return (
     <div className={styles.viewerWrapper}>
       <h3>{file.name}</h3>
-      {file.type === "upload" && file.path
+      {file.type === "upload" && fileUrl
         ? renderUploadPreview()
         : file.type === "text"
         ? renderTextFile()
