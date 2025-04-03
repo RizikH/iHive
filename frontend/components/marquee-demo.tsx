@@ -10,75 +10,7 @@ import { Dialog, DialogContent, DialogTitle } from "../components/ui/dialog";
 import styles from "@/app/styles/repository-modal.module.css";
 import { fetcher } from "@/app/utils/fetcher";
 import { VisuallyHidden } from "@radix-ui/react-visually-hidden";
-
-
-
-
-// ========================
-// Repository Modal Component
-// ========================
-
-const RepositoryModal = ({
-  isOpen,
-  onClose,
-  repoId,
-  title,
-}: {
-  isOpen: boolean;
-  onClose: () => void;
-  repoId: string;
-  title: string;
-}) => {
-  const [content, setContent] = useState<string>("");
-  const [currentFileId, setCurrentFileId] = useState<string | null>(null);
-  const [currentFileName, setCurrentFileName] = useState<string>("Main Content");
-
-  const handleFileSelect = (fileId: string, fileContent: string, fileName: string) => {
-    setCurrentFileId(fileId);
-    setContent(fileContent);
-    setCurrentFileName(fileName);
-  };
-
-  return (
-    <Dialog open={isOpen} onOpenChange={onClose}>
-      {/* Add DialogTitle component */}
-      <VisuallyHidden>
-        <DialogTitle>{title || "Repository Modal"}</DialogTitle>
-      </VisuallyHidden>
-      <DialogContent className={styles["modal-content"]}>
-        <div className={styles["modal-container"]}>
-          <div className={styles.sidebar}>
-            <h3 className={styles["sidebar-title"]}>Files</h3>
-            <div className={styles["file-tree-container"]}>
-              <FileTreeDemo
-                onFileSelect={handleFileSelect}
-                currentFileId={currentFileId}
-                onContentUpdate={() => { }}
-                onFileDelete={() => { }}
-                isPreview={true}
-              />
-            </div>
-          </div>
-
-          <div className={styles["content-area"]}>
-            <div className={styles["content-header"]}>
-              <h3 className={styles["content-title"]}>{currentFileName}</h3>
-            </div>
-            <div className={styles["content-body"]}>
-              {content ? (
-                <div dangerouslySetInnerHTML={{ __html: content }} />
-              ) : (
-                <div className={styles["content-placeholder"]}>
-                  <p>Select a file from the file tree to view its contents.</p>
-                </div>
-              )}
-            </div>
-          </div>
-        </div>
-      </DialogContent>
-    </Dialog>
-  );
-};
+import RepositoryModal from "@/components/repository-modal";
 
 // ========================
 // Repository Card Component
@@ -119,7 +51,7 @@ const ReviewCard = ({
               className="rounded-full"
               width="32"
               height="32"
-              alt=""
+              alt={`${username}'s avatar`}
               src={img || "/placeholder.svg"}
             />
             <div className="flex flex-col">
@@ -155,10 +87,15 @@ export default function MarqueeDemo() {
   useEffect(() => {
     const fetchUserIdeas = async () => {
       try {
-        const data = await fetcher("/ideas/"); // 🔐 Auth-required route
-        setIdeas(data);
+        const data = await fetcher(`/ideas`);
+        
+        if (Array.isArray(data) && data.length > 0) {
+          setIdeas(data);
+        } else {
+          setIdeas([]);
+        }
 
-        // Try to get user info from localStorage
+        // Get user info from localStorage (this is still needed for profile display)
         const savedUsername = localStorage.getItem("username");
         const savedAvatar = localStorage.getItem("userAvatar");
 
@@ -166,6 +103,7 @@ export default function MarqueeDemo() {
         if (savedAvatar) setUserAvatar(savedAvatar);
       } catch (err) {
         console.error("Error loading user ideas:", err);
+        setIdeas([]);
       }
     };
 

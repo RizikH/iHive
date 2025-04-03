@@ -3,14 +3,24 @@
 import React, { useEffect, useState } from "react";
 import Head from "next/head";
 import { useSearchParams } from "next/navigation";
-import NavBar from "@/components/nav-bar";
-import styles from "../styles/repository.module.css";
 
+import NavBar from "@/components/nav-bar";
 import FileTree, { FileItem } from "@/components/file-tree";
 import FileEditor from "@/components/file-editor";
 import FileViewer from "@/components/file-viewer";
+import Footer from '@/components/footer';
 
-import { fetcher } from "@/app/utils/fetcher"; // ✅ global fetcher import
+import {
+  FiCopy,
+  FiDownload,
+  FiUpload,
+  FiEdit,
+} from "react-icons/fi";
+
+import styles from "../styles/repository.module.css";
+import { fetcher } from "@/app/utils/fetcher";
+
+const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000/api';
 
 export default function Repository() {
   const [files, setFiles] = useState<FileItem[]>([]);
@@ -25,14 +35,14 @@ export default function Repository() {
     try {
       setLoading(true);
       const path = ideaId ? `/files?idea_id=${ideaId}` : "/files";
-      const data = await fetcher(path); // ✅ now using fetcher
+      console.log("Fetching files from:", path);
+      const data = await fetcher(path);
+      console.log("Files response:", data);
       setFiles(data);
     } catch (err) {
-      if (err instanceof Error) {
-        setError(err.message);
-      } else {
-        setError("An unknown error occurred");
-      }
+      console.error("Error fetching files:", err);
+      if (err instanceof Error) setError(err.message);
+      else setError("An unknown error occurred");
     } finally {
       setLoading(false);
     }
@@ -42,7 +52,7 @@ export default function Repository() {
     fetchFiles();
   }, [ideaId]);
 
-  const handleSelectFile = (file: FileItem) => {
+  const handleSelectFile = (file: FileItem | null) => {
     setCurrentFile(file);
   };
 
@@ -83,34 +93,31 @@ export default function Repository() {
               onRefresh={fetchFiles}
               selectedId={currentFile?.id || null}
               ideaId={Number(ideaId) || 0}
-              userId={""}
             />
           </div>
 
           <div className={styles.docSpace}>
             {currentFile ? (
-              currentFile.type === "text" ? (
-                <FileEditor file={currentFile} onUpdate={handleUpdate} />
-              ) : (
-                <FileViewer file={currentFile} />
-              )
+              <>
+                <div className={styles.docContent}>
+                  {currentFile.type === "text" ? (
+                    <FileEditor file={currentFile} onUpdate={handleUpdate} />
+                  ) : (
+                    <FileViewer file={currentFile} />
+                  )}
+                </div>
+              </>
             ) : (
               <div className={styles.placeholderContent}>
-                <h3>Select a file to view or edit</h3>
-                <p>
-                  You can also create a new file or folder from the file tree.
-                </p>
+                <h3>Welcome to iHive Editor!</h3>
+                <p>Select or create a file to begin editing.</p>
               </div>
             )}
           </div>
         </main>
 
-        <footer className={styles.footer}>
-          <p>
-            © 2025 iHive · Entrepreneur | <a href="/terms">Terms</a> |{" "}
-            <a href="/Privacy">Privacy</a>
-          </p>
-        </footer>
+        {/* Footer */}
+        <Footer role="Entrepreneur" />
       </div>
     </>
   );

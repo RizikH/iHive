@@ -2,230 +2,213 @@
    Container and Layout
    ============================================= */
 .fileTreeContainer {
-  display: flex;
-  flex-direction: column;
-  gap: 1rem;
+  width: 100%;
+  height: 100%;
+  overflow: auto;
+  padding: 10px;
+  border-radius: 5px;
+  min-height: 400px;
+  border: 1px solid #eaeaea;
+  background-color: #f9f9f9;
+  position: relative;
+}
+
+.fileTreeList {
+  width: 100%;
+  height: calc(100% - 40px);
+  min-height: 300px;
+  overflow: auto;
+  margin-top: 10px;
+  border-radius: 4px;
+  background-color: white;
+  padding: 10px;
+  cursor: default; /* Show default cursor on empty areas */
 }
 
 .emptyState {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  height: 100%;
+  color: #999;
   text-align: center;
   padding: 20px;
-  color: #666;
-  font-size: 14px;
 }
 
-.emptyState p:first-child {
-  margin-bottom: 8px;
-}
-
-.emptyState p:last-child {
-  font-size: 12px;
-  color: #999;
+.emptyState p {
+  margin: 5px 0;
 }
 
 .folderContent {
-  width: 100%;
-  padding-left: 16px;
+  margin-left: 16px;
+  padding-left: 8px;
+  border-left: 1px dashed #ddd;
+}
+
+.depth-0 .folderContent {
+  background: #f6f8fa;
+}
+
+.depth-1 .folderContent {
+  background: #f6f8fa;
+}
+
+.depth-2 .folderContent {
+  background: #f6f8fa;
+}
+
+.depth-3 .folderContent {
+  background: #f6f8fa;
 }
 
 /* =============================================
-   File Tree Actions
-   ============================================= */
-.fileTreeHeader {
+     Tree Action Bar (Top)
+     ============================================= */
+.treeActionsTop {
   display: flex;
-  justify-content: flex-end;
-  padding: 0.5rem;
-  border-bottom: 1px solid #eee;
+  gap: 10px;
+  margin-bottom: 10px;
 }
 
-.fileTreeActions {
-  display: flex;
-  gap: 8px;
-  padding: 8px;
-}
-
-.fileTreeActions button {
-  background: none;
-  border: none;
-  cursor: pointer;
-  padding: 0.5rem;
-  border-radius: 4px;
-  transition: background-color 0.2s;
-}
-
-.fileTreeActions button:hover {
-  background-color: rgba(0, 0, 0, 0.05);
-}
-
-.createFileForm {
-  display: flex;
-  flex-direction: column;
-  gap: 0.5rem;
-  padding: 0.5rem;
-  background: white;
-  border-radius: 4px;
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-}
-
-.createFileForm input {
-  padding: 0.5rem;
+.treeActionsTop button,
+.treeActionsTop label {
+  background-color: #f1f1f1;
+  color: #333;
   border: 1px solid #ddd;
+  padding: 5px 10px;
   border-radius: 4px;
-}
-
-.createFileForm button {
-  padding: 0.5rem;
-  background: #f0f0f0;
-  border: none;
-  border-radius: 4px;
+  font-size: 0.9rem;
   cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  transition: all 0.2s ease;
 }
 
-.createFileForm button:hover {
-  background: #e0e0e0;
+.treeActionsTop button:hover,
+.treeActionsTop label:hover {
+  background-color: #e0e0e0;
+}
+
+.treeActionsTop input[type="file"] {
+  display: none;
 }
 
 /* =============================================
-   File and Folder Items
-   ============================================= */
+     File and Folder Items
+     ============================================= */
 .treeItem {
-  position: relative;
-  cursor: move;
-  display: flex;
-  align-items: center;
-  padding-right: 70px; /* Make space for action buttons */
-}
-
-.fileLabel, .folderLabel {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  width: 100%;
-  padding-right: 8px;
+  margin: 2px 0;
+  user-select: none;
 }
 
 .fileItem {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  padding: 2px 4px;
+  padding: 4px 6px;
   border-radius: 4px;
+  cursor: pointer;
+  transition: background-color 0.2s ease;
 }
 
 .fileItem:hover {
-  background-color: rgba(0, 0, 0, 0.05);
+  background-color: #f0f0f0;
+}
+
+.fileItemLeft {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  flex: 1;
 }
 
 .fileItemName {
-  flex: 1;
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  font-size: 0.9rem;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
   cursor: pointer;
-  display: flex;
-  align-items: center;
 }
 
-/* Ensure delete button doesn't interfere with folder expansion */
-.folderLabel {
-  width: 100%;
-  min-width: 0;
+.toggleIcon {
+  cursor: pointer;
+  display: inline-flex;
+  margin-right: 2px;
+  color: #666;
 }
 
-.fileLabel {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  width: 100%;
-  gap: 8px;
+.fileIndent {
+  width: 16px;
+  display: inline-block;
 }
 
-/* =============================================
-   Action Buttons
-   ============================================= */
-.deleteButton {
-  opacity: 0;
+.folderIcon {
+  color: #0969da;
+}
+
+.selected .fileItem {
+  background-color: #e6f7ff;
+  border: 1px solid #91d5ff;
+  padding: 3px 5px; /* Adjust for the border */
+}
+
+.dropTarget {
+  background-color: #f0f7ff;
+  border: 1px dashed #1890ff;
+}
+
+.deleteBtn {
+  opacity: 0.7;
   background: none;
   border: none;
+  color: #ff4d4f;
   cursor: pointer;
   padding: 4px;
-  color: #666;
   border-radius: 4px;
-  transition: all 0.2s ease;
 }
 
-.deleteButton:hover {
-  color: #ff4444;
-  background-color: rgba(255, 68, 68, 0.1);
-}
-
-.treeItem:hover .deleteButton {
+.deleteBtn:hover {
   opacity: 1;
-}
-
-.itemActions {
-  display: flex;
-  gap: 4px;
-  opacity: 0;
-  transition: opacity 0.2s;
-  position: absolute;
-  right: 8px;
-  top: 50%;
-  transform: translateY(-50%);
-}
-
-.treeItem:hover .itemActions {
-  opacity: 1;
-}
-
-.actionButton {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  width: 28px;
-  height: 28px;
-  padding: 0;
-  border: none;
-  border-radius: 4px;
-  background: transparent;
-  color: #666;
-  cursor: pointer;
-  transition: all 0.2s;
-}
-
-.actionButton:hover {
-  background-color: rgba(0, 0, 0, 0.1);
-  color: #000;
-}
-
-.actionButton[title*="Delete"]:hover {
-  color: #ff4444;
-  background-color: rgba(255, 68, 68, 0.1);
-}
-
-.actionButton[title*="Rename"]:hover {
-  color: #0070f3;
-  background-color: rgba(0, 112, 243, 0.1);
-}
-
-/* You can add these specific hover effects if desired */
-.actionButton[title="Save"]:hover {
-  color: #4caf50;
-}
-
-.actionButton[title="Cancel"]:hover {
-  color: #f44336;
-}
-
-.fileActions {
-  display: none;
-  gap: 4px;
-}
-
-.fileItem:hover .fileActions {
-  display: flex;
+  background-color: #fff1f0;
 }
 
 /* =============================================
-   Rename Controls
-   ============================================= */
+     Inline Actions (nested items)
+     ============================================= */
+.treeActionsInline {
+  display: flex;
+  gap: 6px;
+  margin: 6px 0 10px 16px;
+}
+
+.treeActionsInline button,
+.treeActionsInline label {
+  font-size: 12px;
+  padding: 0.3rem 0.5rem;
+  border: 1px solid #ccc;
+  background-color: #f9f9f9;
+  border-radius: 4px;
+  cursor: pointer;
+  transition: background-color 0.2s ease;
+}
+
+.treeActionsInline button:hover,
+.treeActionsInline label:hover {
+  background-color: #eee;
+}
+
+.treeActionsInline input[type="file"] {
+  display: none;
+}
+
+/* =============================================
+     Rename Controls
+     ============================================= */
 .renameForm {
   display: flex;
   align-items: center;
@@ -299,8 +282,8 @@
 }
 
 /* =============================================
-   Drag and Drop
-   ============================================= */
+     Drag and Drop
+     ============================================= */
 .dropTarget {
   position: relative;
 }
@@ -322,12 +305,10 @@
   opacity: 0.5;
 }
 
-/* Add visual feedback for drag operation */
 .dragging {
   opacity: 0.5;
 }
 
-/* Highlight drop zones */
 .dropZone {
   position: relative;
 }
@@ -344,9 +325,8 @@
 }
 
 /* =============================================
-   Dialogs
-   ============================================= */
-/* Style for the delete confirmation dialog (optional) */
+     Delete Dialog (Optional)
+     ============================================= */
 .deleteDialog {
   position: fixed;
   top: 50%;
@@ -357,4 +337,39 @@
   border-radius: 8px;
   box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
   z-index: 1000;
-} 
+}
+
+/* Depth styling */
+.depth-0 {
+  margin-left: 0px;
+}
+
+.depth-1 {
+  margin-left: 8px;
+}
+
+.depth-2 {
+  margin-left: 6px;
+}
+
+.depth-3 {
+  margin-left: 4px;
+}
+
+/* Add a subtle hover effect to the empty areas to indicate they're clickable */
+.fileTreeList:empty, 
+.fileTreeContainer:empty {
+  min-height: 100px;
+  border: 1px dashed #ccc;
+  background-color: #fafafa;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #888;
+}
+
+.fileTreeList:empty:hover, 
+.fileTreeContainer:empty:hover {
+  background-color: #f5f5f5;
+  border-color: #aaa;
+}

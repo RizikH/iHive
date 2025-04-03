@@ -7,14 +7,20 @@ const authenticate = require('../middleware/authMiddleware');
 // Enable file upload middleware
 router.use(fileUpload());
 
-// 🔓 Public Routes
 router.get('/', fileController.getFiles);
+
+// protected route for streaming files
+router.get('/:id/view', authenticate, fileController.streamFile);
+
+
+// Gets a file by ID
 router.get('/:id', fileController.getFileById);
 
 // 🔐 Protected Routes
 router.post('/', authenticate, fileController.createFile);
 router.put('/:id', authenticate, fileController.updateFile);
 router.delete('/:id', authenticate, fileController.deleteFile);
+
 router.post('/upload', authenticate, fileController.uploadFile);
 
 module.exports = router;

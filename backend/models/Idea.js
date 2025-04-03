@@ -25,12 +25,21 @@ const createIdea = async (ideaData) => {
         .from("ideas")
         .insert([ideaData])
         .select()
-        .single();
+        .single(); 
 
     if (error) throw error;
 
-    // Generate tags using OpenAI
+    // Generate tags and category using OpenAI
     const generatedTags = await openAI.generateTags(data.title, data.description);
+    const generatedCategory = await openAI.generateCategory(data.title, data.description);
+
+    // Update the idea with the generated category
+    const { error: updateError } = await supabase
+        .from("ideas")
+        .update({ category: generatedCategory })
+        .eq("id", data.id);
+
+    if (updateError) throw updateError;
 
     // Insert tags into the `tags` table and link them
     const insertedTags = [];
