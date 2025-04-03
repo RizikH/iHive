@@ -46,8 +46,10 @@ const RepositoryModal = ({
     try {
       setIsLoading(true);
       setError(null);
-      const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000/api';
-      const data = await fetcher(`${API_URL}/ideas/${repoId}`);
+      
+      // IMPORTANT: Just provide the path - the fetcher utility will add the API URL
+      // Don't use full URLs like `${API_URL}/ideas/${repoId}` to avoid duplication
+      const data = await fetcher(`/ideas/${repoId}`);
       setRepoDetails(data);
     } catch (err) {
       console.error("Error fetching repository details:", err);
@@ -220,9 +222,7 @@ export default function MarqueeDemo() {
   useEffect(() => {
     const fetchUserIdeas = async () => {
       try {
-        // Define API URL with proper base path
-        const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000/api';
-        const data = await fetcher(`${API_URL}/ideas`); // Use full API path
+        const data = await fetcher(`/ideas`);
         
         if (Array.isArray(data) && data.length > 0) {
           setIdeas(data);

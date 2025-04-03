@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useRef, useEffect } from "react";
 import styles from "@/app/styles/file-tree.module.css";
 import { JSX } from "react/jsx-runtime";
 import { fetcher } from "@/app/utils/fetcher";
@@ -61,6 +61,7 @@ const FileTree = ({ files, onSelect, onRefresh, selectedId, ideaId }: FileTreePr
   const [expanded, setExpanded] = useState<Record<string, boolean>>({});
   const [draggedItem, setDraggedItem] = useState<string | null>(null);
   const [dropTarget, setDropTarget] = useState<string | null>(null);
+  const fileTreeRef = useRef<HTMLDivElement>(null);
 
   // Auto-expand first level folders at first load
   React.useEffect(() => {
@@ -74,6 +75,23 @@ const FileTree = ({ files, onSelect, onRefresh, selectedId, ideaId }: FileTreePr
       setExpanded(prev => ({...prev, ...newExpanded}));
     }
   }, [files]);
+
+  // Add click outside listener to deselect folders and files
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (fileTreeRef.current && !fileTreeRef.current.contains(event.target as Node)) {
+        // Click is outside the file tree - deselect the current file
+        if (selectedId) {
+          onSelect({ id: "", name: "", type: "text", parent_id: null });
+        }
+      }
+    };
+
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => {
+      document.removeEventListener('mousedown', handleClickOutside);
+    };
+  }, [selectedId, onSelect]);
 
   const selectedFile = files.find((f) => f.id === selectedId) || null;
 
@@ -263,7 +281,7 @@ const FileTree = ({ files, onSelect, onRefresh, selectedId, ideaId }: FileTreePr
   const isPreviewMode = false; // Set this based on your needs
   
   return (
-    <div className={styles.fileTreeContainer}>
+    <div className={styles.fileTreeContainer} ref={fileTreeRef}>
       <div className={styles.treeActionsTop}>
         <button onClick={() => handleCreate("folder")} title="Create new folder">
           <FiFolderPlus /> Folder
