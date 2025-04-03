@@ -52,7 +52,7 @@ export default function Repository() {
     fetchFiles();
   }, [ideaId]);
 
-  const handleSelectFile = (file: FileItem) => {
+  const handleSelectFile = (file: FileItem | null) => {
     setCurrentFile(file);
   };
 
