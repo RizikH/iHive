@@ -12,67 +12,57 @@ const ideaRoutes = require("./routes/ideaRoutes");
 const tagRoutes = require("./routes/tagRoutes");
 const fileRoutes = require("./routes/fileRoutes");
 
-// Create app and server
 const app = express();
 const server = http.createServer(app);
 
 const allowedOrigins = [
   "http://localhost:3000",
+  "https://ihive.vercel.app",
   "https://ihive-git-dev-main-rizik-haddads-projects.vercel.app",
-  "https://ihive.vercel.app"
 ];
 
+app.use((req, res, next) => {
+  const origin = req.headers.origin;
 
-app.use(cors({
-  origin: function (origin, callback) {
-    // Allow requests with no origin (like mobile apps or curl requests)
-    if (!origin || allowedOrigins.includes(origin)) {
-      callback(null, true);
-    } else {
-      callback(new Error("CORS not allowed from this origin"));
-    }
-  },
-  credentials: true,
-  methods: ["GET", "POST", "PUT", "DELETE"]
-}));
+  if (allowedOrigins.includes(origin)) {
+    res.setHeader("Access-Control-Allow-Origin", origin);
+  }
 
+  res.setHeader("Access-Control-Allow-Credentials", "true");
+  res.setHeader("Access-Control-Allow-Methods", "GET, POST, PUT, DELETE, OPTIONS");
+  res.setHeader("Access-Control-Allow-Headers", "Origin, X-Requested-With, Content-Type, Accept, Authorization");
 
-/**
- * 🔹 Middleware
- */
-app.use(cookieParser()); // ✅ Parse cookies for authentication
+  if (req.method === "OPTIONS") {
+    return res.sendStatus(200);
+  }
+
+  next();
+});
+
+// Middleware
+app.use(cookieParser());
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
-/**
- * 🔹 API Routes
- */
+// API Routes
 app.use("/api/users", userRoutes);
 app.use("/api/ideas", ideaRoutes);
 app.use("/api/tags", tagRoutes);
 app.use("/api/files", fileRoutes);
 
-/**
- * 🔹 Health Check
- */
+// Health Check
 app.get("/", (req, res) => {
   res.send("Welcome to iHive API");
 });
 
-/**
- * 🔹 WebSocket Support
- */
-initializeSocket(server, { origin: "http://localhost:3000", credentials: true });
+// WebSocket (optional, restrict in prod if needed)
+initializeSocket(server, { origin: allowedOrigins[0], credentials: true });
 
-/**
- * 🔹 Global Error Handling
- */
+// Global Error Handler
 const errorHandler = require("./middleware/errorHandler");
 app.use(errorHandler);
 
-/**
- * 🔹 Start Server
- */
+// Start Server
 const PORT = process.env.PORT || 5000;
 server.listen(PORT, () => {
   console.log(`🚀 Server running at http://localhost:${PORT}`);
