@@ -1,28 +1,20 @@
 const jwt = require("jsonwebtoken");
 
-const SUPABASE_JWT_SECRET = process.env.SUPABASE_JWT_SECRET;
-
 const authenticate = (req, res, next) => {
-  let token;
-
-  const authHeader = req.headers.authorization;
-  if (authHeader?.startsWith("Bearer ")) {
-    token = authHeader.split(" ")[1];
-  } else if (req.cookies?.token) {
-    token = req.cookies.token;
-  }
-
+  const token = req.cookies.token;
   if (!token) {
-    return res.status(401).json({ error: "Unauthorized: No token provided" });
+    console.log("No token found in cookies");
+    return res.status(401).json({ error: "Unauthorized" });
   }
 
   try {
-    const decoded = jwt.verify(token, SUPABASE_JWT_SECRET);
+    const decoded = jwt.verify(token, process.env.SUPABASE_JWT_SECRET);
     req.user = decoded;
+    console.log("✅ Authenticated user:", decoded);
     next();
   } catch (err) {
-    console.error("❌ JWT verification failed:", err.message);
-    return res.status(401).json({ error: "Unauthorized: Invalid token" });
+    console.error("❌ Token verification failed:", err.message);
+    return res.status(401).json({ error: "Invalid token" });
   }
 };
 
