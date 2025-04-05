@@ -74,21 +74,31 @@ export const AuthForm = ({ initialView = "login", onClose }: AuthFormProps) => {
       email: formData.email,
       password: formData.password,
     });
-
+  
     setSuccess("Login successful!");
-
+  
+    // ✅ Set cookie (let backend handle auth via cookie-parser)
     if (data.token) {
       document.cookie = `token=${data.token}; path=/; SameSite=Lax`;
+  
+      // ✅ Decode token to store sub (user_id) and email for UI
+      const payloadBase64 = data.token.split(".")[1];
+      const decoded = JSON.parse(atob(payloadBase64));
+  
+      localStorage.setItem("user_id", decoded.sub);
+      localStorage.setItem("email", decoded.email);
+      localStorage.setItem("role", decoded.role || "");
     }
-
+  
+    // ✅ Store additional fields from response
     storeUserLocally(data);
-
+  
     setTimeout(() => {
       hideForm();
       router.push("/");
     }, 1000);
   };
-
+  
   const handleRegister = async () => {
     if (!formData.role) throw new Error("Please select a role (Entrepreneur or Investor).");
     if (!formData.termsAccepted) throw new Error("You must accept the Terms & Privacy Policy.");
