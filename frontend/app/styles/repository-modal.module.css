@@ -208,3 +208,49 @@
     display: none !important;
   }
   
+  /* =============================================
+     Investment Section
+     ============================================= */
+  .investButton {
+    margin-top: 1rem;
+    background-color: #0069d9;
+    color: white;
+    border: none;
+    padding: 0.6rem 1.2rem;
+    border-radius: 5px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+  }
+  
+  .investButton:hover {
+    background-color: #0056b3;
+  }
+  
+  .investButtonIcon {
+    margin-right: 0.5rem;
+  }
+  
+  /* =============================================
+     Repository View Section
+     ============================================= */
+  .viewRepositoryButton {
+    margin-top: 1rem;
+    background-color: #28a745;
+    color: white;
+    border: none;
+    padding: 0.6rem 1.2rem;
+    border-radius: 5px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+  }
+  
+  .viewRepositoryButton:hover {
+    background-color: #218838;
+  }
+  
+  .viewRepositoryButtonIcon {
+    margin-right: 0.5rem;
+  }
+  
