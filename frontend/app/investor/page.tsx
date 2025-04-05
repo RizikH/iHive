@@ -76,9 +76,10 @@ const InvestorPage = () => {
             }
         };
 
-
         fetchSearchedIdeas();
-    }, [searchTerm]);
+    }, [searchTerm, allIdeas]);
+
+
 
     useEffect(() => {
         const fetchAllTags = async () => {

@@ -6,6 +6,7 @@ import { oneDark } from "react-syntax-highlighter/dist/esm/styles/prism";
 import { fetcher } from "@/app/utils/fetcher";
 import ReactMarkdown from "react-markdown";
 import remarkGfm from "remark-gfm";
+import Image from "next/image";
 
 type Props = {
   file: FileItem;
@@ -52,7 +53,7 @@ const FileViewer = ({ file }: Props) => {
         return "text";
     }
   };
-  
+
 
   const isCodeFile = (filename: string): boolean => {
     const codeExtensions = [
@@ -62,24 +63,22 @@ const FileViewer = ({ file }: Props) => {
     const ext = filename.split(".").pop()?.toLowerCase();
     return codeExtensions.includes(ext || "");
   };
-  
+
 
   useEffect(() => {
+    let objectUrl: string;
+
     const fetchFile = async () => {
       if (file.type === "upload" && file.id) {
         try {
           const blob = await fetcher(`/files/${file.id}/view`, "GET", null, {}, "blob");
 
-          if (getLanguage(file.name) === "markdown") {
-            const text = await blob.text();
-            setFileTextContent(text);
-          } else if (isCodeFile(file.name)) {
+          if (getLanguage(file.name) === "markdown" || isCodeFile(file.name)) {
             const text = await blob.text();
             setFileTextContent(text);
           } else {
-            const objectUrl = URL.createObjectURL(blob);
+            objectUrl = URL.createObjectURL(blob);
             setFileBlobUrl(objectUrl);
-            return () => URL.revokeObjectURL(objectUrl);
           }
         } catch (err) {
           console.error("Error loading file blob:", err);
@@ -91,7 +90,12 @@ const FileViewer = ({ file }: Props) => {
     };
 
     fetchFile();
+
+    return () => {
+      if (objectUrl) URL.revokeObjectURL(objectUrl);
+    };
   }, [file]);
+
 
   const renderCodeBlock = (content: string) => (
     <SyntaxHighlighter
@@ -134,9 +138,9 @@ const FileViewer = ({ file }: Props) => {
       </ReactMarkdown>
     </div>
   );
-  
-  
-  
+
+
+
 
   const renderUploadPreview = () => {
     const isImage = file.mime_type?.startsWith("image/");
@@ -145,10 +149,13 @@ const FileViewer = ({ file }: Props) => {
     return (
       <>
         {isImage ? (
-          <img
+          <Image
             src={fileBlobUrl}
             alt={file.name}
+            width={800}
+            height={500}
             className={styles.uploadedImage}
+            unoptimized={true}
           />
         ) : isPdf ? (
           <iframe
