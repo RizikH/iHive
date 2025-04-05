@@ -236,7 +236,7 @@
      ============================================= */
   .viewRepositoryButton {
     margin-top: 1rem;
-    background-color: #28a745;
+    background-color: #fd7e14;
     color: white;
     border: none;
     padding: 0.6rem 1.2rem;
@@ -247,7 +247,7 @@
   }
   
   .viewRepositoryButton:hover {
-    background-color: #218838;
+    background-color: #e06703;
   }
   
   .viewRepositoryButtonIcon {
