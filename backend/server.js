@@ -18,9 +18,10 @@ const server = http.createServer(app);
 
 const allowedOrigins = [
   "http://localhost:3000",
-  "ihive-git-dev-main-rizik-haddads-projects.vercel.app",
+  "https://ihive-git-dev-main-rizik-haddads-projects.vercel.app",
   "https://ihive.vercel.app"
 ];
+
 
 app.use(cors({
   origin: function (origin, callback) {
