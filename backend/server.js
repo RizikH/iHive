@@ -16,14 +16,25 @@ const fileRoutes = require("./routes/fileRoutes");
 const app = express();
 const server = http.createServer(app);
 
-/**
- * 🔹 CORS Configuration — Allow ONLY localhost:3000
- */
+const allowedOrigins = [
+  "http://localhost:3000",
+  "ihive-git-dev-main-rizik-haddads-projects.vercel.app",
+  "https://ihive.vercel.app"
+];
+
 app.use(cors({
-  origin: "http://localhost:3000",
+  origin: function (origin, callback) {
+    // Allow requests with no origin (like mobile apps or curl requests)
+    if (!origin || allowedOrigins.includes(origin)) {
+      callback(null, true);
+    } else {
+      callback(new Error("CORS not allowed from this origin"));
+    }
+  },
   credentials: true,
   methods: ["GET", "POST", "PUT", "DELETE"]
 }));
+
 
 /**
  * 🔹 Middleware
