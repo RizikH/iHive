@@ -185,7 +185,7 @@ const RepositoryModal = ({
                               href={`/repository?id=${repoId}`}
                               className={styles.viewRepositoryButton}
                             >
-                              <span className={styles.viewRepositoryButtonIcon}>📂</span>
+                              <span className={styles.viewRepositoryButtonIcon}>🚀</span>
                               View Full Repository
                             </Link>
                           </div>
