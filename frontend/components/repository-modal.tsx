@@ -7,17 +7,22 @@ import { fetcher } from "@/app/utils/fetcher";
 import { VisuallyHidden } from "@radix-ui/react-visually-hidden";
 import FileTree, { FileItem } from "@/components/file-tree";
 import FileViewer from "@/components/file-viewer";
+import Link from "next/link";
 
 const RepositoryModal = ({
   isOpen,
   onClose,
   repoId,
   title,
+  isInvestorView = false,
+  onInvest,
 }: {
   isOpen: boolean;
   onClose: () => void;
   repoId: string;
   title: string;
+  isInvestorView?: boolean;
+  onInvest?: (repoId: string) => void;
 }) => {
   const [content, setContent] = useState<string>("");
   const [files, setFiles] = useState<FileItem[]>([]);
@@ -148,6 +153,44 @@ const RepositoryModal = ({
                           <span>Last updated: {new Date(repoDetails.updatedAt).toLocaleDateString()}</span>
                         )}
                       </div>
+
+                      {/* handle investor view */}
+                      {isInvestorView && (
+                        <div className="mt-4 border-t pt-4">
+                          <div className="flex justify-between items-center">
+                            <div>
+                              <h4 className="text-sm font-medium">Interested in this idea?</h4>
+                              <p className="text-xs text-gray-600 mt-1">Support this entrepreneur by investing</p>
+                            </div>
+                            <button 
+                              onClick={() => onInvest && onInvest(repoId)}
+                              className={styles.investButton}
+                            >
+                              <span className={styles.investButtonIcon}>💰</span>
+                              Invest
+                            </button>
+                          </div>
+                        </div>
+                      )}
+                      
+                      {/* handle entrepreneur view */}
+                      {!isInvestorView && (
+                        <div className="mt-4 border-t pt-4">
+                          <div className="flex justify-between items-center">
+                            <div>
+                              <h4 className="text-sm font-medium">Want to see the full repository?</h4>
+                              <p className="text-xs text-gray-600 mt-1">Open the complete repository editor</p>
+                            </div>
+                            <Link 
+                              href={`/repository?id=${repoId}`}
+                              className={styles.viewRepositoryButton}
+                            >
+                              <span className={styles.viewRepositoryButtonIcon}>🚀</span>
+                              View Full Repository
+                            </Link>
+                          </div>
+                        </div>
+                      )}
                     </div>
                   )}
 

@@ -7,6 +7,7 @@ import styles from "../styles/investor.module.css";
 import "../styles/globals.css";
 import Image from "next/image";
 import { fetcher } from "@/app/utils/fetcher"; // ✅ Import fetcher
+import RepositoryModal from "@/components/repository-modal"; // ✅ Import RepositoryModal
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:5000/api";
 
@@ -44,6 +45,10 @@ const InvestorPage = () => {
     const [filteredTags, setFilteredTags] = useState<Tag[]>([]);
     const [allIdeas, setAllIdeas] = useState<Idea[]>([]);
     const [dropdownVisible, setDropdownVisible] = useState(false);
+    {/* Repository Modal */}
+    const [selectedRepository, setSelectedRepository] = useState<string | null>(null);
+    const [isRepositoryModalOpen, setIsRepositoryModalOpen] = useState(false);
+    const [selectedIdeaTitle, setSelectedIdeaTitle] = useState("");
 
     useEffect(() => {
         const fetchIdeas = async () => {
@@ -141,6 +146,21 @@ const InvestorPage = () => {
 
     const toggleDropdownVisibility = () => {
         setDropdownVisible(!dropdownVisible);
+    };
+
+    {/* handle open repository modal */}
+    const handleOpenRepository = (idea: Idea) => {
+        setSelectedRepository(idea.id.toString());
+        setSelectedIdeaTitle(idea.title);
+        setIsRepositoryModalOpen(true);
+    };
+
+    const handleInvestment = (repoId: string) => {
+        // Add investment logic here
+        alert(`Investment process started for repository #${repoId}`);
+        // You would typically call your investment API here
+        // and then maybe close the modal or show a confirmation
+        setIsRepositoryModalOpen(false);
     };
 
     return (
@@ -271,11 +291,29 @@ const InvestorPage = () => {
                                     ? idea.idea_tags.map(tag => tag.tags.name).join(", ")
                                     : "No tags available"}
                             </p>
-                            <button className={styles.investButton}>💰 Invest</button>
+                            {/* handle open repository modal */}
+                            <button 
+                                className={styles.investButton}
+                                onClick={() => handleOpenRepository(idea)}
+                            >
+                                💰 Invest
+                            </button>
                         </div>
                     ))}
                 </div>
             </main>
+
+            {/* Repository Modal */}
+            {isRepositoryModalOpen && selectedRepository && (
+                <RepositoryModal
+                    isOpen={isRepositoryModalOpen}
+                    onClose={() => setIsRepositoryModalOpen(false)}
+                    repoId={selectedRepository}
+                    title={selectedIdeaTitle}
+                    isInvestorView={true}
+                    onInvest={handleInvestment}
+                />
+            )}
 
             {/* Footer */}
             <footer className={styles.footer}>
