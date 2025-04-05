@@ -61,8 +61,11 @@ const loginUser = async (req, res) => {
 
     const token = data.session.access_token;
 
+    console.log("NODE_ENV:", process.env.NODE_ENV);
+
     const isProduction = process.env.NODE_ENV === "production";
 
+    
     res.cookie("token", token, {
       httpOnly: true,
       secure: isProduction,                  // ✅ only secure in production
