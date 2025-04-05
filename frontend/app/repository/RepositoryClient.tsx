@@ -2,27 +2,23 @@
 
 import React, { useEffect, useState, useCallback } from "react";
 import Head from "next/head";
-import { useSearchParams } from "next/navigation";
+import { useSearchParams, useRouter } from "next/navigation";
 
 import NavBar from "@/components/nav-bar";
 import FileTree, { FileItem } from "@/components/file-tree";
 import FileEditor from "@/components/file-editor";
 import FileViewer from "@/components/file-viewer";
 import Footer from '@/components/footer';
-
-import {
-  FiCopy,
-  FiDownload,
-  FiUpload,
-  FiEdit,
-} from "react-icons/fi";
+import { isAuthenticated } from "@/app/utils/isAuthenticated";
+import { fetcher } from "@/app/utils/fetcher";
 
 import styles from "../styles/repository.module.css";
-import { fetcher } from "@/app/utils/fetcher";
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000/api';
 
 export default function Repository() {
+  const [authChecked, setAuthChecked] = useState(false);
+  const [user, setUser] = useState<any | null>(null);
   const [files, setFiles] = useState<FileItem[]>([]);
   const [currentFile, setCurrentFile] = useState<FileItem | null>(null);
   const [error, setError] = useState<string | null>(null);
@@ -30,6 +26,7 @@ export default function Repository() {
 
   const searchParams = useSearchParams();
   const ideaId = searchParams.get("id");
+  const router = useRouter();
 
   const fetchFiles = useCallback(async () => {
     try {
@@ -41,16 +38,26 @@ export default function Repository() {
       setFiles(data);
     } catch (err) {
       console.error("Error fetching files:", err);
-      if (err instanceof Error) setError(err.message);
-      else setError("An unknown error occurred");
+      setError(err instanceof Error ? err.message : "An unknown error occurred");
     } finally {
       setLoading(false);
     }
-  }, [ideaId]); // ✅ useCallback depends on ideaId
+  }, [ideaId]);
 
   useEffect(() => {
-    fetchFiles();
-  }, [fetchFiles]); // ✅ now safe to use in useEffect
+    const checkAuth = async () => {
+      const currentUser = await isAuthenticated();
+      if (!currentUser) {
+        router.push("/get-started");
+      } else {
+        setUser(currentUser);
+        setAuthChecked(true);
+        fetchFiles(); // ✅ Fetch files only after user is authenticated
+      }
+    };
+
+    checkAuth();
+  }, [fetchFiles, router]);
 
   const handleSelectFile = (file: FileItem | null) => {
     setCurrentFile(file);
@@ -62,6 +69,8 @@ export default function Repository() {
     );
     setCurrentFile(updatedFile);
   };
+
+  if (!authChecked) return <p>Checking authentication...</p>;
 
   return (
     <>

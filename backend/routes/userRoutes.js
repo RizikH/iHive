@@ -23,6 +23,7 @@ router.post("/logout", (req, res) => {
 
   res.json({ message: "Logged out successfully" });
 });
+
 // ✅ NEW: Get current user info from token
 const authRateLimiter = rateLimit({
   windowMs: 15 * 60 * 1000, // 15 minutes

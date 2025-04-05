@@ -7,7 +7,8 @@ import styles from "../styles/investor.module.css";
 import "../styles/globals.css";
 import Image from "next/image";
 import { fetcher } from "@/app/utils/fetcher"; // ✅ Import fetcher
-import RepositoryModal from "@/components/repository-modal"; // ✅ Import RepositoryModal
+import { useRouter } from "next/navigation";
+import { isAuthenticated } from "@/app/utils/isAuthenticated";
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:5000/api";
 
@@ -34,6 +35,8 @@ interface Idea {
 }
 
 const InvestorPage = () => {
+    const [authChecked, setAuthChecked] = useState(false);
+    const [user, setUser] = useState<any | null>(null);
     const [ideas, setIdeas] = useState<Idea[]>([]);
     const [loadingIdeas, setLoadingIdeas] = useState(true);
     const [errorIdeas, setErrorIdeas] = useState<string | null>(null);
@@ -45,10 +48,24 @@ const InvestorPage = () => {
     const [filteredTags, setFilteredTags] = useState<Tag[]>([]);
     const [allIdeas, setAllIdeas] = useState<Idea[]>([]);
     const [dropdownVisible, setDropdownVisible] = useState(false);
-    {/* Repository Modal */}
-    const [selectedRepository, setSelectedRepository] = useState<string | null>(null);
-    const [isRepositoryModalOpen, setIsRepositoryModalOpen] = useState(false);
-    const [selectedIdeaTitle, setSelectedIdeaTitle] = useState("");
+
+    const router = useRouter();
+
+    useEffect(() => {
+        const checkAuth = async () => {
+            const currentUser = await isAuthenticated();
+            if (!currentUser) {
+                router.push("/get-started");
+            } else {
+                setUser(currentUser);
+                setAuthChecked(true);
+            }
+        };
+
+        checkAuth();
+    }, []);
+
+
 
     useEffect(() => {
         const fetchIdeas = async () => {
@@ -148,21 +165,7 @@ const InvestorPage = () => {
         setDropdownVisible(!dropdownVisible);
     };
 
-    {/* handle open repository modal */}
-    const handleOpenRepository = (idea: Idea) => {
-        setSelectedRepository(idea.id.toString());
-        setSelectedIdeaTitle(idea.title);
-        setIsRepositoryModalOpen(true);
-    };
-
-    const handleInvestment = (repoId: string) => {
-        // Add investment logic here
-        alert(`Investment process started for repository #${repoId}`);
-        // You would typically call your investment API here
-        // and then maybe close the modal or show a confirmation
-        setIsRepositoryModalOpen(false);
-    };
-
+    if (!authChecked) return <p>Checking authentication...</p>;
     return (
         <>
             <Head>
@@ -291,29 +294,11 @@ const InvestorPage = () => {
                                     ? idea.idea_tags.map(tag => tag.tags.name).join(", ")
                                     : "No tags available"}
                             </p>
-                            {/* handle open repository modal */}
-                            <button 
-                                className={styles.investButton}
-                                onClick={() => handleOpenRepository(idea)}
-                            >
-                                💰 Invest
-                            </button>
+                            <button className={styles.investButton}>💰 Invest</button>
                         </div>
                     ))}
                 </div>
             </main>
-
-            {/* Repository Modal */}
-            {isRepositoryModalOpen && selectedRepository && (
-                <RepositoryModal
-                    isOpen={isRepositoryModalOpen}
-                    onClose={() => setIsRepositoryModalOpen(false)}
-                    repoId={selectedRepository}
-                    title={selectedIdeaTitle}
-                    isInvestorView={true}
-                    onInvest={handleInvestment}
-                />
-            )}
 
             {/* Footer */}
             <footer className={styles.footer}>

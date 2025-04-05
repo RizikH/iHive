@@ -24,10 +24,16 @@ import { fetcher } from '@/app/utils/fetcher';
 // Styles
 import styles from '../styles/entrepreneur-profile.module.css';
 
+import { useRouter } from "next/navigation";
+import { isAuthenticated } from "@/app/utils/isAuthenticated";
+
+
 const EntrepreneurProfile = () => {
   // =============================================
   // State Management
   // =============================================
+  const [authChecked, setAuthChecked] = useState(false);
+  const [user, setUser] = useState<any | null>(null);
   const [isAvatarModalOpen, setIsAvatarModalOpen] = useState(false);
   const [currentAvatar, setCurrentAvatar] = useState('https://avatar.vercel.sh/jack');
   const [username, setUsername] = useState('user');
@@ -44,7 +50,21 @@ const EntrepreneurProfile = () => {
   const [error, setError] = useState<string | null>(null);
   const [debugInfo, setDebugInfo] = useState<string | null>(null);
 
+  const router = useRouter();
 
+  useEffect(() => {
+    const checkAuth = async () => {
+      const currentUser = await isAuthenticated();
+      if (!currentUser) {
+        router.push("/get-started");
+      } else {
+        setUser(currentUser);
+        setAuthChecked(true);
+      }
+    };
+
+    checkAuth();
+  }, []);
 
 
   const loadFromLocalStorage = () => {
@@ -199,6 +219,8 @@ const EntrepreneurProfile = () => {
       }
     };
   }, [fetchUserProfile, currentAvatar]);
+
+  if (!authChecked) return <p>Checking authentication...</p>;
 
   // =============================================
   // Render Component
