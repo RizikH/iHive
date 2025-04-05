@@ -59,31 +59,32 @@ const loginUser = async (req, res) => {
     const { data, error } = await supabase.auth.signInWithPassword({ email, password });
     if (error) throw new Error(error.message);
 
-    // Ensure you're sending the token back correctly
     const token = data.session.access_token;
+
+    const isProduction = process.env.NODE_ENV === "production";
+
     res.cookie("token", token, {
       httpOnly: true,
-      secure: true,
-      sameSite: "None",
+      secure: isProduction,                  // ✅ only secure in production
+      sameSite: isProduction ? "None" : "Lax", // ✅ needed for cross-site cookies in prod
       path: "/",
-      maxAge: 24 * 60 * 60 * 1000
+      maxAge: 24 * 60 * 60 * 1000,
     });
-    
 
-    // Send response with user details (without the password)
     res.json({
       token,
       user: {
         id: data.user.id,
         username: data.user.user_metadata.username,
-        email: data.user.email
-      }
+        email: data.user.email,
+      },
     });
   } catch (error) {
     console.error("Login Error:", error.message);
     res.status(401).json({ error: error.message });
   }
 };
+
 
 
 // ✅ PUT /api/users/update/:id
