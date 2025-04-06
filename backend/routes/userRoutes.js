@@ -16,10 +16,11 @@ router.delete("/delete/:id", authMiddleware, controller.deleteUser);
 router.post("/logout", (req, res) => {
   res.clearCookie("token", {
     httpOnly: true,
-    sameSite: "Lax",
+    sameSite: process.env.NODE_ENV === "production" ? "None" : "Lax",
     secure: process.env.NODE_ENV === "production",
     path: "/",
-  });
+    domain: process.env.NODE_ENV === "production" ? ".vercel.app" : undefined,
+  });  
 
   res.json({ message: "Logged out successfully" });
 });
