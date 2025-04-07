@@ -99,7 +99,6 @@ const getFileById = async (req, res) => {
 };
 // Create a folder or text file
 const createFile = async (req, res) => {
-  console.log('📁 Creating file:', req.body);
   try {
     const { name, type, idea_id, parent_id, content } = req.body;
     const user_id = req.user.sub;
@@ -109,7 +108,6 @@ const createFile = async (req, res) => {
       return res.status(400).json({ error: 'Missing required fields' });
     }
 
-    console.log('📋 File details:', { name, type, idea_id, parent_id, user_id, content });
 
     const file = await File.create({
       name,
@@ -120,7 +118,6 @@ const createFile = async (req, res) => {
       content,
     });
 
-    console.log('✅ File created successfully:', file);
     res.status(201).json(file);
   } catch (err) {
     console.error("❌ Error in createFile:", err);

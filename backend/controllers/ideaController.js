@@ -7,9 +7,7 @@ const getAllIdeas = async (req, res) => {
         const ideas = await Idea.getAllIdeas();
         res.json(ideas);
     } catch (error) {
-        res.status(500).json({
-            error: error.message
-        });
+        res.status(500).json({ error: error.message });
     }
 };
 
@@ -18,22 +16,19 @@ const getIdeaById = async (req, res) => {
     try {
         const idea = await Idea.getIdeaById(req.params.id);
         if (!idea) {
-            return res.status(404).json({
-                message: "Idea not found"
-            });
+            return res.status(404).json({ message: "Idea not found" });
         }
         res.json(idea);
     } catch (error) {
-        res.status(500).json({
-            error: error.message
-        });
+        res.status(500).json({ error: error.message });
     }
 };
 
 const createIdea = async (req, res) => {
-    try {
-        console.log("📥 Incoming request body:", req.body);
+  try {
+    console.log("📥 Incoming request body:", req.body);
 
+<<<<<<< HEAD
         const {
             title,
             description,
@@ -43,9 +38,16 @@ const createIdea = async (req, res) => {
         // 🔍 Extract user info from decoded token set by middleware
         const userTokenPayload = req.user;
         console.log("🔐 Decoded user from token (req.user):", userTokenPayload);
+=======
+    const { title, description } = req.body;
 
-        const userId = userTokenPayload?.sub;
+    // 🔍 Extract user info from decoded token set by middleware
+    const userTokenPayload = req.user;
+>>>>>>> 3db0a07ea6c002eef2169dd3a08d3b97afae6387
 
+    const userId = userTokenPayload?.sub;
+
+<<<<<<< HEAD
         // 🔒 Validate inputs
         if (!title || !description || !category) {
             console.warn("⚠️ Missing fields:", {
@@ -86,41 +88,50 @@ const createIdea = async (req, res) => {
             error: error.message || "Server error"
         });
     }
+=======
+    // 🔒 Validate inputs
+    if (!title || !description) {
+      console.warn("⚠️ Missing fields:", { title, description});
+      return res.status(400).json({ error: "Fields (title, description) are required." });
+    }
+
+    if (!userId) {
+      console.warn("❌ No userId found in token payload");
+      return res.status(401).json({ error: "Unauthorized: Missing or invalid user token." });
+    }
+
+    // 💾 Create the idea in DB
+    const newIdea = await Idea.createIdea({
+      user_id: userId,
+      title,
+      description,
+    });
+
+    return res.status(201).json({ message: "Idea created successfully!", idea: newIdea });
+
+  } catch (error) {
+    console.error("❌ Error while creating idea:", error);
+    return res.status(500).json({ error: error.message || "Server error" });
+  }
+>>>>>>> 3db0a07ea6c002eef2169dd3a08d3b97afae6387
 };
 
 
 // ✅ PUT /api/ideas/:id
 const updateIdea = async (req, res) => {
     try {
-        const {
-            title,
-            description,
-            category,
-            status
-        } = req.body;
+        const { title, description, category, status } = req.body;
         const ideaId = req.params.id;
 
-        const updatedIdea = await Idea.updateIdea(ideaId, {
-            title,
-            description,
-            category,
-            status
-        });
+        const updatedIdea = await Idea.updateIdea(ideaId, { title, description, category, status });
         if (!updatedIdea) {
-            return res.status(404).json({
-                message: "Idea not found or update failed"
-            });
+            return res.status(404).json({ message: "Idea not found or update failed" });
         }
 
-        res.json({
-            message: "Idea updated successfully!",
-            updatedIdea
-        });
+        res.json({ message: "Idea updated successfully!", updatedIdea });
     } catch (error) {
         console.error("Update Idea Error:", error.message);
-        res.status(500).json({
-            error: error.message
-        });
+        res.status(500).json({ error: error.message });
     }
 };
 
@@ -131,20 +142,13 @@ const deleteIdea = async (req, res) => {
         const deletedIdea = await Idea.deleteIdea(ideaId);
 
         if (!deletedIdea) {
-            return res.status(404).json({
-                message: "Idea not found"
-            });
+            return res.status(404).json({ message: "Idea not found" });
         }
 
-        res.json({
-            message: "Idea deleted successfully",
-            deletedIdea
-        });
+        res.json({ message: "Idea deleted successfully", deletedIdea });
     } catch (error) {
         console.error("Delete Idea Error:", error.message);
-        res.status(500).json({
-            error: error.message
-        });
+        res.status(500).json({ error: error.message });
     }
 };
 
@@ -152,7 +156,6 @@ const deleteIdea = async (req, res) => {
 const searchIdeasByTitle = async (req, res) => {
     try {
         const { title } = req.params;
-
         if (!title) {
             return res.status(400).json({ error: "Title parameter is required for search." });
         }
@@ -168,22 +171,16 @@ const searchIdeasByTitle = async (req, res) => {
 // ✅ POST /api/ideas/search/tags
 const advancedSearchTags = async (req, res) => {
     try {
-        const {
-            tags
-        } = req.body;
+        const { tags } = req.body;
         if (!tags || !tags.length) {
-            return res.status(400).json({
-                error: "Tags array is required for search."
-            });
+            return res.status(400).json({ error: "Tags array is required for search." });
         }
 
         const ideas = await Idea.advancedSearchTags(tags);
         res.json(ideas);
     } catch (error) {
         console.error("Search Ideas Error:", error.message);
-        res.status(500).json({
-            error: error.message
-        });
+        res.status(500).json({ error: error.message });
     }
 };
 
@@ -194,9 +191,7 @@ const getAllByUserId = async (req, res) => {
         res.json(ideas);
     } catch (error) {
         console.error("Get Ideas by User Error:", error.message);
-        res.status(500).json({
-            error: error.message
-        });
+        res.status(500).json({ error: error.message });
     }
 };
 

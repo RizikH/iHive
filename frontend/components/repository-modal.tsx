@@ -5,10 +5,11 @@ import { Dialog, DialogContent, DialogTitle } from "@/components/ui/dialog";
 import styles from "@/app/styles/repository-modal.module.css";
 import { fetcher } from "@/app/utils/fetcher";
 import { VisuallyHidden } from "@radix-ui/react-visually-hidden";
-import FileTreeDemo from "@/components/file-tree-demo";
+import FileTree, { FileItem } from "@/components/file-tree";
+import FileViewer from "@/components/file-viewer";
 
 // ========================
-// Repository Modal Component
+// Repository Modal Component - READ ONLY
 // ========================
 
 const RepositoryModal = ({
@@ -23,53 +24,88 @@ const RepositoryModal = ({
   title: string;
 }) => {
   const [content, setContent] = useState<string>("");
-  const [currentFileId, setCurrentFileId] = useState<string | null>(null);
+  const [files, setFiles] = useState<FileItem[]>([]);
+  const [currentFile, setCurrentFile] = useState<FileItem | null>(null);
   const [currentFileName, setCurrentFileName] = useState<string>("Main Content");
   const [repoDetails, setRepoDetails] = useState<any>(null);
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const [error, setError] = useState<string | null>(null);
+  
+  // This modal is READ ONLY
+  const isReadOnly = true;
 
   useEffect(() => {
     if (isOpen && repoId) {
-      fetchRepoDetails();
+      setIsLoading(true);
+      Promise.all([fetchRepoDetails(), fetchFiles()])
+        .finally(() => setIsLoading(false));
     }
   }, [isOpen, repoId]);
 
   const fetchRepoDetails = async () => {
     try {
-      setIsLoading(true);
       setError(null);
       
       console.log("Fetching repository details for repoId:", repoId);
-      // Directly fetch files instead of idea details
-      const filesData = await fetcher(`/files?idea_id=${repoId}`);
-      console.log("Files response:", filesData);
-      
-      // Also fetch idea metadata if needed
-      const ideaData = await fetcher(`/ideas/${repoId}`);
+      // Get idea details using the search/id endpoint which doesn't require auth
+      const ideaData = await fetcher(`/ideas/search/id/${repoId}`);
       console.log("Idea data response:", ideaData);
       
+      if (!ideaData) throw new Error("Failed to load repository details");
+      
       setRepoDetails(ideaData);
+      return ideaData;
     } catch (err) {
       console.error("Error fetching repository details:", err);
       setError("Failed to load repository details");
       setRepoDetails(null);
-    } finally {
-      setIsLoading(false);
+      return null;
     }
   };
 
-  const handleFileSelect = (fileId: string, fileContent: string, fileName: string) => {
-    setCurrentFileId(fileId);
-    setContent(fileContent);
-    setCurrentFileName(fileName);
+  const fetchFiles = async () => {
+    try {
+      console.log("Fetching files for idea_id:", repoId);
+      const filesData = await fetcher(`/files?idea_id=${repoId}`);
+      console.log("Files response:", filesData);
+      
+      if (Array.isArray(filesData)) {
+        setFiles(filesData);
+      } else {
+        console.warn("Invalid files data format:", filesData);
+        setFiles([]);
+      }
+      return filesData;
+    } catch (err) {
+      console.error("Error fetching files:", err);
+      setFiles([]);
+      return [];
+    }
   };
+
+  const handleSelectFile = (file: FileItem | null) => {
+    setCurrentFile(file);
+    if (file) {
+      setCurrentFileName(file.name);
+      if (file.type === "text") {
+        setContent(file.content || "");
+      } else if (file.type === "upload" && file.path) {
+        // For uploaded files, we'll display content differently
+        setContent(""); // Clear text content
+      }
+    } else {
+      setCurrentFileName("Main Content");
+      setContent("");
+    }
+  };
+
+  // No-op refresh function for read-only mode
+  const handleRefresh = () => {};
 
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
-      {/* Add DialogTitle component */}
       <VisuallyHidden>
-        <DialogTitle>{title || "Repository Modal"}</DialogTitle>
+        <DialogTitle>{title || "Repository Preview"}</DialogTitle>
       </VisuallyHidden>
       <DialogContent className={styles["modal-content"]}>
         <div className={styles["modal-container"]}>
@@ -86,23 +122,31 @@ const RepositoryModal = ({
               <div className={styles.sidebar}>
                 <h3 className={styles["sidebar-title"]}>Files</h3>
                 <div className={styles["file-tree-container"]}>
-                  <FileTreeDemo
-                    onFileSelect={handleFileSelect}
-                    currentFileId={currentFileId}
-                    onContentUpdate={() => { }}
-                    onFileDelete={() => { }}
-                    isPreview={true}
-                    repoId={repoId}
-                  />
+                  {files.length === 0 && (
+                    <div className={styles.emptyState || "p-4 text-center text-gray-500"}>
+                      <p>No files available</p>
+                      <p>This is a read-only preview</p>
+                    </div>
+                  )}
+                  {files.length > 0 && (
+                    <FileTree
+                      files={files}
+                      onSelect={handleSelectFile}
+                      onRefresh={handleRefresh}
+                      selectedId={currentFile?.id || null}
+                      ideaId={Number(repoId) || 0}
+                    />
+                  )}
                 </div>
               </div>
 
               <div className={styles["content-area"]}>
                 <div className={styles["content-header"]}>
                   <h3 className={styles["content-title"]}>{currentFileName}</h3>
+                  <div className="text-xs text-gray-500">Preview - Read Only</div>
                 </div>
                 <div className={styles["content-body"]}>
-                  {repoDetails && (
+                  {!currentFile && repoDetails && (
                     <div className="mb-4 p-4 bg-gray-50 rounded-md">
                       <h2 className="text-xl font-bold">{repoDetails.title}</h2>
                       {repoDetails.category && (
@@ -123,11 +167,17 @@ const RepositoryModal = ({
                     </div>
                   )}
                   
-                  {content ? (
-                    <div dangerouslySetInnerHTML={{ __html: content }} />
+                  {currentFile ? (
+                    currentFile.type === "text" ? (
+                      <div dangerouslySetInnerHTML={{ __html: content }} />
+                    ) : (
+                      <FileViewer file={currentFile} />
+                    )
                   ) : (
                     <div className={styles["content-placeholder"]}>
-                      <p>Select a file from the file tree to view its contents.</p>
+                      {files.length === 0 ? (
+                        <p>No files available in this repository</p>
+                      ) : null}
                     </div>
                   )}
                 </div>
