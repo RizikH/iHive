@@ -24,7 +24,6 @@ const authenticate = (req, res, next) => {
   }
 
   try {
-<<<<<<< HEAD
     // Decode token without verifying to inspect its payload
     const decoded = jwt.decode(token);
     console.log("Decoded token:", decoded);
@@ -37,12 +36,6 @@ const authenticate = (req, res, next) => {
     req.user = verified;
 
     next(); // Proceed to the next middleware or route handler
-=======
-    const decoded = jwt.verify(token, SUPABASE_JWT_SECRET);
-    req.user = decoded;
-    console.log("✅ JWT verification successful:", decoded);
-    next();
->>>>>>> dev-main
   } catch (err) {
     console.error("❌ JWT verification failed:", err);
 
