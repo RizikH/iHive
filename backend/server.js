@@ -13,56 +13,53 @@ const tagRoutes = require("./routes/tagRoutes");
 const fileRoutes = require("./routes/fileRoutes");
 const chatRoutes = require('./routes/chatRoutes');
 
-// Create app and server
 const app = express();
 const server = http.createServer(app);
 
-/**
- * 🔹 CORS Configuration — Allow ONLY localhost:3000
- */
-app.use(cors({
-  origin: "http://localhost:3000",
-  credentials: true,
-  methods: ["GET", "POST", "PUT", "DELETE"]
-}));
+const allowedOrigins = [
+  "http://localhost:3000",
+  "https://ihive.vercel.app",
+  "https://ihive-git-dev-main-rizik-haddads-projects.vercel.app",
+];
 
-/**
- * 🔹 Middleware
- */
-app.use(cookieParser()); // ✅ Parse cookies for authentication
+app.use(
+  cors({
+    origin: (origin, callback) => {
+      if (!origin || allowedOrigins.includes(origin)) {
+        callback(null, true);
+      } else {
+        callback(new Error("Not allowed by CORS"));
+      }
+    },
+    credentials: true,
+  })
+);
+
+// Middleware
+app.use(cookieParser());
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
-/**
- * 🔹 API Routes
- */
+// API Routes
 app.use("/api/users", userRoutes);
 app.use("/api/ideas", ideaRoutes);
 app.use("/api/tags", tagRoutes);
 app.use("/api/files", fileRoutes);
 app.use('/chat', chatRoutes);
 
-/**
- * 🔹 Health Check
- */
+// Health Check
 app.get("/", (req, res) => {
   res.send("Welcome to iHive API");
 });
 
-/**
- * 🔹 WebSocket Support
- */
-initializeSocket(server, { origin: "http://localhost:3000", credentials: true });
+// WebSocket (optional, restrict in prod if needed)
+initializeSocket(server, { origin: allowedOrigins[0], credentials: true });
 
-/**
- * 🔹 Global Error Handling
- */
+// Global Error Handler
 const errorHandler = require("./middleware/errorHandler");
 app.use(errorHandler);
 
-/**
- * 🔹 Start Server
- */
+// Start Server
 const PORT = process.env.PORT || 5000;
 server.listen(PORT, () => {
   console.log(`🚀 Server running at http://localhost:${PORT}`);

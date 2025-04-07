@@ -33,25 +33,33 @@ const NavBar = ({
     fetchUser();
   }, []);
 
-  const handleSignOut = () => {
-    document.cookie =
-      "access_token=; path=/; expires=Thu, 01 Jan 1970 00:00:00 GMT";
-    setUserId(null);
-    window.location.href = "/";
+  const handleSignOut = async () => {
+    try {
+      await fetcher("/users/logout", "POST");
+
+      localStorage.clear();
+
+      setUserId(null);
+
+      window.location.href = "/";
+    } catch (error) {
+      console.error("Logout failed", error);
+    }
   };
+
 
   const computedLinks =
     links ??
     (userId
       ? [
-          { href: `/setting`, label: "Settings" },
-          { href: `/repository/${userId}`, label: "My Repositories" },
-          { href: "#", label: "Sign Out", onClick: handleSignOut },
-        ]
+        { href: `/setting`, label: "Settings" },
+        { href: `/repository/${userId}`, label: "My Repositories" },
+        { href: "#", label: "Sign Out", onClick: handleSignOut },
+      ]
       : [
-          { href: "/get-started", label: "Login" },
-          { href: "/register", label: "Register" },
-        ]);
+        { href: "/get-started", label: "Login" },
+        { href: "/register", label: "Register" },
+      ]);
 
   return (
     <nav className={styles.navContainer}>

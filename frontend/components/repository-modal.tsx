@@ -1,27 +1,28 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { Dialog, DialogContent, DialogTitle } from "@/components/ui/dialog";
 import styles from "@/app/styles/repository-modal.module.css";
 import { fetcher } from "@/app/utils/fetcher";
 import { VisuallyHidden } from "@radix-ui/react-visually-hidden";
 import FileTree, { FileItem } from "@/components/file-tree";
 import FileViewer from "@/components/file-viewer";
-
-// ========================
-// Repository Modal Component - READ ONLY
-// ========================
+import Link from "next/link";
 
 const RepositoryModal = ({
   isOpen,
   onClose,
   repoId,
   title,
+  isInvestorView = false,
+  onInvest,
 }: {
   isOpen: boolean;
   onClose: () => void;
   repoId: string;
   title: string;
+  isInvestorView?: boolean;
+  onInvest?: (repoId: string) => void;
 }) => {
   const [content, setContent] = useState<string>("");
   const [files, setFiles] = useState<FileItem[]>([]);
@@ -30,29 +31,14 @@ const RepositoryModal = ({
   const [repoDetails, setRepoDetails] = useState<any>(null);
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const [error, setError] = useState<string | null>(null);
-  
-  // This modal is READ ONLY
+
   const isReadOnly = true;
 
-  useEffect(() => {
-    if (isOpen && repoId) {
-      setIsLoading(true);
-      Promise.all([fetchRepoDetails(), fetchFiles()])
-        .finally(() => setIsLoading(false));
-    }
-  }, [isOpen, repoId]);
-
-  const fetchRepoDetails = async () => {
+  const fetchRepoDetails = useCallback(async () => {
     try {
       setError(null);
-      
-      console.log("Fetching repository details for repoId:", repoId);
-      // Get idea details using the search/id endpoint which doesn't require auth
       const ideaData = await fetcher(`/ideas/search/id/${repoId}`);
-      console.log("Idea data response:", ideaData);
-      
       if (!ideaData) throw new Error("Failed to load repository details");
-      
       setRepoDetails(ideaData);
       return ideaData;
     } catch (err) {
@@ -61,14 +47,11 @@ const RepositoryModal = ({
       setRepoDetails(null);
       return null;
     }
-  };
+  }, [repoId]);
 
-  const fetchFiles = async () => {
+  const fetchFiles = useCallback(async () => {
     try {
-      console.log("Fetching files for idea_id:", repoId);
       const filesData = await fetcher(`/files?idea_id=${repoId}`);
-      console.log("Files response:", filesData);
-      
       if (Array.isArray(filesData)) {
         setFiles(filesData);
       } else {
@@ -81,7 +64,15 @@ const RepositoryModal = ({
       setFiles([]);
       return [];
     }
-  };
+  }, [repoId]);
+
+  useEffect(() => {
+    if (isOpen && repoId) {
+      setIsLoading(true);
+      Promise.all([fetchRepoDetails(), fetchFiles()])
+        .finally(() => setIsLoading(false));
+    }
+  }, [isOpen, repoId, fetchRepoDetails, fetchFiles]);
 
   const handleSelectFile = (file: FileItem | null) => {
     setCurrentFile(file);
@@ -90,8 +81,7 @@ const RepositoryModal = ({
       if (file.type === "text") {
         setContent(file.content || "");
       } else if (file.type === "upload" && file.path) {
-        // For uploaded files, we'll display content differently
-        setContent(""); // Clear text content
+        setContent("");
       }
     } else {
       setCurrentFileName("Main Content");
@@ -99,7 +89,6 @@ const RepositoryModal = ({
     }
   };
 
-  // No-op refresh function for read-only mode
   const handleRefresh = () => {};
 
   return (
@@ -164,9 +153,47 @@ const RepositoryModal = ({
                           <span>Last updated: {new Date(repoDetails.updatedAt).toLocaleDateString()}</span>
                         )}
                       </div>
+
+                      {/* handle investor view */}
+                      {isInvestorView && (
+                        <div className="mt-4 border-t pt-4">
+                          <div className="flex justify-between items-center">
+                            <div>
+                              <h4 className="text-sm font-medium">Interested in this idea?</h4>
+                              <p className="text-xs text-gray-600 mt-1">Support this entrepreneur by investing</p>
+                            </div>
+                            <button 
+                              onClick={() => onInvest && onInvest(repoId)}
+                              className={styles.investButton}
+                            >
+                              <span className={styles.investButtonIcon}>💰</span>
+                              Invest
+                            </button>
+                          </div>
+                        </div>
+                      )}
+                      
+                      {/* handle entrepreneur view */}
+                      {!isInvestorView && (
+                        <div className="mt-4 border-t pt-4">
+                          <div className="flex justify-between items-center">
+                            <div>
+                              <h4 className="text-sm font-medium">Want to see the full repository?</h4>
+                              <p className="text-xs text-gray-600 mt-1">Open the complete repository editor</p>
+                            </div>
+                            <Link 
+                              href={`/repository?id=${repoId}`}
+                              className={styles.viewRepositoryButton}
+                            >
+                              <span className={styles.viewRepositoryButtonIcon}>🚀</span>
+                              View Full Repository
+                            </Link>
+                          </div>
+                        </div>
+                      )}
                     </div>
                   )}
-                  
+
                   {currentFile ? (
                     currentFile.type === "text" ? (
                       <div dangerouslySetInnerHTML={{ __html: content }} />
@@ -190,4 +217,4 @@ const RepositoryModal = ({
   );
 };
 
-export default RepositoryModal; 
+export default RepositoryModal;

@@ -7,6 +7,8 @@ import styles from "../styles/investor.module.css";
 import "../styles/globals.css";
 import Image from "next/image";
 import { fetcher } from "@/app/utils/fetcher"; // ✅ Import fetcher
+import { useRouter } from "next/navigation";
+import { isAuthenticated } from "@/app/utils/isAuthenticated";
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:5000/api";
 
@@ -33,6 +35,8 @@ interface Idea {
 }
 
 const InvestorPage = () => {
+    const [authChecked, setAuthChecked] = useState(false);
+    const [user, setUser] = useState<any | null>(null);
     const [ideas, setIdeas] = useState<Idea[]>([]);
     const [loadingIdeas, setLoadingIdeas] = useState(true);
     const [errorIdeas, setErrorIdeas] = useState<string | null>(null);
@@ -44,6 +48,24 @@ const InvestorPage = () => {
     const [filteredTags, setFilteredTags] = useState<Tag[]>([]);
     const [allIdeas, setAllIdeas] = useState<Idea[]>([]);
     const [dropdownVisible, setDropdownVisible] = useState(false);
+
+    const router = useRouter();
+
+    useEffect(() => {
+        const checkAuth = async () => {
+            const currentUser = await isAuthenticated();
+            if (!currentUser) {
+                router.push("/get-started");
+            } else {
+                setUser(currentUser);
+                setAuthChecked(true);
+            }
+        };
+
+        checkAuth();
+    }, []);
+
+
 
     useEffect(() => {
         const fetchIdeas = async () => {
@@ -76,9 +98,10 @@ const InvestorPage = () => {
             }
         };
 
-
         fetchSearchedIdeas();
-    }, [searchTerm]);
+    }, [searchTerm, allIdeas]);
+
+
 
     useEffect(() => {
         const fetchAllTags = async () => {
@@ -142,6 +165,7 @@ const InvestorPage = () => {
         setDropdownVisible(!dropdownVisible);
     };
 
+    if (!authChecked) return <p>Checking authentication...</p>;
     return (
         <>
             <Head>

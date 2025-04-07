@@ -1,5 +1,5 @@
 import { File, Folder, Tree } from "@/components/magicui/file-tree"
-import { useState, useRef, useEffect } from 'react';
+import { useState, useRef, useEffect, useCallback } from 'react';
 import { FileContent } from '@/components/magicui/file-tree';
 import { 
   FiPlus, 
@@ -30,16 +30,13 @@ interface FileTreeDemoProps {
 
 export default function FileTreeDemo({ 
   onFileSelect, 
-  onContentUpdate, 
+  onContentUpdate: originalOnContentUpdate, 
   currentFileId, 
   onFileDelete,
   files: initialFiles,
   isPreview = false,
   repoId
 }: FileTreeDemoProps) {
-  // =============================================
-  // State Management
-  // =============================================
   const [fileList, setFileList] = useState<FileContent[]>([]);
   const [editingId, setEditingId] = useState<string | null>(null);
   const [editingName, setEditingName] = useState('');
@@ -51,21 +48,21 @@ export default function FileTreeDemo({
   const [openFolders, setOpenFolders] = useState<Set<string>>(new Set());
   const [fileContentsMap, setFileContentsMap] = useState<Record<string, string>>({});
   const fileTreeRef = useRef<HTMLDivElement>(null);
+  const onContentUpdateRef = useRef(originalOnContentUpdate);
 
-  // Initialize file list from props
+  useEffect(() => {
+    onContentUpdateRef.current = originalOnContentUpdate;
+  }, [originalOnContentUpdate]);
+
   useEffect(() => {
     if (initialFiles && initialFiles.length > 0) {
-      // Convert initialFiles to FileContent array
       const files: FileContent[] = initialFiles.map(idea => ({
-        id: idea.id.toString(), // Ensure ID is string
+        id: idea.id.toString(),
         name: idea.title,
         type: 'file',
         content: idea.description,
       }));
-      
       setFileList(files);
-      
-      // Initialize fileContentsMap directly from initialFiles without localStorage
       const contentsMap: Record<string, string> = {};
       initialFiles.forEach(idea => {
         contentsMap[idea.id.toString()] = idea.description;
@@ -74,11 +71,6 @@ export default function FileTreeDemo({
     }
   }, [initialFiles]);
 
-  // =============================================
-  // Effects
-  // =============================================
-  
-  // Update file content when currentFileId changes
   useEffect(() => {
     if (currentFileId) {
       const updateFileContent = (items: FileContent[]): FileContent[] => {
@@ -92,12 +84,10 @@ export default function FileTreeDemo({
           return item;
         });
       };
-
       setFileList(prevFiles => updateFileContent(prevFiles));
     }
   }, [currentFileId, fileContentsMap]);
 
-  // Handle content updates from file list
   useEffect(() => {
     const handleContentUpdates = () => {
       const findAndUpdateContent = (items: FileContent[]) => {
@@ -115,63 +105,36 @@ export default function FileTreeDemo({
           }
         });
       };
-
       findAndUpdateContent(fileList);
     };
-
     handleContentUpdates();
-  }, [fileList]);
+  }, [fileList, fileContentsMap]);
 
-  // Notify parent about content updates
   useEffect(() => {
     if (fileList) {
       const uniqueFileIds = new Set<string>();
-      
       const notifyForUniqueFiles = (items: FileContent[]) => {
         items.forEach(file => {
           if (file.type === 'file' && !uniqueFileIds.has(file.id) && file.content !== undefined) {
             uniqueFileIds.add(file.id);
-            onContentUpdate(file.id, file.content || '');
+            onContentUpdateRef.current(file.id, file.content || '');
           }
           if (file.children) {
             notifyForUniqueFiles(file.children);
           }
         });
       };
-      
       notifyForUniqueFiles(fileList);
     }
   }, [fileList]);
 
-  // Handle external content updates
-  useEffect(() => {
-    const handleExternalContentUpdate = (fileId: string, newContent: string) => {
-      if (fileContentsMap[fileId] !== newContent) {
-        setFileContentsMap(prev => ({
-          ...prev,
-          [fileId]: newContent
-        }));
-      }
-    };
-
-    const originalOnContentUpdate = onContentUpdate;
-    onContentUpdate = (fileId: string, newContent: string) => {
-      handleExternalContentUpdate(fileId, newContent);
-      originalOnContentUpdate(fileId, newContent);
-    };
-
-    return () => {
-      onContentUpdate = originalOnContentUpdate;
-    };
-  }, [onContentUpdate]);
-
-  // Sync expandedItems with openFolders
   useEffect(() => {
     const expandedItemsArray = Array.from(openFolders);
     if (expandedItemsArray.length > 0) {
       setFileList(prev => [...prev]);
     }
   }, [openFolders]);
+
 
   // =============================================
   // File Creation Handlers

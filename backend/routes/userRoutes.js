@@ -13,20 +13,31 @@ router.get("/all", authMiddleware, controller.getUsers);
 router.get("/get/:id", authMiddleware, controller.getUser);
 router.put("/update/:id", authMiddleware, controller.updateUser);
 router.delete("/delete/:id", authMiddleware, controller.deleteUser);
+router.post("/logout", (req, res) => {
+  res.clearCookie("token", {
+    httpOnly: true,
+    sameSite: process.env.NODE_ENV === "production" ? "None" : "Lax",
+    secure: process.env.NODE_ENV === "production",
+    path: "/",
+    domain: process.env.NODE_ENV === "production" ? ".vercel.app" : undefined,
+  });  
+
+  res.json({ message: "Logged out successfully" });
+});
 
 // ✅ NEW: Get current user info from token
 const authRateLimiter = rateLimit({
-    windowMs: 15 * 60 * 1000, // 15 minutes
-    max: 100, // max 100 requests per windowMs
+  windowMs: 15 * 60 * 1000, // 15 minutes
+  max: 100, // max 100 requests per windowMs
 });
 router.get("/me", authRateLimiter, authMiddleware, (req, res) => {
-    const user = req.user;
-    res.json({
-      id: user.sub,
-      email: user.email,
-      username: user.user_metadata?.username || null
-    });
+  const user = req.user;
+  res.json({
+    id: user.sub,
+    email: user.email,
+    username: user.user_metadata?.username || null
   });
-  
+});
+
 
 module.exports = router;
