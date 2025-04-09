@@ -35,13 +35,27 @@ const NavBar = ({
 
   const handleSignOut = async () => {
     try {
+      // 1. Invalidate backend session
       await fetcher("/users/logout", "POST");
 
+      // 2. Clear local storage and session storage
       localStorage.clear();
+      sessionStorage.clear();
 
+      // 3. Remove non-HttpOnly cookies
+      document.cookie
+        .split(";")
+        .forEach((c) => {
+          document.cookie = c
+            .replace(/^ +/, "")
+            .replace(/=.*/, `=;expires=${new Date(0).toUTCString()};path=/`);
+        });
+
+      // 4. Optional: Clear user state
       setUserId(null);
 
-      window.location.href = "/";
+      // 5. Redirect to landing/login page
+      window.location.href = "/get-started"; // more explicit redirect
     } catch (error) {
       console.error("Logout failed", error);
     }
