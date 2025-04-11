@@ -15,7 +15,6 @@ const getUserById = async (id) => {
         .from("users")
         .select("*")
         .eq("id", id)
-        .single();
 
     if (error) throw error;
     return data;

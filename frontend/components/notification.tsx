@@ -1,12 +1,22 @@
 import React from 'react';
 import styles from '@/app/styles/setting.module.css';
-import { FiBell, FiMail, FiMessageSquare, FiActivity } from 'react-icons/fi';
+import { 
+  FiBell, 
+  FiMail, 
+  FiMessageSquare, 
+  FiActivity 
+} from 'react-icons/fi';
+
+// =============================================
+// Notification Preferences Component
+// =============================================
 
 const NotificationPreferences = () => {
   return (
     <div className={styles.settingSection}>
       <h2>Notification Preferences</h2>
       <form>
+        {/*Push Notifications*/}
         <div className={styles.formGroup}>
           <label className={styles.checkboxLabel}>
             <FiBell className={styles.icon} />
@@ -24,6 +34,7 @@ const NotificationPreferences = () => {
           </div>
         </div>
 
+        {/*Email Notifications*/}
         <div className={styles.formGroup}>
           <label className={styles.checkboxLabel}>
             <FiMail className={styles.icon} />
@@ -36,6 +47,7 @@ const NotificationPreferences = () => {
           </div>
         </div>
 
+        {/*Direct Message Settings*/}
         <div className={styles.formGroup}>
           <label className={styles.checkboxLabel}>
             <FiMessageSquare className={styles.icon} />
@@ -51,6 +63,7 @@ const NotificationPreferences = () => {
           </div>
         </div>
 
+        {/*Activity Update Settings*/}
         <div className={styles.formGroup}>
           <label className={styles.checkboxLabel}>
             <FiActivity className={styles.icon} />
@@ -66,6 +79,7 @@ const NotificationPreferences = () => {
           </div>
         </div>
 
+        {/*Form Submission*/}
         <button type="submit" className={styles.saveButton}>Save Preferences</button>
       </form>
     </div>

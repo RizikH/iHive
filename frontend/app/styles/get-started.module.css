@@ -1,60 +1,16 @@
+/* =============================================================================
+   Get Started Page Styles
+   ============================================================================= */
+
+/* -----------------------------------------------------------------------------
+   Container and Layout
+   ----------------------------------------------------------------------------- */
 .bodyContainer {
     min-height: 100vh;
     display: flex;
     flex-direction: column;
     background-color: #ffffff;
     color: #000000;
-}
-
-
-  
-.navContainer {
-    padding: 1.5rem 4rem;
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    background-color: #1a1a1a;
-}
-
-.logo {
-    display: flex;
-    align-items: center;
-    gap: 0.5rem;
-    font-size: 1.5rem;
-    font-weight: bold;
-}
-
-.logo a {
-    color: #fff;
-    text-decoration: none;
-}
-
-.logoImage {
-    width: 35px;
-    height: 35px;
-    object-fit: contain;
-}
-
-.nav-links {
-    display: flex;
-    gap: 2rem;
-    font-weight: bold;
-}
-
-.nav-links a, .nav-links:visited {
-    color: #ccc;
-    background-color: transparent;
-    text-decoration: none;
-}
-
-.nav-links a:hover {
-    background-color: transparent;
-    text-decoration: underline;
-}
-
-.nav-links a:active {
-    background-color: transparent;
-    text-decoration: none;
 }
 
 .main-content {
@@ -72,6 +28,9 @@
     max-width: 500px;
 }
 
+/* -----------------------------------------------------------------------------
+   Content Elements
+   ----------------------------------------------------------------------------- */
 .intro-text {
     flex: 1;
 }
@@ -99,6 +58,9 @@
     font-weight: bold;
 }
 
+/* -----------------------------------------------------------------------------
+   Icon Animation
+   ----------------------------------------------------------------------------- */
 .ihive-icon {
     display: flex;
     justify-content: center;
@@ -121,7 +83,9 @@
     }
 }
 
-/* Responsive design */
+/* -----------------------------------------------------------------------------
+   Media Queries
+   ----------------------------------------------------------------------------- */
 @media (max-width: 768px) {
     .main-content {
         flex-direction: column;

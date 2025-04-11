@@ -1,4 +1,10 @@
+"use client";
+
 import { AvatarCircles } from "@/components/magicui/avatar-circles"
+
+// =============================================
+// Sample Avatar Data
+// =============================================
 
 const avatars = [
   {
@@ -23,7 +29,12 @@ const avatars = [
   },
 ]
 
+// =============================================
+// Avatar Circles Component
+// =============================================
+
 export default function AvatarCirclesDemo() {
+  // Render the avatar circles component with sample data
   return <AvatarCircles numPeople={99} avatarUrls={avatars} />
 }
 

@@ -5,6 +5,10 @@ import React, { useState } from 'react';
 import styles from '@/app/styles/change-avatar.module.css';
 import Image from 'next/image';
 
+// =============================================
+// Types and Interfaces
+// =============================================
+
 interface ChangeAvatarProps {
   isOpen: boolean;
   onClose: () => void;
@@ -12,16 +16,26 @@ interface ChangeAvatarProps {
   currentAvatar: string;
 }
 
+// =============================================
+// Avatar Selection Component
+// =============================================
+
 const ChangeAvatar: React.FC<ChangeAvatarProps> = ({
   isOpen,
   onClose,
   onAvatarChange,
   currentAvatar
 }) => {
+  // =============================================
+  // State Management
+  // =============================================
   const [selectedAvatar, setSelectedAvatar] = useState(currentAvatar);
   const [isUploading, setIsUploading] = useState(false);
   const fileInputRef = React.useRef<HTMLInputElement>(null);
 
+  // =============================================
+  // Default Avatar Options
+  // =============================================
   const defaultAvatars = [
     'https://avatar.vercel.sh/jack',
     'https://avatar.vercel.sh/jill',
@@ -30,6 +44,9 @@ const ChangeAvatar: React.FC<ChangeAvatarProps> = ({
     'https://avatar.vercel.sh/james'
   ];
 
+  // =============================================
+  // Avatar Selection Handlers
+  // =============================================
   const handleDefaultAvatarSelect = (avatarUrl: string) => {
     setSelectedAvatar(avatarUrl);
   };
@@ -61,6 +78,14 @@ const ChangeAvatar: React.FC<ChangeAvatarProps> = ({
     }
   };
 
+  const handleSave = () => {
+    onAvatarChange(selectedAvatar);
+    onClose();
+  };
+
+  // =============================================
+  // Effects
+  // =============================================
   // Clean up object URLs when component unmounts
   React.useEffect(() => {
     return () => {
@@ -71,22 +96,23 @@ const ChangeAvatar: React.FC<ChangeAvatarProps> = ({
     };
   }, [selectedAvatar]);
 
-  const handleSave = () => {
-    onAvatarChange(selectedAvatar);
-    onClose();
-  };
-
+  // Conditional rendering
   if (!isOpen) return null;
 
+  // =============================================
+  // Render Component
+  // =============================================
   return (
     <div className={styles.overlay} onClick={onClose}>
       <div className={styles.modal} onClick={e => e.stopPropagation()}>
+        {/*Modal Header*/}
         <div className={styles.header}>
           <h2>Change Avatar</h2>
           <button className={styles.closeButton} onClick={onClose}>×</button>
         </div>
 
         <div className={styles.content}>
+          {/*Current Avatar Preview*/}
           <div className={styles.currentAvatar}>
             <h3>Current Avatar</h3>
             <Image
@@ -98,6 +124,7 @@ const ChangeAvatar: React.FC<ChangeAvatarProps> = ({
             />
           </div>
 
+          {/*Avatar Selection Options*/}
           <div className={styles.defaultAvatars}>
             <h3>Choose from defaults</h3>
             <div className={styles.avatarGrid}>
@@ -138,6 +165,7 @@ const ChangeAvatar: React.FC<ChangeAvatarProps> = ({
             </div>
           </div>
 
+          {/*Action Buttons*/}
           <div className={styles.actions}>
             <button 
               className={styles.cancelButton} 

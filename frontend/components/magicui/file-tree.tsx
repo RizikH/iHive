@@ -9,6 +9,15 @@ import { Button } from "@/components/ui/button"
 import { ScrollArea } from "../ui/scroll-area"
 import { cn } from "@/lib/utils"
 
+export interface FileContent {
+  id: string;
+  name: string;
+  content: string;
+  type: 'file' | 'folder';
+  parentId?: string;
+  children?: FileContent[];
+}
+
 type TreeViewElement = {
   id: string
   name: string
@@ -38,7 +47,7 @@ const useTree = () => {
   return context
 }
 
-interface TreeViewComponentProps extends React.HTMLAttributes<HTMLDivElement> {}
+type TreeViewComponentProps = React.HTMLAttributes<HTMLDivElement>;
 
 type Direction = "rtl" | "ltr" | undefined
 
@@ -114,6 +123,7 @@ const Tree = forwardRef<HTMLDivElement, TreeViewProps>(
     )
 
     useEffect(() => {
+    // TODO: Add missing dependencies if needed
       if (initialSelectedId) {
         expandSpecificTargetedElements(elements, initialSelectedId)
       }
@@ -177,7 +187,7 @@ const TreeIndicator = forwardRef<HTMLDivElement, React.HTMLAttributes<HTMLDivEle
 
 TreeIndicator.displayName = "TreeIndicator"
 
-interface FolderComponentProps extends React.ComponentPropsWithoutRef<typeof AccordionPrimitive.Item> {}
+type FolderComponentProps = React.ComponentPropsWithoutRef<typeof AccordionPrimitive.Item>;
 
 type FolderProps = {
   expandedItems?: string[]
@@ -294,6 +304,7 @@ const CollapseButton = forwardRef<
   }, [setExpandedItems])
 
   useEffect(() => {
+    // TODO: Add missing dependencies if needed
     console.log(expandAll)
     if (expandAll) {
       expendAllTree(elements)

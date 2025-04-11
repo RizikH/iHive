@@ -1,12 +1,21 @@
+/* =============================================
+   Tailwind Imports
+   ============================================= */
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
 
+/* =============================================
+   CSS Variables
+   ============================================= */
 :root {
   --background: #ffffff;
   --foreground: #171717;
 }
 
+/* =============================================
+   Dark Mode
+   ============================================= */
 @media (prefers-color-scheme: dark) {
   :root {
     --background: #0a0a0a;
@@ -14,6 +23,9 @@
   }
 }
 
+/* =============================================
+   Base Elements
+   ============================================= */
 body {
     margin: 0;
     padding: 0;
@@ -25,7 +37,9 @@ body {
     flex-direction: column;
 }
 
-
+/* =============================================
+   Footer Styles
+   ============================================= */
 footer {
     text-align: center;
     padding: 1rem;
@@ -41,7 +55,6 @@ footer a:hover {
     color: var(--hover-color);
 }
 
-/* Footer */
 .footer {
     text-align: center;
     padding: 20px;

@@ -1,0 +1,116 @@
+.investmentsContainer {
+    max-width: 800px;
+    margin: 20px auto;
+    padding: 20px;
+    background-color: #ffffff;
+    border-radius: 8px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.investmentsTitle {
+    text-align: center;
+    font-size: 24px;
+    color: #333;
+    margin-bottom: 20px;
+}
+
+.investmentsTable {
+    width: 100%;
+    border-collapse: collapse;
+    text-align: left;
+}
+
+.investmentsTable th,
+.investmentsTable td {
+    padding: 12px;
+    border-bottom: 1px solid #ddd;
+}
+
+.investmentsTable th {
+    background-color: #007bff;
+    color: white;
+    font-weight: bold;
+}
+
+.investmentsTable tr:nth-child(even) {
+    background-color: #f8f9fa;
+}
+
+.investmentsTable tr:hover {
+    background-color: #e9ecef;
+}
+
+/* Status Styles */
+.completed {
+    color: #28a745;
+    font-weight: bold;
+}
+
+.pending {
+    color: #ffc107;
+    font-weight: bold;
+}
+
+.cancelled {
+    color: #dc3545;
+    font-weight: bold;
+}
+
+
+/* Navbar styling */
+.navContainer {
+    padding: 1.5rem 4rem;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    background-color: #1a1a1a;
+}
+
+.logo {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    font-size: 1.5rem;
+    font-weight: bold;
+}
+
+.logo a {
+    color: #fff;
+    text-decoration: none;
+}
+
+.logoImage {
+    width: 30px;
+    height: 30px;
+    object-fit: contain;
+}
+
+.nav-links {
+    display: flex;
+    align-items: center;
+    gap: 30px;
+
+}
+
+.avatarIcon {
+    border-radius: 50%;
+    margin-left: 20px;
+    /* Makes the image circular if needed */
+}
+
+.nav-links a,
+.nav-links:visited {
+    color: #ccc;
+    background-color: transparent;
+    text-decoration: none;
+}
+
+.nav-links a:hover {
+    background-color: transparent;
+    text-decoration: underline;
+}
+
+.nav-links a:active {
+    background-color: transparent;
+    text-decoration: none;
+}

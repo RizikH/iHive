@@ -1,3 +1,10 @@
+/* =============================================================================
+   Settings Page Styles
+   ============================================================================= */
+
+/* -----------------------------------------------------------------------------
+   Container and Layout
+   ----------------------------------------------------------------------------- */
 .pageContainer {
     min-height: 100vh;
     display: flex;
@@ -5,54 +12,6 @@
     background-color: #fff;
     color: #000;
 }
-
-.navbar {
-    padding: 1.5rem 4rem;
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    background-color: #1a1a1a;
-}
-
-.logo {
-    display: flex;
-    align-items: center;
-    gap: 0.5rem;
-    font-size: 1.5rem;
-    font-weight: bold;
-}
-
-.logo a {
-    color: #fff;
-    text-decoration: none;
-}
-
-.logoIcon {
-    width: 35px;
-    height: 35px;
-    object-fit: contain;
-}
-
-.nav-links {
-    display: flex;
-    gap: 2rem;
-    font-weight: bold;
-}
-
-.nav-links a, .nav-links:visited {
-    color: #ccc;
-    background-color: transparent;
-    text-decoration: none;
-}
-
-.nav-links a:hover {
-    text-decoration: underline;
-}
-
-.nav-links a:active {
-    text-decoration: none;
-}
-
 
 .mainContainer {
     display: flex;
@@ -65,6 +24,15 @@
     padding: 0 24px;
 }
 
+.divider {
+    width: 1px;
+    background-color: #ddd;
+    margin: 0 20px;
+}
+
+/* -----------------------------------------------------------------------------
+   Sidebar Elements
+   ----------------------------------------------------------------------------- */
 .sidebar {
     width: 250px;
     padding: 20px;
@@ -100,6 +68,9 @@
     border-left: 2px solid #0969da;
 }
 
+/* -----------------------------------------------------------------------------
+   Settings Content Area
+   ----------------------------------------------------------------------------- */
 .setting {
     flex: 1;
     padding: 20px;
@@ -138,6 +109,9 @@
     margin-bottom: 2rem;
 }
 
+/* -----------------------------------------------------------------------------
+   Form Elements
+   ----------------------------------------------------------------------------- */
 .formGroup {
     margin-bottom: 1.5rem;
 }
@@ -181,6 +155,15 @@
     border-color: #5046e6;
 }
 
+.icon {
+    color: #1a1a1a;
+    width: 1.2rem;
+    height: 1.2rem;
+}
+
+/* -----------------------------------------------------------------------------
+   Buttons
+   ----------------------------------------------------------------------------- */
 .saveButton {
     width: 100%;
     padding: 0.75rem;
@@ -198,19 +181,9 @@
     background: #333;
 }
 
-.icon {
-    color: #1a1a1a;
-    width: 1.2rem;
-    height: 1.2rem;
-}
-
-.divider {
-    width: 1px;
-    background-color: #ddd;
-    margin: 0 20px;
-}
-
-/* Add these new styles */
+/* -----------------------------------------------------------------------------
+   Checkbox Styles
+   ----------------------------------------------------------------------------- */
 .checkboxGroup {
     display: flex;
     flex-direction: column;

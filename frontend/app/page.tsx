@@ -13,20 +13,28 @@ export default function Home() {
 
       <nav className={styles.navContainer}>
         <div className={styles.logo}>
-          <Image
-            src="/Images/iHive.png"
-            alt="Logo"
-            title="Home"
-            width={35}
-            height={35}
-            className={styles.logoImage}
-          />
-          <Link href="/">iHive-Home</Link>
+          <Link href="/get-started" title="Get-Started" className="flex items-center gap-2">
+            <Image
+              src="/Images/iHive.png"
+              alt="Logo"
+              title="Home"
+              width={35}
+              height={35}
+              className={styles.logoImage}
+            />
+            <span>iHive-Home</span>
+          </Link>
         </div>
+
+        {/* 
+        Maybe we don't need these: since a one-time page
+
         <div className={styles['nav-links']}>
-          <Link href="#setting">Settings</Link>
+          <Link href="setting">Settings</Link>
           <Link href="get-started">Signout</Link> 
         </div>
+        */}
+
       </nav>
 
       {/* Split Layout */}

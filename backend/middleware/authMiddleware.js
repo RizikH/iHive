@@ -1,27 +1,20 @@
-const supabase = require("../config/db");
+const jwt = require("jsonwebtoken");
 
-const authMiddleware = async (req, res, next) => {
-    const token = req.header("Authorization");
+const authenticate = (req, res, next) => {
+  const token = req.cookies.token;
+  if (!token) {
+    console.log("No token found in cookies");
+    return res.status(401).json({ error: "Unauthorized" });
+  }
 
-    if (!token) {
-        return res.status(401).json({ message: "Access Denied. No token provided." });
-    }
-
-    try {
-        // Validate Supabase Auth token
-        const { data, error } = await supabase.auth.getUser(token.replace("Bearer ", ""));
-
-        if (error || !data || !data.user) {
-            return res.status(401).json({ message: "Invalid or expired token.", error });
-        }
-
-        // Attach authenticated user to request
-        req.user = data.user;
-        next();
-    } catch (err) {
-        console.error("Error verifying token:", err);
-        res.status(400).json({ message: "Invalid Token" });
-    }
+  try {
+    const decoded = jwt.verify(token, process.env.SUPABASE_JWT_SECRET);
+    req.user = decoded;
+    next();
+  } catch (err) {
+    console.error("❌ Token verification failed:", err.message);
+    return res.status(401).json({ error: "Invalid token" });
+  }
 };
 
-module.exports = authMiddleware;
+module.exports = authenticate;

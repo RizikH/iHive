@@ -1,21 +1,18 @@
 const express = require("express");
 const router = express.Router();
 const ideaController = require("../controllers/ideaController");
+const authenticate = require("../middleware/authMiddleware"); 
 
-// Get all ideas
+// 🔓 Public Routes
 router.get("/", ideaController.getAllIdeas);
-
-// Create a new idea
-router.post("/", ideaController.createIdea);
-
-// Update an idea by ID
-router.put("/:id", ideaController.updateIdea);
-
-// Delete an idea by ID
-router.delete("/:id", ideaController.deleteIdea);
-
-// Search for ideas with similar titles or exact match by ID
 router.get("/search/title/:title", ideaController.searchIdeasByTitle);
 router.get("/search/id/:id", ideaController.getIdeaById);
+router.post("/search/tags", ideaController.advancedSearchTags);
+
+// 🔐 Protected Routes
+router.post("/", authenticate, ideaController.createIdea);
+router.put("/:id", authenticate, ideaController.updateIdea);
+router.delete("/:id", authenticate, ideaController.deleteIdea);
+router.get("/user/:id", authenticate, ideaController.getAllByUserId);
 
 module.exports = router;

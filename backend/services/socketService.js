@@ -15,12 +15,21 @@ const initializeSocket = (server, corsOptions) => {
     console.log(`🔌 New WebSocket connection established: ${socket.id}`);
 
     /**
+     * Handle incoming messages from users.
+     */
+    socket.on("message", (message) => {
+      console.log(`Received message: ${message}`);
+      socket.emit("message", message);
+  });
+
+    /**
      * Handle user joining a discussion room based on idea ID.
      */
     socket.on("joinRoom", ({ ideaId, userId }) => {
-      socket.join(ideaId);
-      console.log(`🟢 User ${userId} joined idea room: ${ideaId}`);
-    });
+    socket.join(ideaId);
+    console.log(`🟢 User ${userId} joined idea room: ${ideaId}`);
+    socket.emit("joinedRoom", { ideaId, userId }); // Emit acknowledgment
+});
 
     /**
      * Direct messaging between users (investors & innovators).
