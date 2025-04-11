@@ -79,8 +79,6 @@ export const AuthForm = ({ initialView = "login", onClose }: AuthFormProps) => {
   
     // ✅ Set cookie (let backend handle auth via cookie-parser)
     if (data.token) {
-      document.cookie = `token=${data.token}; path=/; SameSite=Lax`;
-  
       // ✅ Decode token to store sub (user_id) and email for UI
       const payloadBase64 = data.token.split(".")[1];
       const decoded = JSON.parse(atob(payloadBase64));

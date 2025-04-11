@@ -13,6 +13,7 @@ const getAllIdeas = async (req, res) => {
 
 // ✅ GET /api/ideas/:id
 const getIdeaById = async (req, res) => {
+
     try {
         const idea = await Idea.getIdeaById(req.params.id);
         if (!idea) {
@@ -25,40 +26,40 @@ const getIdeaById = async (req, res) => {
 };
 
 const createIdea = async (req, res) => {
-  try {
-    console.log("📥 Incoming request body:", req.body);
+    try {
+        console.log("📥 Incoming request body:", req.body);
 
-    const { title, description } = req.body;
+        const { title, description } = req.body;
 
-    // 🔍 Extract user info from decoded token set by middleware
-    const userTokenPayload = req.user;
+        // 🔍 Extract user info from decoded token set by middleware
+        const userTokenPayload = req.user;
 
-    const userId = userTokenPayload?.sub;
+        const userId = userTokenPayload?.sub;
 
-    // 🔒 Validate inputs
-    if (!title || !description) {
-      console.warn("⚠️ Missing fields:", { title, description});
-      return res.status(400).json({ error: "Fields (title, description) are required." });
+        // 🔒 Validate inputs
+        if (!title || !description) {
+            console.warn("⚠️ Missing fields:", { title, description });
+            return res.status(400).json({ error: "Fields (title, description) are required." });
+        }
+
+        if (!userId) {
+            console.warn("❌ No userId found in token payload");
+            return res.status(401).json({ error: "Unauthorized: Missing or invalid user token." });
+        }
+
+        // 💾 Create the idea in DB
+        const newIdea = await Idea.createIdea({
+            user_id: userId,
+            title,
+            description,
+        });
+
+        return res.status(201).json({ message: "Idea created successfully!", idea: newIdea });
+
+    } catch (error) {
+        console.error("❌ Error while creating idea:", error);
+        return res.status(500).json({ error: error.message || "Server error" });
     }
-
-    if (!userId) {
-      console.warn("❌ No userId found in token payload");
-      return res.status(401).json({ error: "Unauthorized: Missing or invalid user token." });
-    }
-
-    // 💾 Create the idea in DB
-    const newIdea = await Idea.createIdea({
-      user_id: userId,
-      title,
-      description,
-    });
-
-    return res.status(201).json({ message: "Idea created successfully!", idea: newIdea });
-
-  } catch (error) {
-    console.error("❌ Error while creating idea:", error);
-    return res.status(500).json({ error: error.message || "Server error" });
-  }
 };
 
 

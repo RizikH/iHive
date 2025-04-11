@@ -3,6 +3,8 @@ const router = express.Router();
 const controller = require("../controllers/userController");
 const authMiddleware = require("../middleware/authMiddleware");
 const rateLimit = require("express-rate-limit");
+const isProduction = process.env.NODE_ENV === "production";
+
 
 // ✅ Public Routes (Authentication)
 router.post("/register", controller.addUser);

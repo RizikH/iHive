@@ -1,48 +1,58 @@
 "use client";
 
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, ReactNode } from "react";
 import Link from "next/link";
 import Image from "next/image";
 import styles from "@/app/styles/nav-bar.module.css";
-import { fetcher } from "@/app/utils/fetcher"; // ✅ import your fetcher utility
+import { fetcher } from "@/app/utils/fetcher";
+import { useRouter } from "next/navigation";
+
+interface NavLink {
+  href: string;
+  label: ReactNode;
+  onClick?: () => void;
+}
 
 interface NavBarProps {
   title?: string;
   logoPath?: string;
-  links?: { href: string; label: string; onClick?: () => void }[];
+  links?: NavLink[];
+  extraLinks?: NavLink[];
+  profileHref?: string; // ✅ e.g. "/investor-profile"
+  profileImgSrc?: string; // ✅ e.g. "/Images/Yixi.jpeg"
+  searchBar?: ReactNode; // ✅ custom search bar passed from the page
 }
 
 const NavBar = ({
   title = "iHive",
   logoPath = "/Images/iHive.png",
   links,
+  extraLinks,
+  profileHref,
+  profileImgSrc,
+  searchBar,
 }: NavBarProps) => {
   const [userId, setUserId] = useState<string | null>(null);
+  const router = useRouter();
 
   useEffect(() => {
     const fetchUser = async () => {
       try {
         const data = await fetcher("/users/me");
-        setUserId(data.id); // Supabase user ID
-      } catch (err) {
-        console.warn("User not logged in");
+        setUserId(data.id);
+      } catch {
         setUserId(null);
       }
     };
-
     fetchUser();
   }, []);
 
   const handleSignOut = async () => {
     try {
-      // 1. Invalidate backend session
       await fetcher("/users/logout", "POST");
-
-      // 2. Clear local storage and session storage
       localStorage.clear();
       sessionStorage.clear();
 
-      // 3. Remove non-HttpOnly cookies
       document.cookie
         .split(";")
         .forEach((c) => {
@@ -51,22 +61,19 @@ const NavBar = ({
             .replace(/=.*/, `=;expires=${new Date(0).toUTCString()};path=/`);
         });
 
-      // 4. Optional: Clear user state
       setUserId(null);
-
-      // 5. Redirect to landing/login page
-      window.location.href = "/get-started"; // more explicit redirect
+      router.push("/get-started");
+      router.refresh();
     } catch (error) {
       console.error("Logout failed", error);
     }
   };
 
-
-  const computedLinks =
-    links ??
-    (userId
+  const computedLinks: NavLink[] =
+    links ?? (userId
       ? [
-        { href: `/setting`, label: "Settings" },
+        ...(extraLinks || []),
+        { href: "/setting", label: "Settings" },
         { href: `/repository/${userId}`, label: "My Repositories" },
         { href: "#", label: "Sign Out", onClick: handleSignOut },
       ]
@@ -75,35 +82,50 @@ const NavBar = ({
         { href: "/register", label: "Register" },
       ]);
 
+  // ⬇️ Add this line right after
+  const filteredLinks = computedLinks.filter(link => link.label !== "My Repositories");
+
+
   return (
     <nav className={styles.navContainer}>
-      {/* Logo and Title */}
+      {/* Left side: logo */}
       <Link href="/" className={styles.logo}>
-        <Image
-          src={logoPath}
-          alt="Logo"
-          width={35}
-          height={35}
-          className={styles.logoImage}
-        />
+        <Image src={logoPath} alt="Logo" width={35} height={35} className={styles.logoImage} />
         <span>{title}</span>
       </Link>
 
-      {/* Navigation Links */}
-      <div className={styles.navLinks}>
-        {computedLinks.map((link, index) =>
-          link.onClick ? (
-            <button key={index} onClick={link.onClick} className={styles.navButton}>
-              {link.label}
-            </button>
-          ) : (
-            <Link key={index} href={link.href}>
-              {link.label}
+      {/* Right side: search bar + links + profile */}
+      <div className={styles.navRight}>
+        {searchBar && <div className={styles.searchWrapper}>{searchBar}</div>}
+
+        <div className={styles.navLinks}>
+          {filteredLinks.map((link, index) =>
+            link.onClick ? (
+              <button key={index} onClick={link.onClick} className={styles.navButton}>
+                {link.label}
+              </button>
+            ) : (
+              <Link key={index} href={link.href}>
+                {link.label}
+              </Link>
+            )
+          )}
+
+          {profileHref && profileImgSrc && (
+            <Link href={profileHref}>
+              <Image
+                src={profileImgSrc}
+                alt="Profile"
+                width={40}
+                height={40}
+                className={styles.avatarIcon}
+              />
             </Link>
-          )
-        )}
+          )}
+        </div>
       </div>
     </nav>
+
   );
 };
 

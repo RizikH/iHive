@@ -235,11 +235,9 @@ const EntrepreneurProfile = () => {
       <div className={styles.container}>
         <NavBar
           title="iHive-Entrepreneur"
-          links={[
+          extraLinks={[
             { href: "/ideas", label: "Repositories" },
-            { href: "/setting", label: "Setting" },
             { href: "/sponsors", label: "Sponsors" },
-            { href: "/get-started", label: "Sign Out" }
           ]}
         />
 

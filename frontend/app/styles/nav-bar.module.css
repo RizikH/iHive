@@ -14,8 +14,8 @@
 }
 
 /* -----------------------------------------------------------------------------
-   Logo and Branding
-   ----------------------------------------------------------------------------- */
+     Logo and Branding
+     ----------------------------------------------------------------------------- */
 .logo {
   display: flex;
   align-items: center;
@@ -39,30 +39,73 @@
 }
 
 /* -----------------------------------------------------------------------------
-   Navigation Links
-   ----------------------------------------------------------------------------- */
+     Navigation Layout (Right Side Wrapper)
+     ----------------------------------------------------------------------------- */
+.navRight {
+  display: flex;
+  align-items: center;
+  gap: 2rem;
+}
+
+/* -----------------------------------------------------------------------------
+     Optional Search Bar Wrapper
+     ----------------------------------------------------------------------------- */
+.searchWrapper {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+
+/* -----------------------------------------------------------------------------
+     Navigation Links
+     ----------------------------------------------------------------------------- */
 .navLinks {
   display: flex;
-  gap: 2rem;
+  align-items: center;
+  gap: 1.5rem;
   font-weight: bold;
 }
 
-.navLinks a, 
+.navLinks a,
 .navLinks:visited {
   color: #ccc;
   background-color: transparent;
   text-decoration: none;
 }
 
-.navLinks a:hover, 
+.navLinks a:hover,
 .navLinks a:active {
   text-decoration: underline;
   background-color: transparent;
 }
 
+.navButton {
+  background: none;
+  border: none;
+  color: #ccc;
+  cursor: pointer;
+  font-weight: bold;
+}
+
+.navButton:hover {
+  text-decoration: underline;
+}
+
 /* -----------------------------------------------------------------------------
-   Responsive Styles
-   ----------------------------------------------------------------------------- */
+     Avatar Icon
+     ----------------------------------------------------------------------------- */
+.avatarIcon {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  object-fit: cover;
+  cursor: pointer;
+}
+
+/* -----------------------------------------------------------------------------
+     Responsive Styles
+     ----------------------------------------------------------------------------- */
 @media (max-width: 768px) {
   .navContainer {
     flex-direction: column;
@@ -71,7 +114,17 @@
     padding: 1rem;
   }
 
-  .navLinks {
+  .navRight {
+    flex-direction: column;
     gap: 1rem;
   }
-} 
+
+  .navLinks {
+    flex-direction: column;
+    gap: 1rem;
+  }
+
+  .searchWrapper {
+    justify-content: center;
+  }
+}
