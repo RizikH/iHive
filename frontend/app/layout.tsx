@@ -1,6 +1,7 @@
 import { Metadata } from 'next';
 import { Inter, Roboto } from 'next/font/google';
 import "../app/styles/globals.css"; 
+import ChatWidget from '@/components/chat-widget';
 
 const inter = Inter({
   variable: '--font-inter',
@@ -30,6 +31,7 @@ export default function RootLayout({
         style={{ fontFamily: 'var(--font-inter), var(--font-roboto)' }} 
       >
         {children}
+        <ChatWidget /> {/* 👈 Add this line inside the body */}
       </body>
     </html>
   );
