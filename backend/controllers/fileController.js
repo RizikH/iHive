@@ -2,32 +2,51 @@ const s3 = require('../config/s3');
 const { v4: uuidv4 } = require('uuid');
 const File = require('../models/File');
 const path = require('path');
+const Idea = require('../models/Idea');
 
 const BUCKET_NAME = process.env.AWS_BUCKET_NAME;
+if (!BUCKET_NAME) {
+  throw new Error("Environment variable AWS_BUCKET_NAME is not defined.");
+}
 
-// Upload a file to S3 and store metadata in DB
+// Upload a file
 const uploadFile = async (req, res) => {
   try {
     const file = req.files?.file;
     if (!file) return res.status(400).json({ error: 'No file uploaded' });
+
+    const ideaId = req.body.idea_id;
+    if (!ideaId) return res.status(400).json({ error: 'Invalid or missing idea_id' });
+
+    const idea = await Idea.getIdeaById(ideaId);
+    if (!idea) return res.status(404).json({ error: 'Idea not found' });
+
+    const userId = req.user?.sub;
+    if (!userId) return res.status(401).json({ error: "Unauthorized: User information is missing." });
+    if (idea.user_id !== userId) return res.status(403).json({ error: 'You are not the owner of this idea' });
 
     const uniqueName = `${uuidv4()}_${file.name}`;
     const params = {
       Bucket: BUCKET_NAME,
       Key: uniqueName,
       Body: file.data,
-      ContentType: file.mimetype
+      ContentType: file.mimetype,
     };
 
-    const result = await s3.upload(params).promise();
-    console.log('📤 Uploaded to S3:', result.Location);
+    let result;
+    try {
+      result = await s3.upload(params).promise();
+    } catch (uploadError) {
+      console.error("❌ S3 Upload error:", uploadError);
+      return res.status(500).json({ error: "Failed to upload file to S3." });
+    }
 
     const saved = await File.create({
       name: file.name,
       type: 'upload',
-      idea_id: req.body.idea_id,
+      idea_id: ideaId,
       parent_id: req.body.parent_id || null,
-      user_id: req.user.sub, // 👈 use from auth
+      user_id: userId,
       path: result.Location,
       mime_type: file.mimetype,
     });
@@ -39,56 +58,114 @@ const uploadFile = async (req, res) => {
   }
 };
 
-// Delete a file from S3 (if uploaded) and from DB
+// Delete a file
 const deleteFile = async (req, res) => {
   try {
     const fileId = req.params.id;
     const file = await File.getById(fileId);
 
-    if (!file) return res.status(404).json({ error: 'File not found' });
-
-    // If file was uploaded, delete it from S3
-    if (file.type === 'upload' && file.path) {
-      const key = path.basename(file.path);
-      await s3.deleteObject({ Bucket: BUCKET_NAME, Key: key }).promise();
-      console.log(`🗑️ Deleted from S3: ${key}`);
+    if (!file) {
+      console.warn(`⚠️ File ${fileId} not found in DB.`);
+      return res.status(404).json({ error: 'File not found in database.' });
     }
 
-    // Delete from DB
-    await File.remove(fileId); // 👈 renamed from .remove to .delete
-    console.log(`📦 Deleted from DB: ${fileId}`);
+    if (file.type === 'upload' && file.path) {
+      const key = path.basename(file.path);
+      try {
+        await s3.deleteObject({ Bucket: BUCKET_NAME, Key: key }).promise();
+      } catch (err) {
+        console.warn(`⚠️ File not found in S3 or already deleted: ${key}`);
+      }
+    }
+
+    try {
+      await File.remove(fileId);
+    } catch (err) {
+      console.warn(`⚠️ Couldn't delete from DB: ${err.message}`);
+      return res.status(500).json({ error: 'Failed to delete from database.' });
+    }
 
     res.json({ message: 'File deleted successfully' });
   } catch (err) {
     console.error("❌ Delete error:", err);
-    res.status(500).json({ error: err.message });
+    res.status(500).json({ error: 'Unexpected server error during deletion.' });
   }
 };
 
-// Get all files for a given idea
+// Get all files for an idea
 const getFiles = async (req, res) => {
   try {
     const ideaId = req.query.idea_id;
+    const userId = req.user?.sub;
+
     const files = await File.getAll(ideaId);
-    res.json(files);
+
+    const sanitizedFiles = files.map(file => {
+      const isOwner = file.user_id === userId;
+      const isPublic = file.is_public === true || file.is_public === "true";
+      const isLocked = !isPublic && !isOwner;
+
+      if (isLocked) {
+        const {
+          id, name, type, idea_id, parent_id, user_id,
+          mime_type, created_at, updated_at, is_public
+        } = file;
+
+        return {
+          id,
+          name,
+          type,
+          idea_id,
+          parent_id,
+          user_id,
+          mime_type,
+          created_at,
+          updated_at,
+          is_public,
+          is_locked: true
+        };
+      }
+
+      return {
+        ...file,
+        is_locked: false
+      };
+    });
+
+    res.json(sanitizedFiles);
   } catch (err) {
     console.error("❌ Error in getFiles:", err);
     res.status(500).json({ error: err.message });
   }
 };
 
+// Get file by ID
 const getFileById = async (req, res) => {
   try {
     const file = await File.getById(req.params.id);
+    if (!file) return res.status(404).json({ error: "File not found" });
+
+    const userId = req.user?.sub;
+    const isOwner = file.user_id === userId;
+    const isPublic = file.is_public === true || file.is_public === "true";
 
     if (file.type === "upload" && file.path) {
-      const key = path.basename(file.path); // This assumes your key is stored in file.path
-      const signedUrl = s3.getSignedUrl("getObject", {
-        Bucket: BUCKET_NAME,
-        Key: key,
-        Expires: 60 * 5, // 5 minutes
-      });
-      file.path = signedUrl;
+      const key = path.basename(file.path);
+
+      if (isPublic || isOwner) {
+        const signedUrl = s3.getSignedUrl("getObject", {
+          Bucket: BUCKET_NAME,
+          Key: key,
+          Expires: 60 * 5,
+        });
+        file.path = signedUrl;
+      } else {
+        delete file.path;
+      }
+    }
+
+    if (!isPublic && !isOwner && file.type === 'text') {
+      delete file.content;
     }
 
     res.json(file);
@@ -97,17 +174,16 @@ const getFileById = async (req, res) => {
     res.status(404).json({ error: "File not found" });
   }
 };
-// Create a folder or text file
+
+// Create a new file
 const createFile = async (req, res) => {
   try {
     const { name, type, idea_id, parent_id, content } = req.body;
-    const user_id = req.user.sub;
+    const user_id = req.user?.sub;
 
     if (!name || !type || !idea_id) {
-      console.error('❌ Missing required fields:', { name, type, idea_id });
       return res.status(400).json({ error: 'Missing required fields' });
     }
-
 
     const file = await File.create({
       name,
@@ -125,17 +201,18 @@ const createFile = async (req, res) => {
   }
 };
 
-// Update text file or rename
+// Update file metadata
 const updateFile = async (req, res) => {
   try {
-    const { name, content, parent_id, type, idea_id, is_public } = req.body;
-
     const file = await File.getById(req.params.id);
-    const userId = req.user?.sub;
+    if (!file) return res.status(404).json({ error: "File not found" });
 
-    if (!file || file.user_id !== userId) {
+    const userId = req.user?.sub;
+    if (file.user_id !== userId) {
       return res.status(403).json({ error: "Not authorized to update this file." });
     }
+
+    const { name, content, parent_id, type, idea_id, is_public } = req.body;
 
     const updatedFields = {
       name,
@@ -154,8 +231,7 @@ const updateFile = async (req, res) => {
   }
 };
 
-
-// Stream a file from S3
+// Stream file from S3
 const streamFile = async (req, res) => {
   try {
     const file = await File.getById(req.params.id);
@@ -180,7 +256,6 @@ const streamFile = async (req, res) => {
 
     res.setHeader("Content-Type", file.mime_type || "application/octet-stream");
     res.setHeader("Content-Disposition", `inline; filename="${file.name}"`);
-
     s3Stream.pipe(res);
   } catch (err) {
     console.error("❌ Error streaming file:", err);
@@ -188,7 +263,26 @@ const streamFile = async (req, res) => {
   }
 };
 
+// Move file to a different parent folder
+const moveFile = async (req, res) => {
+  try {
+    const { parent_id } = req.body;
+    const fileId = req.params.id;
+    const userId = req.user?.sub;
 
+    const file = await File.getById(fileId);
+
+    if (!file || file.user_id !== userId) {
+      return res.status(403).json({ error: "Not authorized to move this file." });
+    }
+
+    const updatedFile = await File.update(fileId, { parent_id });
+    res.json(updatedFile);
+  } catch (err) {
+    console.error("❌ Error in moveFile:", err);
+    res.status(400).json({ error: err.message });
+  }
+};
 
 module.exports = {
   uploadFile,
@@ -197,5 +291,6 @@ module.exports = {
   getFileById,
   createFile,
   updateFile,
-  streamFile
+  streamFile,
+  moveFile,
 };

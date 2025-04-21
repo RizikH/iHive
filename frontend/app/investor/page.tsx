@@ -49,21 +49,21 @@ const InvestorPage = () => {
     const [allIdeas, setAllIdeas] = useState<Idea[]>([]);
     const [dropdownVisible, setDropdownVisible] = useState(false);
 
-    // const router = useRouter();
+    const router = useRouter();
 
-    // useEffect(() => {
-    //     const checkAuth = async () => {
-    //         const currentUser = await isAuthenticated();
-    //         if (!currentUser) {
-    //             router.push("/get-started");
-    //         } else {
-    //             setUser(currentUser);
-    //             setAuthChecked(true);
-    //         }
-    //     };
+    useEffect(() => {
+        const checkAuth = async () => {
+            const currentUser = await isAuthenticated();
+            if (!currentUser) {
+                router.push("/get-started");
+            } else {
+                setUser(currentUser);
+                setAuthChecked(true);
+            }
+        };
 
-    //     checkAuth();
-    // }, []);
+        checkAuth();
+    }, []);
 
 
 
@@ -165,7 +165,7 @@ const InvestorPage = () => {
         setDropdownVisible(!dropdownVisible);
     };
 
-    //if (!authChecked) return <p>Checking authentication...</p>;
+    if (!authChecked) return <p>Checking authentication...</p>;
     return (
         <>
             <Head>

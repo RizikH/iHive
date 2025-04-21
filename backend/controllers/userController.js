@@ -68,8 +68,8 @@ const loginUser = async (req, res) => {
     
     res.cookie("token", token, {
       httpOnly: true,
-      secure: isProduction,                  // ✅ only secure in production
-      sameSite: isProduction ? "None" : "Lax", // ✅ needed for cross-site cookies in prod
+      secure: isProduction,
+      sameSite: isProduction ? "None" : "Lax",
       path: "/",
       maxAge: 24 * 60 * 60 * 1000,
     });

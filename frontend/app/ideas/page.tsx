@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useEffect } from "react";
+import React, { useEffect, useState } from "react";
 import Link from "next/link";
 import Head from "next/head";
 import { FiPlus, FiSearch, FiFilter } from "react-icons/fi";
@@ -89,8 +89,8 @@ const IdeasPage = () => {
     try {
       setIsLoading(true);
       const savedIdea = await fetcher(
-        "/ideas", 
-        "POST", 
+        "/ideas",
+        "POST",
         {
           ...formData,
           user_id: userId
@@ -115,134 +115,137 @@ const IdeasPage = () => {
         <link rel="icon" href="/Images/iHive.png" />
       </Head>
 
-      <div className={styles.pageContainer}>
-        <NavBar title="iHive-Entrepreneur" />
+      <NavBar
+        title="iHive-Entrepreneur"
+        extraLinks={[
+          { href: "/sponsors", label: "Sponsors" }
+        ]}
+      />
 
-        <main className={styles.mainContent}>
-          {isLoading && <div className={styles.loading}>Loading...</div>}
-          {error && <div className={styles.error}>{error}</div>}
+      <main className={styles.mainContent}>
+        {isLoading && <div className={styles.loading}>Loading...</div>}
+        {error && <div className={styles.error}>{error}</div>}
 
-          {/* Filter + Search + New Button */}
-          <div className={styles.controlsSection}>
-            <div className={styles.searchBar}>
-              <FiSearch className={styles.searchIcon} />
-              <input
-                type="text"
-                placeholder="Search ideas..."
-                value={searchTerm}
-                onChange={(e) => setSearchTerm(e.target.value)}
-                className={styles.searchInput}
-              />
-            </div>
+        {/* Filter + Search + New Button */}
+        <div className={styles.controlsSection}>
+          <div className={styles.searchBar}>
+            <FiSearch className={styles.searchIcon} />
+            <input
+              type="text"
+              placeholder="Search ideas..."
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
+              className={styles.searchInput}
+            />
+          </div>
 
-            <div className={styles.filterContainer}>
-              <FiFilter className={styles.filterIcon} />
-              <select
-                value={filter}
-                onChange={(e) => setFilter(e.target.value)}
-                className={styles.filterSelect}
-              >
-                {getCategories().map((category) => (
-                  <option key={category} value={category}>
-                    {category.charAt(0).toUpperCase() + category.slice(1)}
-                  </option>
-                ))}
-              </select>
-            </div>
-
-            <button
-              className={styles.newIdeaButton}
-              onClick={handleCreateNewIdea}
-              disabled={isLoading}
+          <div className={styles.filterContainer}>
+            <FiFilter className={styles.filterIcon} />
+            <select
+              value={filter}
+              onChange={(e) => setFilter(e.target.value)}
+              className={styles.filterSelect}
             >
-              <FiPlus /> New Idea
-            </button>
+              {getCategories().map((category) => (
+                <option key={category} value={category}>
+                  {category.charAt(0).toUpperCase() + category.slice(1)}
+                </option>
+              ))}
+            </select>
           </div>
 
-          {/* New Idea Form */}
-          {showForm && (
-            <form onSubmit={handleFormSubmit} className={styles.form}>
-              <input
-                type="text"
-                placeholder="Title"
-                value={formData.title}
-                onChange={(e) =>
-                  setFormData({ ...formData, title: e.target.value })
-                }
-                required
-              />
-              <textarea
-                placeholder="Description"
-                value={formData.description}
-                onChange={(e) =>
-                  setFormData({ ...formData, description: e.target.value })
-                }
-                required
-              />
-              <div className={styles.formButtons}>
-                <button type="submit">Submit</button>
-                <button
-                  type="button"
-                  onClick={() => setShowForm(false)}
-                >
-                  Cancel
-                </button>
-              </div>
-            </form>
-          )}
+          <button
+            className={styles.newIdeaButton}
+            onClick={handleCreateNewIdea}
+            disabled={isLoading}
+          >
+            <FiPlus /> New Idea
+          </button>
+        </div>
 
-          {/* Idea Grid */}
-          <div className={styles.ideasGrid}>
-            {filteredIdeas.length > 0 ? (
-              filteredIdeas.map((idea) => (
-                <Link
-                  href={`/repository?id=${idea.id}`}
-                  key={idea.id}
-                  className={styles.ideaCard}
-                >
-                  <h3 className={styles.ideaTitle}>{idea.title}</h3>
-                  {idea.category && (
-                    <span className={styles.ideaCategory}>
-                      {idea.category}
-                    </span>
-                  )}
-                  <p className={styles.ideaPreview}>
-                    {idea.description
-                      ? getPreviewText(idea.description)
-                      : "No content"}
-                  </p>
-                  <div className={styles.ideaFooter}>
-                    <span className={styles.ideaDate}>
-                      {idea.updatedAt
-                        ? new Date(idea.updatedAt).toLocaleDateString()
-                        : "Not saved"}
-                    </span>
-                  </div>
-                </Link>
-              ))
-            ) : (
-              <div className={styles.noIdeas}>
-                {searchTerm || filter !== "all" ? (
-                  <p>No ideas match your search criteria.</p>
-                ) : (
-                  <div>
-                    <p>You haven't created any ideas yet.</p>
-                    <button
-                      className={styles.createFirstButton}
-                      onClick={handleCreateNewIdea}
-                    >
-                      Create your first idea
-                    </button>
-                  </div>
+        {/* New Idea Form */}
+        {showForm && (
+          <form onSubmit={handleFormSubmit} className={styles.form}>
+            <input
+              type="text"
+              placeholder="Title"
+              value={formData.title}
+              onChange={(e) =>
+                setFormData({ ...formData, title: e.target.value })
+              }
+              required
+            />
+            <textarea
+              placeholder="Description"
+              value={formData.description}
+              onChange={(e) =>
+                setFormData({ ...formData, description: e.target.value })
+              }
+              required
+            />
+            <div className={styles.formButtons}>
+              <button type="submit">Submit</button>
+              <button
+                type="button"
+                onClick={() => setShowForm(false)}
+              >
+                Cancel
+              </button>
+            </div>
+          </form>
+        )}
+
+        {/* Idea Grid */}
+        <div className={styles.ideasGrid}>
+          {filteredIdeas.length > 0 ? (
+            filteredIdeas.map((idea) => (
+              <Link
+                href={`/repository?id=${idea.id}`}
+                key={idea.id}
+                className={styles.ideaCard}
+              >
+                <h3 className={styles.ideaTitle}>{idea.title}</h3>
+                {idea.category && (
+                  <span className={styles.ideaCategory}>
+                    {idea.category}
+                  </span>
                 )}
-              </div>
-            )}
-          </div>
-        </main>
+                <p className={styles.ideaPreview}>
+                  {idea.description
+                    ? getPreviewText(idea.description)
+                    : "No content"}
+                </p>
+                <div className={styles.ideaFooter}>
+                  <span className={styles.ideaDate}>
+                    {idea.updatedAt
+                      ? new Date(idea.updatedAt).toLocaleDateString()
+                      : "Not saved"}
+                  </span>
+                </div>
+              </Link>
+            ))
+          ) : (
+            <div className={styles.noIdeas}>
+              {searchTerm || filter !== "all" ? (
+                <p>No ideas match your search criteria.</p>
+              ) : (
+                <div>
+                  <p>You haven't created any ideas yet.</p>
+                  <button
+                    className={styles.createFirstButton}
+                    onClick={handleCreateNewIdea}
+                  >
+                    Create your first idea
+                  </button>
+                </div>
+              )}
+            </div>
+          )}
+        </div>
+      </main>
 
-        {/* Footer */}
-        <Footer role="Entrepreneur" />
-      </div>
+      {/* Footer */}
+      <Footer role="Entrepreneur" />
     </>
   );
 };

@@ -14,7 +14,8 @@ import {
   FiChevronDown,
   FiImage,
   FiFileText as FiFilePdf,
-  FiCode
+  FiCode,
+  FiLock
 } from "react-icons/fi";
 
 export type FileItem = {
@@ -26,6 +27,7 @@ export type FileItem = {
   path?: string;
   mime_type?: string;
   children?: FileItem[];
+  is_locked?: boolean;
 };
 
 type FileTreeProps = {
@@ -154,6 +156,16 @@ const FileTree = ({ files, onSelect, onRefresh, selectedId, ideaId }: FileTreePr
     }
   };
 
+  const isDescendant = (files: FileItem[], parentId: string, potentialChildId: string): boolean => {
+    const children = files.filter(f => f.parent_id === parentId);
+    for (const child of children) {
+      if (child.id === potentialChildId) return true;
+      if (isDescendant(files, child.id, potentialChildId)) return true;
+    }
+    return false;
+  };
+
+
   const handleDragStart = (e: React.DragEvent, id: string) => {
     setDraggedItem(id);
     e.dataTransfer.setData('text/plain', id);
@@ -162,10 +174,12 @@ const FileTree = ({ files, onSelect, onRefresh, selectedId, ideaId }: FileTreePr
 
   const handleDragOver = (e: React.DragEvent, id: string, type: string) => {
     e.preventDefault();
-    if (type === "folder" && draggedItem !== id) {
+    const targetFolder = files.find(f => f.id === id);
+    if (type === "folder" && draggedItem !== id && !targetFolder?.is_locked) {
       setDropTarget(id);
     }
   };
+
 
   const handleDragLeave = () => {
     setDropTarget(null);
@@ -178,12 +192,30 @@ const FileTree = ({ files, onSelect, onRefresh, selectedId, ideaId }: FileTreePr
     if (!draggedItem || draggedItem === targetId) return;
 
     const draggedFile = files.find(f => f.id === draggedItem);
-    if (!draggedFile) return;
+    const targetFolder = files.find(f => f.id === targetId);
+
+    if (!draggedFile || !targetFolder || targetFolder.type !== "folder") return;
+
+    // 🚫 Prevent moving into self
+    if (draggedFile.id === targetFolder.id) return;
+
+    // 🚫 Prevent moving into own descendant
+    if (isDescendant(files, draggedFile.id, targetFolder.id)) {
+      alert("You can't move a folder into one of its subfolders.");
+      return;
+    }
+
+    // 🚫 Prevent moving into a locked folder
+    if (targetFolder.is_locked) {
+      alert("You can't move files into a locked folder.");
+      return;
+    }
 
     try {
       await fetcher(`/files/${draggedItem}/move`, "PUT", {
         parent_id: targetId
       });
+
       onRefresh();
       setExpanded(prev => ({ ...prev, [targetId]: true }));
     } catch (err: any) {
@@ -192,6 +224,7 @@ const FileTree = ({ files, onSelect, onRefresh, selectedId, ideaId }: FileTreePr
 
     setDraggedItem(null);
   };
+
 
   const buildTree = (items: FileItem[], parentId: string | null = null): FileItem[] => {
     return items
@@ -231,24 +264,31 @@ const FileTree = ({ files, onSelect, onRefresh, selectedId, ideaId }: FileTreePr
         >
 
           <div className={styles.fileItemLeft}>
-            {item.type === "folder" && (
+            {item.type === "folder" ? (
               <span
                 onClick={(e) => {
-                  e.stopPropagation(); // prevent selection, just toggle
+                  e.stopPropagation();
                   toggleExpand(item.id);
                 }}
                 className={styles.toggleIcon}
               >
                 {expanded[item.id] ? <FiChevronDown /> : <FiChevronRight />}
               </span>
-            )}
-            {item.type !== "folder" && (
+            ) : (
               <span className={styles.fileIndent}></span>
             )}
+
             <span className={styles.fileItemName}>
               {getFileIcon(item)} {item.name}
             </span>
+
+            {item.is_locked && (
+              <span className={styles.lockIconRight} title="Locked">
+                <FiLock />
+              </span>
+            )}
           </div>
+
 
           {!isPreviewMode && selectedId === item.id && (
             <button
@@ -300,7 +340,17 @@ const FileTree = ({ files, onSelect, onRefresh, selectedId, ideaId }: FileTreePr
         </button>
         <label title="Upload a file">
           <FiUpload /> Upload
-          <input type="file" onChange={handleUpload} />
+          <input
+            type="file"
+            onChange={handleUpload}
+            ref={(input) => {
+              if (input) {
+                input.setAttribute("webkitdirectory", "false");
+                input.setAttribute("directory", "false");
+              }
+            }}
+          />
+
         </label>
       </div>
 

@@ -3,6 +3,8 @@ const router = express.Router();
 const controller = require("../controllers/userController");
 const authMiddleware = require("../middleware/authMiddleware");
 const rateLimit = require("express-rate-limit");
+const isProduction = process.env.NODE_ENV === "production";
+
 
 // ✅ Public Routes (Authentication)
 router.post("/register", controller.addUser);
@@ -16,13 +18,11 @@ router.delete("/delete/:id", authMiddleware, controller.deleteUser);
 router.post("/logout", (req, res) => {
   res.clearCookie("token", {
     httpOnly: true,
-    sameSite: process.env.NODE_ENV === "production" ? "None" : "Lax",
-    secure: process.env.NODE_ENV === "production",
+    sameSite: isProduction ? "None" : "Lax",
+    secure: isProduction,
     path: "/",
-    domain: process.env.NODE_ENV === "production" ? ".vercel.app" : undefined,
-  });  
-
-  res.json({ message: "Logged out successfully" });
+  });
+  res.status(200).json({ message: "Logged out successfully" });
 });
 
 // ✅ NEW: Get current user info from token

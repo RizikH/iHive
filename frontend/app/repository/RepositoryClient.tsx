@@ -1,7 +1,6 @@
 "use client";
 
 import React, { useEffect, useState, useCallback } from "react";
-import Head from "next/head";
 import { useSearchParams, useRouter } from "next/navigation";
 
 import NavBar from "@/components/nav-bar";
@@ -14,7 +13,10 @@ import { fetcher } from "@/app/utils/fetcher";
 
 import styles from "../styles/repository.module.css";
 
-const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000/api';
+export const metadata = {
+  title: "Entrepreneur Repository",
+  description: "Manage your project files on iHive",
+};
 
 export default function Repository() {
   const [authChecked, setAuthChecked] = useState(false);
@@ -23,18 +25,19 @@ export default function Repository() {
   const [currentFile, setCurrentFile] = useState<FileItem | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
+  const [unauthorized, setUnauthorized] = useState(false);
 
   const searchParams = useSearchParams();
   const ideaId = searchParams.get("id");
+  console.log("Idea ID:", ideaId);
+
   const router = useRouter();
 
   const fetchFiles = useCallback(async () => {
     try {
       setLoading(true);
       const path = ideaId ? `/files?idea_id=${ideaId}` : "/files";
-      console.log("Fetching files from:", path);
       const data = await fetcher(path);
-      console.log("Files response:", data);
       setFiles(data);
     } catch (err) {
       console.error("Error fetching files:", err);
@@ -45,19 +48,38 @@ export default function Repository() {
   }, [ideaId]);
 
   useEffect(() => {
-    const checkAuth = async () => {
+    const checkAuthAndOwnership = async () => {
       const currentUser = await isAuthenticated();
+      console.log("Current User:", currentUser);
+      
       if (!currentUser) {
         router.push("/get-started");
-      } else {
-        setUser(currentUser);
+        return;
+      }
+
+      setUser(currentUser); 
+
+      try {
+        const idea = await fetcher(`/ideas/search/id/${ideaId}`);
+        console.log("idea.user_id type:", typeof idea.user_id);
+        console.log("idea.user_id:", idea.user_id);
+        console.log("currentUser.id:", currentUser);
+
+        if (idea.user_id !== currentUser.id) {
+          setUnauthorized(true);
+        } else {
+          await fetchFiles();
+        }
+      } catch (err) {
+        console.error("Error verifying idea ownership:", err);
+        setUnauthorized(true);
+      } finally {
         setAuthChecked(true);
-        fetchFiles(); // ✅ Fetch files only after user is authenticated
       }
     };
 
-    checkAuth();
-  }, [fetchFiles, router]);
+    checkAuthAndOwnership();
+  }, [fetchFiles, ideaId, router]);
 
   const handleSelectFile = (file: FileItem | null) => {
     setCurrentFile(file);
@@ -72,13 +94,17 @@ export default function Repository() {
 
   if (!authChecked) return <p>Checking authentication...</p>;
 
+  if (unauthorized) {
+    return (
+      <div style={{ padding: "2rem", textAlign: "center", color: "red" }}>
+        <h2>You are not autherized to view this page.</h2>
+        <p>Please contact the owner to request access.</p>
+      </div>
+    );
+  }
+
   return (
     <>
-      <Head>
-        <title>Entrepreneur Repository</title>
-        <link rel="icon" href="/Images/iHive.png" />
-      </Head>
-
       <div className={styles.pageContainer}>
         <NavBar
           title="iHive-Entrepreneur"

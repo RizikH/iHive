@@ -125,6 +125,7 @@
 }
 
 .fileItemName {
+  white-space: nowrap;
   display: flex;
   align-items: center;
   gap: 5px;
@@ -133,6 +134,19 @@
   text-overflow: ellipsis;
   white-space: nowrap;
   cursor: pointer;
+  flex: 1;
+}
+.lockedItem {
+  white-space: nowrap;
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  font-size: 0.9rem;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  cursor: pointer;
+  color: gray;
 }
 
 .toggleIcon {

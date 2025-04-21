@@ -1,11 +1,8 @@
 'use client';
 
 import React, { Suspense } from 'react';
-
-// Next.js
 import Head from 'next/head';
 import Link from 'next/link';
-import Image from 'next/image';
 import { useSearchParams } from 'next/navigation';
 
 // Components
@@ -20,93 +17,75 @@ import styles from '../styles/setting.module.css';
 import '../styles/globals.css';
 import '@fortawesome/fontawesome-svg-core/styles.css';
 
-// =============================================
-// Main Component
-// =============================================
 const Setting = () => {
-    return (
-        <>
-            <Head>
-                <meta charSet="UTF-8" />
-                <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-                <title>iHive | Setting</title>
-                <link rel="icon" href="/Images/iHive.png" />
-            </Head>
+  return (
+    <>
+      <Head>
+        <meta charSet="UTF-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+        <title>iHive | Setting</title>
+        <link rel="icon" href="/Images/iHive.png" />
+      </Head>
 
-            <div className={styles.pageContainer}>
-                {/* Navigation */}
-                <NavBar 
-                    title="iHive"
-                    links={[
-                        { href: "/entrepreneur", label: "Profile" },
-                        { href: "/get-started", label: "Sign Out" }
-                    ]}
-                />
+      <div className={styles.pageContainer}>
+        {/* Shared NavBar */}
+        <NavBar title="iHive" />
 
-                <main className={styles.mainContainer}>
-                    {/* Settings Sidebar */}
-                    <div className={styles.sidebar}>
-                        <ul className={styles.sidebarList}>
-                            <li className={styles.sidebarItem}>
-                                <Link href="/setting?tab=basic" className={styles.sidebarLink}>
-                                    Basic Information
-                                </Link>
-                            </li>
-                            <li className={styles.sidebarItem}>
-                                <Link href="/setting?tab=account" className={styles.sidebarLink}>
-                                    Account Settings
-                                </Link>
-                            </li>
-                            <li className={styles.sidebarItem}>
-                                <Link href="/setting?tab=social" className={styles.sidebarLink}>
-                                    Social Media
-                                </Link>
-                            </li>
-                            <li className={styles.sidebarItem}>
-                                <Link href="/setting?tab=notification" className={styles.sidebarLink}>
-                                    Notification Preferences
-                                </Link>
-                            </li>
-                        </ul>
-                    </div>
+        <main className={styles.mainContainer}>
+          {/* Settings Sidebar */}
+          <div className={styles.sidebar}>
+            <ul className={styles.sidebarList}>
+              <li className={styles.sidebarItem}>
+                <Link href="/setting?tab=basic" className={styles.sidebarLink}>
+                  Basic Information
+                </Link>
+              </li>
+              <li className={styles.sidebarItem}>
+                <Link href="/setting?tab=account" className={styles.sidebarLink}>
+                  Account Settings
+                </Link>
+              </li>
+              <li className={styles.sidebarItem}>
+                <Link href="/setting?tab=social" className={styles.sidebarLink}>
+                  Social Media
+                </Link>
+              </li>
+              <li className={styles.sidebarItem}>
+                <Link href="/setting?tab=notification" className={styles.sidebarLink}>
+                  Notification Preferences
+                </Link>
+              </li>
+            </ul>
+          </div>
 
-                    <div className={styles.divider}></div>
+          <div className={styles.divider}></div>
 
-                    {/* Settings Content */}
-                    <div className={styles.setting}>
-                        <Suspense fallback={<div>Loading settings...</div>}>
-                            <SettingContent />
-                        </Suspense>
-                    </div>
-                </main>
-            </div>
-        </>
-    );
+          {/* Settings Content */}
+          <div className={styles.setting}>
+            <Suspense fallback={<div>Loading settings...</div>}>
+              <SettingContent />
+            </Suspense>
+          </div>
+        </main>
+      </div>
+    </>
+  );
 };
 
-// =============================================
-// Content Component
-// =============================================
-/**
- * SettingContent - Dynamic component that renders different setting tabs
- * Uses client-side routing parameters to determine which setting to display
- */
 const SettingContent = () => {
-    // Get current tab from URL parameters, default to 'basic'
-    const searchParams = useSearchParams();
-    const tab = searchParams?.get('tab') || 'basic';
+  const searchParams = useSearchParams();
+  const tab = searchParams?.get('tab') || 'basic';
 
-    // Render appropriate component based on selected tab
-    switch (tab) {
-        case 'social':
-            return <SocialMedia />;
-        case 'account':
-            return <AccountSettings />;
-        case 'notification':
-            return <NotificationPreferences />;
-        default:
-            return <BasicInfo />;
-    }
+  switch (tab) {
+    case 'social':
+      return <SocialMedia />;
+    case 'account':
+      return <AccountSettings />;
+    case 'notification':
+      return <NotificationPreferences />;
+    default:
+      return <BasicInfo />;
+  }
 };
 
 export default Setting;
