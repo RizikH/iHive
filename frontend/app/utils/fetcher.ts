@@ -36,8 +36,4 @@ export const fetcher = async (
   }
 
   return responseType === "blob" ? res.blob() : res.json();
-<<<<<<< HEAD
 };
-=======
-};
->>>>>>> 3db0a07ea6c002eef2169dd3a08d3b97afae6387

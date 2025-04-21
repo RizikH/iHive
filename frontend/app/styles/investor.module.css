@@ -165,6 +165,7 @@
     text-overflow: ellipsis;
     display: -webkit-box;
     -webkit-line-clamp: 3; /* Show up to 3 lines */
+    line-clamp: 3; /* Standard property for compatibility */
     -webkit-box-orient: vertical;
     white-space: normal; /* Allow wrapping of text to multiple lines */
 }
@@ -198,17 +199,15 @@
 
 
 .postCard h3 {
-    color: var(--foreground);
-    /* Use consistent foreground color */
+    color: #000000;
     font-size: 18px;
     margin-bottom: 10px;
-}
+  }
 
-.postCard p {
+  .postCard p {
     font-size: 14px;
-    color: var(--foreground);
-    /* Same as above */
-}
+    color: #000000;
+  }
 
 /* Hover effect on posts */
 .postCard:hover {
