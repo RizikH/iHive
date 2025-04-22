@@ -11,7 +11,6 @@ import { useRouter, useSearchParams } from "next/navigation";
 import { isAuthenticated } from "@/app/utils/isAuthenticated";
 import RepositoryModal from "@/components/repository-modal";
 
-import FileTree, { FileItem } from "@/components/file-tree";
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:5000/api";
 
@@ -52,11 +51,8 @@ const InvestorPage = () => {
     const [allIdeas, setAllIdeas] = useState<Idea[]>([]);
     const [dropdownVisible, setDropdownVisible] = useState(false);
 
-    // Fetch files for the selected idea
-    const [files, setFiles] = useState<FileItem[]>([]);
-    const [error, setError] = useState<string | null>(null);
-    const [loading, setLoading] = useState(false);
-    const [currentFile, setCurrentFile] = useState<FileItem | null>(null);
+    const [selectedRepo, setSelectedRepo] = useState<string | null>(null);
+    const [isModalOpen, setIsModalOpen] = useState(false);
 
 
     const router = useRouter();
@@ -175,34 +171,14 @@ const InvestorPage = () => {
         setDropdownVisible(!dropdownVisible);
     };
 
+    const handleInvest = (repoId: string) => {
+        console.log(`Investing in idea ${repoId}`);
+    };
+
     // Fetch files for the selected idea
     const searchParams = useSearchParams();
     const ideaId = searchParams.get("id");
 
-    const fetchFiles = useCallback(async () => {
-        try {
-            setLoading(true);
-            const path = ideaId ? `/files?idea_id=${ideaId}` : "/files";
-            const data = await fetcher(path);
-            setFiles(data);
-        } catch (err) {
-            console.error("Error fetching files:", err);
-            setError(err instanceof Error ? err.message : "An unknown error occurred");
-        } finally {
-            setLoading(false);
-        }
-    }, [ideaId]);
-
-    const handleSelectFile = (file: FileItem | null) => {
-        setCurrentFile(file);
-    };
-
-    const handleUpdate = (updatedFile: FileItem) => {
-        setFiles((prev) =>
-            prev.map((f) => (f.id === updatedFile.id ? updatedFile : f))
-        );
-        setCurrentFile(updatedFile);
-    };
 
 
     if (!authChecked) return <p>Checking authentication...</p>;
@@ -334,16 +310,16 @@ const InvestorPage = () => {
                                     ? idea.idea_tags.map(tag => tag.tags.name).join(", ")
                                     : "No tags available"}
                             </p>
-                            <button 
+                            <button
                                 onClick={() => {
-                                  setSelectedRepo(idea.id.toString());
-                                  setIsModalOpen(true);
+                                    setSelectedRepo(idea.id.toString());
+                                    setIsModalOpen(true);
                                 }}
                                 className={styles.investButton}
-                              >
+                            >
                                 <span className={styles.investButtonIcon}>💰</span>
                                 Invest
-                              </button>
+                            </button>
                         </div>
                     ))}
                 </div>
@@ -351,14 +327,14 @@ const InvestorPage = () => {
 
             {selectedRepo && (
                 <RepositoryModal
-                  isOpen={isModalOpen}
-                  onClose={() => setIsModalOpen(false)}
-                  repoId={selectedRepo}
-                  title="Repository Preview"
-                  isInvestorView={true}
-                  onInvest={handleInvest}
+                    isOpen={isModalOpen}
+                    onClose={() => setIsModalOpen(false)}
+                    repoId={selectedRepo}
+                    title="Repository Preview"
+                    isInvestorView={true}
+                    onInvest={handleInvest}
                 />
-              )}
+            )}
 
             {/* Footer */}
             <footer className={styles.footer}>
