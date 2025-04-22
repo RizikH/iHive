@@ -9,6 +9,7 @@ import Image from "next/image";
 import { fetcher } from "@/app/utils/fetcher"; // ✅ Import fetcher
 import { useRouter, useSearchParams } from "next/navigation";
 import { isAuthenticated } from "@/app/utils/isAuthenticated";
+import RepositoryModal from "@/components/repository-modal";
 
 import FileTree, { FileItem } from "@/components/file-tree";
 
@@ -333,19 +334,31 @@ const InvestorPage = () => {
                                     ? idea.idea_tags.map(tag => tag.tags.name).join(", ")
                                     : "No tags available"}
                             </p>
-                            <button className={styles.investButton} onClick={() =>{
-                                <FileTree
-                                    files={files}
-                                    onSelect={handleSelectFile}
-                                    onRefresh={fetchFiles}
-                                    selectedId={currentFile?.id || null}
-                                    ideaId={Number(ideaId) || 0}
-
-                                />}}>💰 Invest</button>
+                            <button 
+                                onClick={() => {
+                                  setSelectedRepo(idea.id.toString());
+                                  setIsModalOpen(true);
+                                }}
+                                className={styles.investButton}
+                              >
+                                <span className={styles.investButtonIcon}>💰</span>
+                                Invest
+                              </button>
                         </div>
                     ))}
                 </div>
             </main>
+
+            {selectedRepo && (
+                <RepositoryModal
+                  isOpen={isModalOpen}
+                  onClose={() => setIsModalOpen(false)}
+                  repoId={selectedRepo}
+                  title="Repository Preview"
+                  isInvestorView={true}
+                  onInvest={handleInvest}
+                />
+              )}
 
             {/* Footer */}
             <footer className={styles.footer}>
