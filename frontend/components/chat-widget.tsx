@@ -63,10 +63,14 @@ export default function ChatWidget() {
     if (!socket && !connectedRef.current) {
       const socketUrl =
         process.env.NODE_ENV === 'production'
-          ? 'https://ihive.vercel.app'
+          ? 'https://ihive.onrender.com'
           : 'http://localhost:5000';
 
-      socket = io(socketUrl);
+      socket = io(socketUrl, {
+        transports: ['websocket'], // fallback to polling if needed
+        withCredentials: true,
+      });
+
       connectedRef.current = true;
     }
 

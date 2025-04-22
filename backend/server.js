@@ -55,7 +55,11 @@ app.get("/", (req, res) => {
 });
 
 // WebSocket (optional, restrict in prod if needed)
-initializeSocket(server, { origin: allowedOrigins[0], credentials: true });
+initializeSocket(server, {
+  origin: allowedOrigins,
+  credentials: true,
+});
+
 
 // Global Error Handler
 const errorHandler = require("./middleware/errorHandler");
