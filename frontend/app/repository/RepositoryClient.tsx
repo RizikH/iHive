@@ -8,8 +8,8 @@ import FileTree, { FileItem } from "@/components/file-tree";
 import FileEditor from "@/components/file-editor";
 import FileViewer from "@/components/file-viewer";
 import Footer from '@/components/footer';
-import { isAuthenticated } from "@/app/utils/isAuthenticated";
 import { fetcher } from "@/app/utils/fetcher";
+import { useAuthStore } from "@/app/stores/useAuthStore";
 
 import styles from "../styles/repository.module.css";
 
@@ -20,7 +20,6 @@ export const metadata = {
 
 export default function Repository() {
   const [authChecked, setAuthChecked] = useState(false);
-  const [user, setUser] = useState<any | null>(null);
   const [files, setFiles] = useState<FileItem[]>([]);
   const [currentFile, setCurrentFile] = useState<FileItem | null>(null);
   const [error, setError] = useState<string | null>(null);
@@ -29,9 +28,10 @@ export default function Repository() {
 
   const searchParams = useSearchParams();
   const ideaId = searchParams.get("id");
-  console.log("Idea ID:", ideaId);
-
   const router = useRouter();
+
+  const currentUser = useAuthStore((state) => state.currentUser);
+  const isAuthenticated = useAuthStore((state) => state.isAuthenticated);
 
   const fetchFiles = useCallback(async () => {
     try {
@@ -49,22 +49,13 @@ export default function Repository() {
 
   useEffect(() => {
     const checkAuthAndOwnership = async () => {
-      const currentUser = await isAuthenticated();
-      console.log("Current User:", currentUser);
-      
-      if (!currentUser) {
+      if (!isAuthenticated) {
         router.push("/get-started");
         return;
       }
 
-      setUser(currentUser); 
-
       try {
         const idea = await fetcher(`/ideas/search/id/${ideaId}`);
-        console.log("idea.user_id type:", typeof idea.user_id);
-        console.log("idea.user_id:", idea.user_id);
-        console.log("currentUser.id:", currentUser);
-
         if (idea.user_id !== currentUser.id) {
           setUnauthorized(true);
         } else {
@@ -79,7 +70,7 @@ export default function Repository() {
     };
 
     checkAuthAndOwnership();
-  }, [fetchFiles, ideaId, router]);
+  }, [fetchFiles, ideaId, currentUser.id, isAuthenticated, router]);
 
   const handleSelectFile = (file: FileItem | null) => {
     setCurrentFile(file);
@@ -97,7 +88,7 @@ export default function Repository() {
   if (unauthorized) {
     return (
       <div style={{ padding: "2rem", textAlign: "center", color: "red" }}>
-        <h2>You are not autherized to view this page.</h2>
+        <h2>You are not authorized to view this page.</h2>
         <p>Please contact the owner to request access.</p>
       </div>
     );

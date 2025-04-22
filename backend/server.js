@@ -45,7 +45,9 @@ app.use("/api/users", userRoutes);
 app.use("/api/ideas", ideaRoutes);
 app.use("/api/tags", tagRoutes);
 app.use("/api/files", fileRoutes);
-app.use('/chat', chatRoutes);
+app.use('/api/chat', chatRoutes);
+
+
 
 // Health Check
 app.get("/", (req, res) => {

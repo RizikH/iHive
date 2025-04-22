@@ -64,10 +64,22 @@ const deleteUser = async (id) => {
     return data;
 };
 
+const getUsersByQuery = async (query, excludeId) => {
+    const { data, error } = await supabase
+        .from('users')
+        .select('id, username')
+        .ilike('username', `%${query}%`)
+        .neq('id', excludeId);
+
+    if (error) throw error;
+    return data;
+};
+
 module.exports = {
     getAllUsers,
     getUserById,
     createUser,
     updateUser,
-    deleteUser
+    deleteUser,
+    getUsersByQuery
 };

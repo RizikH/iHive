@@ -8,14 +8,19 @@ import NavBar from "@/components/nav-bar";
 import Footer from "@/components/footer";
 import styles from "../styles/ideas.module.css";
 import { fetcher } from "@/app/utils/fetcher";
+import { useAuthStore } from "@/app/stores/useAuthStore";
+import { useRouter } from "next/navigation";
 
 const IdeasPage = () => {
+  const router = useRouter();
+  const currentUser = useAuthStore((state) => state.currentUser);
+  const isAuthenticated = useAuthStore((state) => state.isAuthenticated);
+
   const [ideas, setIdeas] = useState<any[]>([]);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [searchTerm, setSearchTerm] = useState("");
   const [filter, setFilter] = useState("all");
-  const [userId, setUserId] = useState<string | null>(null);
   const [showForm, setShowForm] = useState(false);
 
   const [formData, setFormData] = useState({
@@ -24,8 +29,10 @@ const IdeasPage = () => {
   });
 
   useEffect(() => {
-    const storedId = localStorage.getItem("user_id");
-    if (storedId) setUserId(storedId);
+    if (!isAuthenticated) {
+      setTimeout(() => router.push("/get-started"), 1500);
+      return;
+    }
 
     const fetchIdeas = async () => {
       try {
@@ -35,18 +42,17 @@ const IdeasPage = () => {
       } catch (error) {
         console.error("Error fetching ideas:", error);
         setError("Failed to load ideas");
-
-        const savedIdeas = localStorage.getItem("ideas");
-        if (savedIdeas) {
-          setIdeas(JSON.parse(savedIdeas));
-        }
       } finally {
         setIsLoading(false);
       }
     };
 
     fetchIdeas();
-  }, []);
+  }, [isAuthenticated, router]);
+
+  if (!isAuthenticated) {
+    return <p style={{ padding: "2rem", textAlign: "center" }}>Please log in to view this page...</p>;
+  }
 
   const filteredIdeas = ideas.filter((idea) => {
     const matchesSearch =
@@ -72,10 +78,6 @@ const IdeasPage = () => {
   };
 
   const handleCreateNewIdea = () => {
-    if (!userId) {
-      alert("Please log in to create an idea.");
-      return;
-    }
     setShowForm(true);
   };
 
@@ -93,7 +95,7 @@ const IdeasPage = () => {
         "POST",
         {
           ...formData,
-          user_id: userId
+          user_id: currentUser.id
         }
       );
 

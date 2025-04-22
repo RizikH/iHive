@@ -4,11 +4,12 @@ import React, { useEffect, useState } from "react";
 import Head from "next/head";
 import Image from "next/image";
 import Link from "next/link";
-
 import NavBar from "@/components/nav-bar";
 import Footer from "@/components/footer";
 import styles from "../styles/investor.module.css";
 import { fetcher } from "@/app/utils/fetcher";
+import { useAuthStore } from "@/app/stores/useAuthStore";
+import { useRouter } from "next/navigation";
 
 interface Tag {
   id: number;
@@ -45,6 +46,16 @@ const InvestorPage = () => {
   const [allIdeas, setAllIdeas] = useState<Idea[]>([]);
   const [dropdownVisible, setDropdownVisible] = useState(false);
 
+  const isAuthenticated = useAuthStore((state) => state.isAuthenticated);
+  const router = useRouter();
+
+  useEffect(() => {
+    if (!isAuthenticated) {
+      const timeout = setTimeout(() => router.push("/get-started"), 1500);
+      return () => clearTimeout(timeout);
+    }
+  }, [isAuthenticated, router]);
+
   useEffect(() => {
     const fetchIdeas = async () => {
       try {
@@ -58,8 +69,8 @@ const InvestorPage = () => {
       }
     };
 
-    fetchIdeas();
-  }, []);
+    if (isAuthenticated) fetchIdeas();
+  }, [isAuthenticated]);
 
   useEffect(() => {
     const fetchSearchedIdeas = async () => {
@@ -77,7 +88,7 @@ const InvestorPage = () => {
     };
 
     fetchSearchedIdeas();
-  }, [searchTerm]);
+  }, [searchTerm, allIdeas]);
 
   useEffect(() => {
     const fetchAllTags = async () => {
@@ -136,6 +147,10 @@ const InvestorPage = () => {
     setIdeas(filteredIdeas);
     setShowFilterPopup(false);
   };
+
+  if (!isAuthenticated) {
+    return <p style={{ textAlign: "center", padding: "2rem" }}>Please log in to view this page...</p>;
+  }
 
   const searchBar = (
     <div className={styles.searchContainer}>

@@ -46,7 +46,8 @@
     "tailwind-merge": "^3.0.2",
     "tailwindcss-animate": "^1.0.7",
     "unified": "^11.0.5",
-    "vfile": "^6.0.3"
+    "vfile": "^6.0.3",
+    "zustand": "^5.0.3"
   },
   "devDependencies": {
     "@eslint/eslintrc": "^3",

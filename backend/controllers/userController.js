@@ -12,6 +12,17 @@ const getUsers = async (req, res) => {
   }
 };
 
+// ✅ POST /api/users/all
+const getUsersByQuery = async (req, res) => {
+  try {
+    const { query, excludeId } = req.body;
+    const users = await User.getUsersByQuery(query, excludeId);
+    res.json(users);
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+};
+
 // ✅ GET /api/users/get/:id
 const getUser = async (req, res) => {
   try {
@@ -43,7 +54,6 @@ const addUser = async (req, res) => {
 
     res.status(201).json({ message: "User registered successfully!", user: data.user });
   } catch (error) {
-    console.error("Registration Error:", error.message);
     res.status(500).json({ error: error.message });
   }
 };
@@ -61,11 +71,8 @@ const loginUser = async (req, res) => {
 
     const token = data.session.access_token;
 
-    console.log("NODE_ENV:", process.env.NODE_ENV);
-
     const isProduction = process.env.NODE_ENV === "production";
 
-    
     res.cookie("token", token, {
       httpOnly: true,
       secure: isProduction,
@@ -74,21 +81,15 @@ const loginUser = async (req, res) => {
       maxAge: 24 * 60 * 60 * 1000,
     });
 
+    const user = await User.getUserById(data.user.id);
     res.json({
       token,
-      user: {
-        id: data.user.id,
-        username: data.user.user_metadata.username,
-        email: data.user.email,
-      },
+      user,
     });
   } catch (error) {
-    console.error("Login Error:", error.message);
     res.status(401).json({ error: error.message });
   }
 };
-
-
 
 // ✅ PUT /api/users/update/:id
 const updateUser = async (req, res) => {
@@ -134,5 +135,6 @@ module.exports = {
   addUser,
   loginUser,
   updateUser,
-  deleteUser
+  deleteUser,
+  getUsersByQuery
 };

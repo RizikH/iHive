@@ -12,24 +12,29 @@ const initializeSocket = (server, corsOptions) => {
   io = new Server(server, { cors: corsOptions });
 
   io.on("connection", (socket) => {
-    console.log(`🔌 New WebSocket connection established: ${socket.id}`);
 
     /**
      * Handle incoming messages from users.
      */
     socket.on("message", (message) => {
-      console.log(`Received message: ${message}`);
-      socket.emit("message", message);
-  });
+      if (message.roomId) {
+        io.to(message.roomId).emit("message", message); // broadcast to the room
+      } else {
+        socket.emit("message", message); // fallback for non-room messages
+      }
+    });
 
     /**
      * Handle user joining a discussion room based on idea ID.
      */
-    socket.on("joinRoom", ({ ideaId, userId }) => {
-    socket.join(ideaId);
-    console.log(`🟢 User ${userId} joined idea room: ${ideaId}`);
-    socket.emit("joinedRoom", { ideaId, userId }); // Emit acknowledgment
-});
+    socket.on("joinRoom", ({ ideaId, roomId, userId }) => {
+      const targetRoom = roomId || ideaId;
+      if (targetRoom) {
+        socket.join(targetRoom);
+        socket.roomId = targetRoom;
+        socket.emit("joinedRoom", { roomId: targetRoom, userId });
+      }
+    });
 
     /**
      * Direct messaging between users (investors & innovators).
@@ -62,9 +67,7 @@ const initializeSocket = (server, corsOptions) => {
     /**
      * Handle WebSocket disconnection.
      */
-    socket.on("disconnect", () => {
-      console.log(`❌ WebSocket disconnected: ${socket.id}`);
-    });
+    socket.on("disconnect", () => {});
   });
 
   return io;
