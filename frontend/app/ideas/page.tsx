@@ -71,7 +71,8 @@ const IdeasPage = () => {
   };
 
   const getPreviewText = (description: string) => {
-    const textOnly = description.replace(/<[^>]*>/g, "");
+    const sanitizeHtml = require("sanitize-html");
+    const textOnly = sanitizeHtml(description, { allowedTags: [], allowedAttributes: {} });
     return textOnly.length > 100
       ? textOnly.substring(0, 100) + "..."
       : textOnly;
