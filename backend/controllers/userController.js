@@ -37,23 +37,60 @@ const getUser = async (req, res) => {
 // ✅ POST /api/users/register
 const addUser = async (req, res) => {
   try {
-    const { username, email, password, bio } = req.body;
+    const { username, email, password, bio, avatar } = req.body;
+
+    console.debug("addUser called with:", { username, email, bio, avatar });
+
     if (!username || !email || !password) {
+      console.debug("Validation failed: Missing required fields");
       return res.status(400).json({ error: "Username, email, and password are required." });
     }
 
+    // 1. Register user with Supabase Auth
     const { data, error } = await supabase.auth.signUp({
       email,
       password,
       options: {
-        data: { username, bio }
-      }
+        data: { username, bio, avatar },
+      },
     });
 
-    if (error) throw new Error(error.message);
+    if (error) {
+      console.error("Supabase signUp error:", error.message);
+      throw new Error(error.message);
+    }
 
-    res.status(201).json({ message: "User registered successfully!", user: data.user });
+    const authUser = data.user;
+    if (!authUser) {
+      console.error("Signup succeeded but no user returned.");
+      return res.status(500).json({ error: "Signup succeeded but no user returned." });
+    }
+
+    console.debug("Supabase user created:", authUser);
+
+    // 2. Create user in public.users table
+    await User.createUser({
+      id: authUser.id,
+      username: authUser.user_metadata.username,
+      email: authUser.email,
+      avatar: avatar || null,
+      bio: bio || null,
+    });
+
+    console.debug("User successfully added to public.users table");
+
+    res.status(201).json({
+      message: "User registered successfully!",
+      user: {
+        id: authUser.id,
+        email: authUser.email,
+        username,
+        bio,
+        avatar,
+      },
+    });
   } catch (error) {
+    console.error("addUser error:", error.message);
     res.status(500).json({ error: error.message });
   }
 };
@@ -62,12 +99,15 @@ const addUser = async (req, res) => {
 const loginUser = async (req, res) => {
   try {
     const { email, password } = req.body;
+
     if (!email || !password) {
       return res.status(400).json({ error: "Email and password are required." });
     }
 
     const { data, error } = await supabase.auth.signInWithPassword({ email, password });
-    if (error) throw new Error(error.message);
+    if (error) {
+      throw new Error(error.message);
+    }
 
     const token = data.session.access_token;
 
@@ -82,6 +122,7 @@ const loginUser = async (req, res) => {
     });
 
     const user = await User.getUserById(data.user.id);
+
     res.json({
       token,
       user,
@@ -136,5 +177,5 @@ module.exports = {
   loginUser,
   updateUser,
   deleteUser,
-  getUsersByQuery
+  getUsersByQuery,
 };

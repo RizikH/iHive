@@ -115,7 +115,8 @@ export const AuthForm = ({ initialView = "login", onClose }: AuthFormProps) => {
       payload.skills = formData.skills;
     }
 
-    await fetcher("/users/register", "POST", payload);
+    const user = await fetcher("/users/register", "POST", payload);
+    if (!user) throw new Error("Registration failed. Please try again.");
     setSuccess("Registration successful! You can now log in.");
   };
 
