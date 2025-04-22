@@ -9,6 +9,7 @@ import NavBar from "@/components/nav-bar";
 import Footer from "@/components/footer";
 import styles from "../styles/investor.module.css";
 import { fetcher } from "@/app/utils/fetcher";
+import RepositoryModal from "@/components/repository-modal";
 
 interface Tag {
   id: number;
@@ -44,6 +45,8 @@ const InvestorPage = () => {
   const [filteredTags, setFilteredTags] = useState<Tag[]>([]);
   const [allIdeas, setAllIdeas] = useState<Idea[]>([]);
   const [dropdownVisible, setDropdownVisible] = useState(false);
+  const [selectedRepo, setSelectedRepo] = useState<string | null>(null);
+  const [isModalOpen, setIsModalOpen] = useState(false);
 
   useEffect(() => {
     const fetchIdeas = async () => {
@@ -135,6 +138,10 @@ const InvestorPage = () => {
 
     setIdeas(filteredIdeas);
     setShowFilterPopup(false);
+  };
+
+  const handleInvest = (repoId: string) => {
+    console.log(`Investing in idea ${repoId}`);
   };
 
   const searchBar = (
@@ -250,11 +257,31 @@ const InvestorPage = () => {
                   ? idea.idea_tags.map(tag => tag.tags.name).join(", ")
                   : "No tags available"}
               </p>
-              <button className={styles.investButton}>💰 Invest</button>
+              <button 
+                onClick={() => {
+                  setSelectedRepo(idea.id.toString());
+                  setIsModalOpen(true);
+                }}
+                className={styles.investButton}
+              >
+                <span className={styles.investButtonIcon}>💰</span>
+                Invest
+              </button>
             </div>
           ))}
         </div>
       </main>
+
+      {selectedRepo && (
+        <RepositoryModal
+          isOpen={isModalOpen}
+          onClose={() => setIsModalOpen(false)}
+          repoId={selectedRepo}
+          title="Repository Preview"
+          isInvestorView={true}
+          onInvest={handleInvest}
+        />
+      )}
 
       <Footer role="Investor" />
     </>
