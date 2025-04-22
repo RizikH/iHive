@@ -35,8 +35,7 @@
         "react-icons": "^5.5.0",
         "socket.io": "^4.8.1",
         "tailwind-merge": "^3.0.1",
-        "uuid": "^11.1.0",
-        "lusca": "^1.7.0"
+        "uuid": "^11.1.0"
     },
     "devDependencies": {
         "kill-port": "^2.0.1",

@@ -3,7 +3,6 @@ const express = require("express");
 const cors = require("cors");
 const http = require("http");
 const cookieParser = require("cookie-parser");
-const lusca = require("lusca");
 
 const { initializeSocket } = require("./services/socketService");
 
@@ -38,7 +37,6 @@ app.use(
 
 // Middleware
 app.use(cookieParser());
-app.use(lusca.csrf());
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 

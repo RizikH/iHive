@@ -259,7 +259,15 @@ export default function ChatWidget() {
                   }}
                   className="flex items-center gap-2 p-2 bg-white rounded hover:bg-gray-50 cursor-pointer"
                 >
-                  <Image src={user.avatar} className="w-8 h-8 rounded-full" alt={''} />
+                  <Image
+                    src={user.avatar || '/Images/sample.jpeg'}
+                    width={24}
+                    height={24}
+                    className="w-6 h-6 rounded-full"
+                    alt={user.username}
+                  />
+
+
                   <span>{user.username}</span>
                 </div>
               ))}
