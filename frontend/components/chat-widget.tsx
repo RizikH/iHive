@@ -1,263 +1,308 @@
-'use client';
+"use client";
 
 import { useEffect, useRef, useState } from 'react';
-import io from 'socket.io-client';
-// Uncomment the following lines when Supabase is set up:
-// import { useSession } from '@supabase/auth-helpers-react';
-// import { supabase } from '@/lib/supabaseClient';
+import io, { Socket } from 'socket.io-client';
+import { fetcher } from '@/app/utils/fetcher';
+import { useAuthStore } from '@/app/stores/useAuthStore';
+import Image from 'next/image';
 
-// Connect to your backend WebSocket server
-const socket = io('http://localhost:5000');
+let socket: Socket | null = null;
 
-// Replace with Supabase-authenticated user session when ready:
-// const session = useSession();
-// const currentUser = {
-//   id: session?.user.id,
-//   name: session?.user.user_metadata.full_name || 'Anonymous',
-//   avatar: session?.user.user_metadata.avatar_url || '/default-avatar.png',
-// };
-
-// Fallback mock user (used for development/demo)
-const currentUser = {
-  id: 'user123',
-  name: 'You',
-  avatar: '/Images/sample.jpeg',
-};
-
-// Replace this with Supabase call to get all users (except currentUser):
-// const [allUsers, setAllUsers] = useState([]);
-// useEffect(() => {
-//   const fetchUsers = async () => {
-//     const { data, error } = await supabase
-//       .from('users')
-//       .select('id, name, avatar_url')
-//       .neq('id', currentUser.id);
-//     if (data) setAllUsers(data);
-//   };
-//   if (currentUser.id) fetchUsers();
-// }, [currentUser.id]);
-
-// Hardcoded users for now
-const allUsers = [
-  { id: 'user123', name: 'You', avatar: '/Images/sample.jpeg' },
-  { id: 'user456', name: 'Dalton', avatar: '/Images/sample.jpeg' },
-  { id: 'user789', name: 'Rizik', avatar: '/Images/sample.jpeg' },
-  { id: 'user321', name: 'Sam', avatar: '/Images/sample.jpeg' },
-  { id: 'user654', name: 'Yixi', avatar: '/Images/sample.jpeg' },
-];
-
-// Define message type
 type Message = {
-  senderId: string;
+  sender_id: string;
   senderName: string;
   senderAvatar: string;
   content: string;
+  timestamp?: string;
+  roomId?: string;
 };
 
-// Define what each chat window holds
 type ChatWindow = {
   id: string;
-  name: string;
+  username: string;
   avatar: string;
   minimized: boolean;
   messages: Message[];
+  typing?: string | boolean;
 };
 
 export default function ChatWidget() {
-  // Track open chats, menu toggle, and state for group messaging
+  const isAuthenticated = useAuthStore.getState().isAuthenticated;
+  const currentUser = useAuthStore.getState().currentUser;
+
   const [openChats, setOpenChats] = useState<ChatWindow[]>([]);
   const [chatMenuOpen, setChatMenuOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
-  const [groupMode, setGroupMode] = useState(false);
-  const [selectedGroupUsers, setSelectedGroupUsers] = useState<any[]>([]);
+  const [searchResults, setSearchResults] = useState<any[]>([]);
 
-  // Setup listener for incoming socket messages
+  const audioRef = useRef<HTMLAudioElement | null>(null);
+  const messageEndRefs = useRef<{ [key: string]: HTMLDivElement | null }>({});
+  const inputRefs = useRef<{ [key: string]: HTMLInputElement | null }>({});
+
+  const [existingContacts, setExistingContacts] = useState<any[]>([]);
+
+  const connectedRef = useRef(false);
+
   useEffect(() => {
-    const handleMessage = (msg: Message) => {
-      setOpenChats(prev =>
-        prev.map(chat =>
-          chat.id === msg.senderId || chat.id.includes(msg.senderId)
-            ? { ...chat, messages: [...chat.messages, msg] }
-            : chat
-        )
-      );
+    const fetchExistingContacts = async () => {
+      try {
+        const contacts = await fetcher(`/chat/contacts/${currentUser.id}`);
+        setExistingContacts(contacts);
+      } catch (err) {
+        console.error('Failed to fetch contacts:', err);
+      }
     };
 
-    socket.on('message', handleMessage); // listen for 'message' events
-    return () => socket.off('message', handleMessage); // cleanup listener
+    if (isAuthenticated && currentUser.id) {
+      fetchExistingContacts();
+    }
+  }, [currentUser.id, isAuthenticated]);
+
+  useEffect(() => {
+    if (!isAuthenticated) return;
+    if (!socket && !connectedRef.current) {
+      const socketUrl =
+        process.env.NODE_ENV === 'production'
+          ? 'https://ihive.onrender.com'
+          : 'http://localhost:5000';
+
+      socket = io(socketUrl, {
+        transports: ['websocket'], // fallback to polling if needed
+        withCredentials: true,
+      });
+
+      connectedRef.current = true;
+    }
+
+
+    const handleMessage = (msg: Message) => {
+      if (msg.sender_id === currentUser.id) return;
+
+      // Play sound for every incoming message
+      if (audioRef.current) {
+        audioRef.current.play().catch(() => { });
+      }
+
+      setOpenChats(prev => {
+        const exists = prev.find(chat => chat.id === msg.roomId);
+
+        if (exists) {
+          return prev.map(chat =>
+            chat.id === msg.roomId
+              ? { ...chat, messages: [...chat.messages, msg], typing: false }
+              : chat
+          );
+        }
+
+        // If room hasn't been opened yet, join it
+        socket?.emit('joinRoom', { roomId: msg.roomId, userId: currentUser.id });
+
+        // Create a new minimized chat window
+        return [
+          ...prev,
+          {
+            id: msg.roomId!,
+
+            username: msg.senderName,
+            avatar: msg.senderAvatar || '/Images/sample.jpeg',
+            minimized: true,
+            messages: [msg],
+            typing: false,
+          },
+        ];
+      });
+    };
+
+
+    const handleTyping = ({ roomId, senderId }: { roomId: string; senderId: string }) => {
+      if (senderId === currentUser.id) return;
+
+      setOpenChats(prev =>
+        prev.map(chat =>
+          chat.id === roomId ? { ...chat, typing: senderId } : chat
+        )
+      );
+
+      setTimeout(() => {
+        setOpenChats(prev =>
+          prev.map(chat =>
+            chat.id === roomId ? { ...chat, typing: undefined } : chat
+          )
+        );
+      }, 2000);
+    };
+
+    socket?.on('message', handleMessage);
+    socket?.on('typing', handleTyping);
+
+    return () => {
+      socket?.off('message', handleMessage);
+      socket?.off('typing', handleTyping);
+    };
+  }, [currentUser.id, isAuthenticated]);
+
+  useEffect(() => {
+    return () => {
+      if (socket) {
+        socket.disconnect();
+        socket = null;
+        connectedRef.current = false;
+      }
+    };
   }, []);
 
-  // Handles opening a direct (1-to-1) chat
-  const openChat = (user: { id: string; name: string; avatar: string }) => {
-    const existing = openChats.find(c => c.id === user.id);
-    if (!existing) {
-      const roomId = `dm-${[currentUser.id, user.id].sort().join('-')}`; // generate room ID
-      socket.emit('joinRoom', { roomId, userId: currentUser.id }); // join socket room
+  useEffect(() => {
+    openChats.forEach(chat => {
+      const ref = messageEndRefs.current[chat.id];
+      if (ref) ref.scrollIntoView({ behavior: 'smooth' });
+    });
+  }, [openChats]);
 
-      // Replace with Supabase function to get/create room:
-      // const { data: room } = await supabase.rpc('get_or_create_dm_room', {
-      //   user1: currentUser.id,
-      //   user2: user.id,
-      // });
+  useEffect(() => {
+    const fetchResults = async () => {
+      if (!searchQuery.trim() || !currentUser.id) return setSearchResults([]);
+      try {
+        const users = await fetcher('/users/all', 'POST', {
+          query: searchQuery,
+          excludeId: currentUser.id,
+        });
+        setSearchResults(users);
+      } catch (err) {
+        console.error('Search error:', err);
+      }
+    };
 
-      setOpenChats(prev => [
-        ...prev.map(c => ({ ...c, minimized: true })), // minimize all other chats
-        {
-          id: user.id,
-          name: user.name,
-          avatar: user.avatar,
-          minimized: false,
-          messages: [],
-        }
-      ]);
-    }
+    const delay = setTimeout(fetchResults, 300);
+    return () => clearTimeout(delay);
+  }, [searchQuery, currentUser.id]);
+
+  const getReceiverFromRoom = async (roomId: string, userId: string) => {
+    const receiver = await fetcher(`/chat/${roomId}/receiver?userId=${userId}`);
+    return receiver[0];
   };
 
-  // Handles creating a new group chat
-  const openGroupChat = () => {
-    const participants = [currentUser, ...selectedGroupUsers];
-    const roomId = `group-${participants.map(p => p.id).sort().join('-')}`;
-    const customName = window.prompt('Name your group chat:')?.trim() || 'Group Chat';
-    socket.emit('joinRoom', { roomId, userId: currentUser.id });
+  const openChat = async (user: { id: string; username: string; avatar: string }) => {
+    const room = await fetcher('/chat/get-dm-room', 'POST', {
+      user1: currentUser.id,
+      user2: user.id,
+    });
+    const roomId = room.id;
+    if (openChats.some(c => c.id === roomId)) return;
 
-    // Replace with Supabase chat room + participants insert:
-    // const { data: newRoom } = await supabase
-    //   .from('chat_rooms')
-    //   .insert([{ name: customName, is_group: true }])
-    //   .select()
-    //   .single();
-    // await supabase.from('chat_participants').insert(
-    //   participants.map(p => ({ user_id: p.id, room_id: newRoom.id }))
-    // );
+    socket?.emit('joinRoom', { roomId, userId: currentUser.id });
+    const messages = await fetcher(`/chat/${roomId}/messages`);
+    const receiver = await getReceiverFromRoom(roomId, currentUser.id);
 
     setOpenChats(prev => [
       ...prev.map(c => ({ ...c, minimized: true })),
       {
         id: roomId,
-        name: customName,
-        avatar: '',
+        username: receiver.username,
+        avatar: receiver.avatar,
         minimized: false,
-        messages: [],
-      }
+        messages: messages || [],
+      },
     ]);
-    setGroupMode(false);
-    setSelectedGroupUsers([]);
-    setChatMenuOpen(false);
   };
-  /// Handles sending a message
-  const sendMessage = (chatId: string, content: string) => {
+
+  const sendMessage = async (chatId: string, content: string) => {
     if (!content.trim()) return;
-  
+
     const msg: Message = {
-      senderId: currentUser.id,
-      senderName: currentUser.name,
+      sender_id: currentUser.id,
+      senderName: currentUser.username,
       senderAvatar: currentUser.avatar,
       content,
+      roomId: chatId,
     };
-  
-    socket.emit('message', msg); // send through socket
-  
-    // Add message to chat locally right away (so it appears immediately)
+
+    socket?.emit('message', msg);
     setOpenChats(prev =>
       prev.map(chat =>
-        chat.id === chatId
-          ? { ...chat, messages: [...chat.messages, msg] }
-          : chat
+        chat.id === chatId ? { ...chat, messages: [...chat.messages, msg] } : chat
       )
     );
-  
-    // Uncomment this when saving to Supabase:
-    // await supabase.from('messages').insert({
-    //   room_id: chatId,
-    //   sender_id: currentUser.id,
-    //   content: content,
-    // });
+
+    try {
+      await fetcher('/chat/send', 'POST', {
+        roomId: chatId,
+        senderId: currentUser.id,
+        content,
+      });
+    } catch (err) {
+      console.error('Failed to save message:', err);
+    }
   };
-  
+
+  const handleTyping = (chatId: string) => {
+    socket?.emit('typing', { roomId: chatId, userId: currentUser.id });
+  };
+
+  if (!isAuthenticated) return null;
 
   return (
     <div className="fixed bottom-4 right-4 z-50 flex flex-row-reverse items-end gap-2">
-      {/* Chat launcher panel */}
+      <audio ref={audioRef} src="/media/notification.mp3" preload="auto" />
+
+      {/* Chat launcher */}
       {chatMenuOpen ? (
         <div className="bg-gray-100 border rounded shadow-lg p-4 w-72">
-          <div className="flex justify-between items-center mb-2">
+          <div className="flex justify-between mb-2">
             <span className="font-semibold">Start a Chat</span>
             <button onClick={() => setChatMenuOpen(false)}>✕</button>
           </div>
-
-          {/* Mode toggles */}
-          <div className="flex gap-2 mb-2">
-            <button
-              onClick={() => setGroupMode(false)}
-              className={`flex-1 py-1 rounded ${!groupMode ? 'bg-[#FED22B] text-black' : 'bg-gray-200'}`}
-            >
-              Individual
-            </button>
-            <button
-              onClick={() => setGroupMode(true)}
-              className={`flex-1 py-1 rounded ${groupMode ? 'bg-[#FED22B] text-black' : 'bg-gray-200'}`}
-            >
-              Group
-            </button>
-          </div>
-
-          {/* User search field */}
-          <input
-            placeholder="Search users..."
-            value={searchQuery}
-            onChange={(e) => setSearchQuery(e.target.value)}
-            className="w-full border rounded px-2 py-1 mb-2"
-          />
-
-          {/* User list */}
-          <div className="space-y-2 max-h-48 overflow-y-auto">
-            {allUsers.filter(u =>
-              u.name.toLowerCase().includes(searchQuery.toLowerCase()) && u.id !== currentUser.id
-            ).map(user => {
-              const isSelected = selectedGroupUsers.some(u => u.id === user.id);
-              return (
+          <div className="mb-2">
+            <span className="text-sm text-gray-600">Recent Contacts:</span>
+            <div className="max-h-28 overflow-y-auto mt-1 mb-2">
+              {existingContacts.map(user => (
                 <div
                   key={user.id}
                   onClick={() => {
-                    if (groupMode) {
-                      setSelectedGroupUsers(prev =>
-                        isSelected ? prev.filter(u => u.id !== user.id) : [...prev, user]
-                      );
-                    } else {
-                      openChat(user);
-                      setChatMenuOpen(false);
-                      setSearchQuery('');
-                    }
+                    openChat(user);
+                    setChatMenuOpen(false);
                   }}
-                  className="flex items-center gap-2 p-2 bg-white rounded cursor-pointer hover:bg-gray-50"
+                  className="flex items-center gap-2 p-2 bg-white rounded hover:bg-gray-50 cursor-pointer"
                 >
-                  {groupMode && (
-                    <input
-                      type="checkbox"
-                      checked={isSelected}
-                      readOnly
-                      className="accent-[#FED22B]"
-                    />
-                  )}
-                  <img src={user.avatar} className="w-8 h-8 rounded-full" />
-                  <span>{user.name}</span>
+                  <Image
+                    src={user.avatar || '/Images/sample.jpeg'}
+                    width={24}
+                    height={24}
+                    className="w-6 h-6 rounded-full"
+                    alt={user.username}
+                  />
+
+
+                  <span>{user.username}</span>
                 </div>
-              );
-            })}
+              ))}
+            </div>
           </div>
 
-          {/* Confirm button for group chat */}
-          {groupMode && selectedGroupUsers.length > 0 && (
-            <button
-              onClick={openGroupChat}
-              className="mt-3 w-full bg-[#FED22B] text-black py-1 rounded"
-            >
-              Create Group Chat ({selectedGroupUsers.length})
-            </button>
-          )}
+          <input
+            placeholder="Search users..."
+            value={searchQuery}
+            onChange={e => setSearchQuery(e.target.value)}
+            className="w-full border rounded px-2 py-1 mb-2"
+            autoComplete="off"
+          />
+          <div className="max-h-48 overflow-y-auto space-y-2">
+            {searchResults.map(user => (
+              <div
+                key={user.id}
+                onClick={() => {
+                  openChat(user);
+                  setChatMenuOpen(false);
+                  setSearchQuery('');
+                }}
+                className="flex items-center gap-2 p-2 bg-white rounded hover:bg-gray-50 cursor-pointer"
+              >
+                <Image src={user.avatar} className="w-8 h-8 rounded-full" alt={''} />
+                <span>{user.username}</span>
+              </div>
+            ))}
+          </div>
         </div>
       ) : (
-        // Button to open chat menu
         <button
           onClick={() => setChatMenuOpen(true)}
           className="bg-[#FED22B] text-black px-6 py-3 text-lg rounded-full shadow-lg"
@@ -266,24 +311,24 @@ export default function ChatWidget() {
         </button>
       )}
 
-      {/* Render chat windows */}
+      {/* Chat windows */}
       {openChats.map(chat => (
         <div
-        key={chat.id}
-        className={`bg-white border rounded-lg shadow-2xl w-80 overflow-hidden transition-all duration-300 ease-in-out ${
-          chat.minimized ? 'h-10' : 'h-96'
-        } flex flex-col`}>
-      
+          key={chat.id}
+          className={`bg-white w-80 border rounded shadow-lg flex flex-col overflow-hidden transition-all duration-300 ${chat.minimized ? 'h-10' : 'h-96'}`}
+        >
           <div className="flex justify-between items-center bg-gray-200 px-3 py-2">
             <div className="flex items-center gap-2">
-              {chat.avatar && <img src={chat.avatar} className="w-6 h-6 rounded-full" />}
-              <span className="font-medium text-sm">{chat.name}</span>
+              {chat.avatar && <Image src={chat.avatar} className="w-6 h-6 rounded-full" alt={''} />}
+              <span className="font-medium text-sm">{chat.username}</span>
             </div>
             <div className="flex gap-2">
               <button
                 onClick={() =>
                   setOpenChats(prev =>
-                    prev.map(c => c.id === chat.id ? { ...c, minimized: !c.minimized } : c)
+                    prev.map(c =>
+                      c.id === chat.id ? { ...c, minimized: !c.minimized } : c
+                    )
                   )
                 }
               >
@@ -295,40 +340,57 @@ export default function ChatWidget() {
             </div>
           </div>
 
-          {/* Messages */}
           {!chat.minimized && (
-            <div className="flex-1 overflow-y-auto px-2 space-y-1">
-              {chat.messages.map((msg, i) => {
-                const isSender = msg.senderId === currentUser.id;
-                return (
-                  <div key={i} className={`flex ${isSender ? 'justify-end' : 'justify-start'}`}>
-                    <div className={`max-w-xs text-left px-3 py-2 rounded-lg text-sm ${isSender ? 'bg-[#FED22B]' : 'bg-gray-200'} text-black`}>
-                      <div className="text-xs text-gray-600 mb-1">{msg.senderName}</div>
-                      <div className="flex items-center gap-2">
-                        {!isSender && <img src={msg.senderAvatar} className="w-5 h-5 rounded-full" />}
+            <>
+              <div className="flex-1 overflow-y-auto px-2 py-1 space-y-1">
+                {chat.messages.map((msg, i) => {
+                  const isOwn = msg.sender_id === currentUser.id;
+                  return (
+                    <div
+                      key={i}
+                      className={`flex ${isOwn ? 'justify-end' : 'justify-start'}`}
+                    >
+                      <div
+                        className={`px-3 py-2 max-w-xs rounded-lg text-sm ${isOwn ? 'bg-gray-200' : 'bg-[#FED22B]'} text-black`}
+                      >
+                        {!isOwn && (
+                          <div className="text-xs text-gray-600 mb-1 text-right">
+                            {chat.username}
+                          </div>
+                        )}
                         <span>{msg.content}</span>
                       </div>
                     </div>
-                  </div>
-                );
-              })}
-            </div>
-          )}
+                  );
+                })}
 
-          {/* Input field */}
-          {!chat.minimized && (
-            <div className="p-2 border-t flex gap-2">
-              <input
-                className="flex-1 border rounded px-2 py-1 text-sm"
-                placeholder="Type a message..."
-                onKeyDown={(e) => {
-                  if (e.key === 'Enter') {
-                    sendMessage(chat.id, e.currentTarget.value);
-                    e.currentTarget.value = '';
-                  }
-                }}
-              />
-            </div>
+                {chat.typing && (
+                  <div className="text-xs text-gray-500 italic text-right">
+                    {chat.messages.at(-1)?.sender_id !== currentUser.id && 'Typing...'}
+                  </div>
+                )}
+
+                <div ref={el => { messageEndRefs.current[chat.id] = el; }} />
+              </div>
+              <div className="p-2 border-t flex gap-2">
+                <input
+                  ref={el => { inputRefs.current[chat.id] = el; }}
+                  className="flex-1 border rounded px-2 py-1 text-sm"
+                  placeholder="Type a message..."
+                  onKeyDown={(e) => {
+                    if (e.key === 'Enter') {
+                      const content = e.currentTarget.value.trim();
+                      if (content) {
+                        sendMessage(chat.id, content);
+                        e.currentTarget.value = '';
+                      }
+                    } else {
+                      handleTyping(chat.id);
+                    }
+                  }}
+                />
+              </div>
+            </>
           )}
         </div>
       ))}

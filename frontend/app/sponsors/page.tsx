@@ -1,19 +1,13 @@
 "use client";
 
-import React from 'react';
-
-// Next.js
+import React, { useEffect, useState } from 'react';
 import Head from 'next/head';
 import Link from 'next/link';
 import Image from 'next/image';
-
-// Components
 import NavBar from '@/components/nav-bar';
 import Footer from '@/components/footer';
 import AvatarCirclesDemo from '@/components/avatar-circles-demo';
 import AnimatedListDemo from "@/components/animated-list-demo";
-
-// Chart.js
 import { Pie } from 'react-chartjs-2';
 import {
   Chart as ChartJS,
@@ -21,26 +15,30 @@ import {
   Tooltip,
   Legend
 } from 'chart.js';
-
-// Styles
 import styles from '../styles/sponsors.module.css';
 import '../styles/globals.css';
 import '@fortawesome/fontawesome-svg-core/styles.css';
+import { useAuthStore } from '@/app/stores/useAuthStore';
+import { useRouter } from 'next/navigation';
 
-// Register Chart.js components
 ChartJS.register(ArcElement, Tooltip, Legend);
 
-// =============================================
-// Main Component
-// =============================================
 const Sponsors = () => {
-  // Profile state
-  const [currentAvatar, setCurrentAvatar] = React.useState('https://avatar.vercel.sh/jack');
+  const [currentAvatar, setCurrentAvatar] = useState('https://avatar.vercel.sh/jack');
+  const isAuthenticated = useAuthStore((state) => state.isAuthenticated);
+  const router = useRouter();
 
-  // =============================================
-  // Chart Configuration
-  // =============================================
-  // Chart configuration data
+  useEffect(() => {
+    if (!isAuthenticated) {
+      const timeout = setTimeout(() => router.push("/get-started"), 1500);
+      return () => clearTimeout(timeout);
+    }
+  }, [isAuthenticated, router]);
+
+  if (!isAuthenticated) {
+    return <p style={{ textAlign: 'center', padding: '2rem' }}>Please log in to view this page...</p>;
+  }
+
   const chartData = {
     labels: ['Gold Sponsors', 'Silver Sponsors', 'Bronze Sponsors'],
     datasets: [{
@@ -51,7 +49,6 @@ const Sponsors = () => {
     }]
   };
 
-  // Chart display options
   const options = {
     responsive: true,
     plugins: {
@@ -65,9 +62,6 @@ const Sponsors = () => {
     }
   };
 
-  // =============================================
-  // Render Component
-  // =============================================
   return (
     <>
       <Head>
@@ -78,7 +72,6 @@ const Sponsors = () => {
       </Head>
 
       <div className={styles.container}>
-        {/* Navigation */}
         <NavBar 
           title="iHive-Entrepreneur"
           links={[
@@ -89,9 +82,7 @@ const Sponsors = () => {
           ]}
         />
 
-        {/* Main Content */}
         <main className={styles.main}>
-          {/* Profile and Recent Sponsors Section */}
           <div className={styles.profileSection}>
             <div className={styles.profileImage}>
               <Image
@@ -105,18 +96,15 @@ const Sponsors = () => {
 
             <h1 className={styles.recently}>Recent Sponsors...</h1>
 
-            {/* Sponsor Avatar Circles */}
             <div className={styles.avatarCircles}>
               <AvatarCirclesDemo />
             </div>
 
-            {/* Notifications and Messages */}
             <div className={styles.notifications}>
               <AnimatedListDemo />
             </div>
           </div>
 
-          {/* Sponsorship Analytics */}
           <div className={styles.graph}>
             <h2 className={styles.graphTitle}>Your Sponsors Graph</h2>
             <div className={styles.graphContainer}>
@@ -125,7 +113,6 @@ const Sponsors = () => {
           </div>
         </main>
 
-        {/* Footer */}
         <Footer role="Entrepreneur" />
       </div>
     </>

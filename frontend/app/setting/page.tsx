@@ -1,9 +1,9 @@
-'use client';
+"use client";
 
-import React, { Suspense } from 'react';
+import React, { Suspense, useEffect } from 'react';
 import Head from 'next/head';
 import Link from 'next/link';
-import { useSearchParams } from 'next/navigation';
+import { useSearchParams, useRouter } from 'next/navigation';
 
 // Components
 import NavBar from '@/components/nav-bar';
@@ -16,8 +16,23 @@ import NotificationPreferences from '@/components/notification';
 import styles from '../styles/setting.module.css';
 import '../styles/globals.css';
 import '@fortawesome/fontawesome-svg-core/styles.css';
+import { useAuthStore } from '@/app/stores/useAuthStore';
 
 const Setting = () => {
+  const isAuthenticated = useAuthStore((state) => state.isAuthenticated);
+  const router = useRouter();
+
+  useEffect(() => {
+    if (!isAuthenticated) {
+      const timeout = setTimeout(() => router.push("/get-started"), 1500);
+      return () => clearTimeout(timeout);
+    }
+  }, [isAuthenticated, router]);
+
+  if (!isAuthenticated) {
+    return <p style={{ textAlign: 'center', padding: '2rem' }}>Please log in to access settings...</p>;
+  }
+
   return (
     <>
       <Head>
