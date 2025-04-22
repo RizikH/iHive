@@ -1,11 +1,12 @@
 "use client";
 
-import React, { useEffect, useState, ReactNode } from "react";
+import React, { ReactNode } from "react";
 import Link from "next/link";
 import Image from "next/image";
 import styles from "@/app/styles/nav-bar.module.css";
 import { fetcher } from "@/app/utils/fetcher";
 import { useRouter } from "next/navigation";
+import { useAuthStore } from "@/app/stores/useAuthStore";
 
 interface NavLink {
   href: string;
@@ -18,9 +19,9 @@ interface NavBarProps {
   logoPath?: string;
   links?: NavLink[];
   extraLinks?: NavLink[];
-  profileHref?: string; // ✅ e.g. "/investor-profile"
-  profileImgSrc?: string; // ✅ e.g. "/Images/Yixi.jpeg"
-  searchBar?: ReactNode; // ✅ custom search bar passed from the page
+  profileHref?: string;
+  profileImgSrc?: string;
+  searchBar?: ReactNode;
 }
 
 const NavBar = ({
@@ -32,20 +33,9 @@ const NavBar = ({
   profileImgSrc,
   searchBar,
 }: NavBarProps) => {
-  const [userId, setUserId] = useState<string | null>(null);
   const router = useRouter();
-
-  useEffect(() => {
-    const fetchUser = async () => {
-      try {
-        const data = await fetcher("/users/me");
-        setUserId(data.id);
-      } catch {
-        setUserId(null);
-      }
-    };
-    fetchUser();
-  }, []);
+  const currentUser = useAuthStore((state) => state.currentUser);
+  const setAuthenticated = useAuthStore((state) => state.setAuthenticated);
 
   const handleSignOut = async () => {
     try {
@@ -61,7 +51,7 @@ const NavBar = ({
             .replace(/=.*/, `=;expires=${new Date(0).toUTCString()};path=/`);
         });
 
-      setUserId(null);
+      setAuthenticated(null);
       router.push("/get-started");
       router.refresh();
     } catch (error) {
@@ -70,38 +60,47 @@ const NavBar = ({
   };
 
   const computedLinks: NavLink[] =
-    links ?? (userId
+    links ??
+    (currentUser?.id
       ? [
-        ...(extraLinks || []),
-        { href: "/setting", label: "Settings" },
-        { href: `/repository/${userId}`, label: "My Repositories" },
-        { href: "#", label: "Sign Out", onClick: handleSignOut },
-      ]
+          ...(extraLinks || []),
+          { href: "/setting", label: "Settings" },
+          { href: `/repository/${currentUser.id}`, label: "My Repositories" },
+          { href: "#", label: "Sign Out", onClick: handleSignOut },
+        ]
       : [
-        { href: "/get-started", label: "Login" },
-        { href: "/register", label: "Register" },
-      ]);
+          { href: "/get-started", label: "Login" },
+          { href: "/register", label: "Register" },
+        ]);
 
-  // ⬇️ Add this line right after
-  const filteredLinks = computedLinks.filter(link => link.label !== "My Repositories");
-
+  const filteredLinks = computedLinks.filter(
+    (link) => link.label !== "My Repositories"
+  );
 
   return (
     <nav className={styles.navContainer}>
-      {/* Left side: logo */}
       <Link href="/" className={styles.logo}>
-        <Image src={logoPath} alt="Logo" width={35} height={35} className={styles.logoImage} />
+        <Image
+          src={logoPath}
+          alt="Logo"
+          width={35}
+          height={35}
+          className={styles.logoImage}
+        />
         <span>{title}</span>
       </Link>
 
-      {/* Right side: search bar + links + profile */}
       <div className={styles.navRight}>
         {searchBar && <div className={styles.searchWrapper}>{searchBar}</div>}
 
         <div className={styles.navLinks}>
           {filteredLinks.map((link, index) =>
             link.onClick ? (
-              <button key={index} onClick={link.onClick} className={styles.navButton}>
+              <button
+                key={index}
+                onClick={link.onClick}
+                className={styles.navButton}
+              >
                 {link.label}
               </button>
             ) : (
@@ -125,7 +124,6 @@ const NavBar = ({
         </div>
       </div>
     </nav>
-
   );
 };
 

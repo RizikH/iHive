@@ -19,6 +19,7 @@
     "@radix-ui/react-dialog": "^1.1.6",
     "@radix-ui/react-scroll-area": "^1.2.3",
     "@radix-ui/react-visually-hidden": "^1.1.2",
+    "@supabase/ssr": "^0.6.1",
     "@supabase/supabase-js": "^2.49.1",
     "@types/dompurify": "^3.0.5",
     "class-variance-authority": "^0.7.1",
@@ -41,10 +42,12 @@
     "remark-gfm": "^4.0.1",
     "remark-parse": "^11.0.0",
     "sanitize-html": "^2.15.0",
+    "socket.io-client": "^4.8.1",
     "tailwind-merge": "^3.0.2",
     "tailwindcss-animate": "^1.0.7",
     "unified": "^11.0.5",
-    "vfile": "^6.0.3"
+    "vfile": "^6.0.3",
+    "zustand": "^5.0.3"
   },
   "devDependencies": {
     "@eslint/eslintrc": "^3",
