@@ -39,8 +39,6 @@ const addUser = async (req, res) => {
   try {
     const { username, email, password, bio, avatar } = req.body;
 
-    console.debug("addUser called with:", { username, email, bio, avatar });
-
     if (!username || !email || !password) {
       console.debug("Validation failed: Missing required fields");
       return res.status(400).json({ error: "Username, email, and password are required." });
@@ -66,7 +64,6 @@ const addUser = async (req, res) => {
       return res.status(500).json({ error: "Signup succeeded but no user returned." });
     }
 
-    console.debug("Supabase user created:", authUser);
 
     // 2. Create user in public.users table
     await User.createUser({
@@ -77,7 +74,6 @@ const addUser = async (req, res) => {
       bio: bio || null,
     });
 
-    console.debug("User successfully added to public.users table");
 
     res.status(201).json({
       message: "User registered successfully!",
