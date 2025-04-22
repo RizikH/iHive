@@ -111,7 +111,7 @@
             links={[
               { href: "/entrepreneur", label: "Profile" },
               { href: "/setting", label: "Setting" },
-              { href: "/sponsors", label: "Sponsors" },
+              { href: "/sponsors", label: "Offers" },
               { href: "/get-started", label: "Sign Out" },
             ]}
           />

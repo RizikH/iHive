@@ -1,30 +1,33 @@
 "use client";
 
-import React, { useEffect, useState } from 'react';
-import Head from 'next/head';
-import Link from 'next/link';
-import Image from 'next/image';
-import NavBar from '@/components/nav-bar';
-import Footer from '@/components/footer';
-import AvatarCirclesDemo from '@/components/avatar-circles-demo';
-import AnimatedListDemo from "@/components/animated-list-demo";
-import { Pie } from 'react-chartjs-2';
-import {
-  Chart as ChartJS,
-  ArcElement,
-  Tooltip,
-  Legend
-} from 'chart.js';
-import styles from '../styles/sponsors.module.css';
-import '../styles/globals.css';
-import '@fortawesome/fontawesome-svg-core/styles.css';
-import { useAuthStore } from '@/app/stores/useAuthStore';
-import { useRouter } from 'next/navigation';
+import React, { useEffect, useState } from "react";
+import Head from "next/head";
+import Image from "next/image";
+import Link from "next/link";
+import NavBar from "@/components/nav-bar";
+import Footer from "@/components/footer";
+import styles from "../styles/sponsors.module.css"; // Reuse existing styling or create new for table
+import "../styles/globals.css";
+import "@fortawesome/fontawesome-svg-core/styles.css";
+import { useAuthStore } from "@/app/stores/useAuthStore";
+import { useRouter } from "next/navigation";
 
-ChartJS.register(ArcElement, Tooltip, Legend);
+interface Investor {
+  id: number;
+  name: string;
+  amount: number;
+  message: string;
+  status: "Pending" | "Accepted" | "Rejected";
+}
+
+const mockInvestors: Investor[] = [
+  { id: 1, name: "Alice Ventures", amount: 10000, message: "Excited to support your project!", status: "Pending" },
+  { id: 2, name: "Beta Capital", amount: 5000, message: "We believe in your vision.", status: "Pending" },
+  { id: 3, name: "Gamma Group", amount: 20000, message: "Looking forward to working together.", status: "Pending" }
+];
 
 const Sponsors = () => {
-  const [currentAvatar, setCurrentAvatar] = useState('https://avatar.vercel.sh/jack');
+  const [investors, setInvestors] = useState<Investor[]>(mockInvestors);
   const isAuthenticated = useAuthStore((state) => state.isAuthenticated);
   const router = useRouter();
 
@@ -35,32 +38,17 @@ const Sponsors = () => {
     }
   }, [isAuthenticated, router]);
 
+  const handleAction = (id: number, action: "Accepted" | "Rejected") => {
+    setInvestors(prev =>
+      prev.map(investor =>
+        investor.id === id ? { ...investor, status: action } : investor
+      )
+    );
+  };
+
   if (!isAuthenticated) {
     return <p style={{ textAlign: 'center', padding: '2rem' }}>Please log in to view this page...</p>;
   }
-
-  const chartData = {
-    labels: ['Gold Sponsors', 'Silver Sponsors', 'Bronze Sponsors'],
-    datasets: [{
-      data: [300, 200, 100],
-      backgroundColor: ['#ffd700', '#c0c0c0', '#cd7f32'],
-      borderColor: ['#fff', '#fff', '#fff'],
-      borderWidth: 2
-    }]
-  };
-
-  const options = {
-    responsive: true,
-    plugins: {
-      legend: {
-        position: 'bottom' as const,
-      },
-      title: {
-        display: true,
-        text: 'Sponsor Distribution'
-      }
-    }
-  };
 
   return (
     <>
@@ -83,33 +71,40 @@ const Sponsors = () => {
         />
 
         <main className={styles.main}>
-          <div className={styles.profileSection}>
-            <div className={styles.profileImage}>
-              <Image
-                src={currentAvatar}
-                alt="Avatar"
-                width={150}
-                height={150}
-                style={{ objectFit: 'cover', borderRadius: '50%' }}
-              />
-            </div>
-
-            <h1 className={styles.recently}>Recent Sponsors...</h1>
-
-            <div className={styles.avatarCircles}>
-              <AvatarCirclesDemo />
-            </div>
-
-            <div className={styles.notifications}>
-              <AnimatedListDemo />
-            </div>
-          </div>
-
-          <div className={styles.graph}>
-            <h2 className={styles.graphTitle}>Your Sponsors Graph</h2>
-            <div className={styles.graphContainer}>
-              <Pie data={chartData} options={options} />
-            </div>
+          <h1 className={styles.recently}>Investor Offers</h1>
+          
+          <div className={styles.investorTableWrapper}>
+            <table className={styles.investorTable}>
+              <thead>
+                <tr>
+                  <th>Name</th>
+                  <th>Amount ($)</th>
+                  <th>Message</th>
+                  <th>Status</th>
+                  <th>Action</th>
+                </tr>
+              </thead>
+              <tbody>
+                {investors.map((inv) => (
+                  <tr key={inv.id}>
+                    <td>{inv.name}</td>
+                    <td>{inv.amount.toLocaleString()}</td>
+                    <td>{inv.message}</td>
+                    <td>{inv.status}</td>
+                    <td>
+                      {inv.status === "Pending" ? (
+                        <>
+                          <button className={styles.acceptBtn} onClick={() => handleAction(inv.id, "Accepted")}>Accept</button>
+                          <button className={styles.rejectBtn} onClick={() => handleAction(inv.id, "Rejected")}>Reject</button>
+                        </>
+                      ) : (
+                        <span style={{ fontStyle: 'italic' }}>No action</span>
+                      )}
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
           </div>
         </main>
 

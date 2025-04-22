@@ -87,7 +87,7 @@ const EntrepreneurProfile = () => {
           title="iHive-Entrepreneur"
           extraLinks={[
             { href: "/ideas", label: "Repositories" },
-            { href: "/sponsors", label: "Sponsors" },
+            { href: "/sponsors", label: "Offers" },
           ]}
         />
 
