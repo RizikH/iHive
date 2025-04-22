@@ -62,11 +62,14 @@ const addUser = async (req, res) => {
       email,
       password,
       options: {
-        data: { username, bio }
-      }
+        data: { username, bio, avatar },
+      },
     });
 
-    if (error) throw new Error(error.message);
+    if (error) {
+      console.error("Supabase signUp error:", error.message);
+      throw new Error(error.message);
+    }
 
     const authUser = data.user;
     if (!authUser) {

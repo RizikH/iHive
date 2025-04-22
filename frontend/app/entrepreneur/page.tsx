@@ -1,4 +1,3 @@
-// Updated Entrepreneur Profile page using Zustand auth store without normalization
 "use client";
 
 import React, { useState, useEffect, useCallback } from 'react';
@@ -87,7 +86,7 @@ const EntrepreneurProfile = () => {
           title="iHive-Entrepreneur"
           extraLinks={[
             { href: "/ideas", label: "Repositories" },
-            { href: "/sponsors", label: "Offers" },
+            { href: "/sponsors", label: "Sponsors" },
           ]}
         />
 
