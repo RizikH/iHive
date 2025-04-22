@@ -61,9 +61,15 @@ export default function ChatWidget() {
   useEffect(() => {
     if (!isAuthenticated) return;
     if (!socket && !connectedRef.current) {
-      socket = io('http://localhost:5000');
+      const socketUrl =
+        process.env.NODE_ENV === 'production'
+          ? 'https://ihive.vercel.app'
+          : 'http://localhost:5000';
+
+      socket = io(socketUrl);
       connectedRef.current = true;
     }
+
 
     const handleMessage = (msg: Message) => {
       if (msg.sender_id === currentUser.id) return;

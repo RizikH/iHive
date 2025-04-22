@@ -10,6 +10,7 @@ import styles from "../styles/ideas.module.css";
 import { fetcher } from "@/app/utils/fetcher";
 import { useAuthStore } from "@/app/stores/useAuthStore";
 import { useRouter } from "next/navigation";
+import sanitizeHtml from "sanitize-html";
 
 const IdeasPage = () => {
   const router = useRouter();
@@ -70,13 +71,14 @@ const IdeasPage = () => {
     return ["all", ...new Set(categories)];
   };
 
+
+  
   const getPreviewText = (description: string) => {
-    const sanitizeHtml = require("sanitize-html");
-    const textOnly = sanitizeHtml(description, { allowedTags: [], allowedAttributes: {} });
-    return textOnly.length > 100
-      ? textOnly.substring(0, 100) + "..."
-      : textOnly;
-  };
+      const textOnly = sanitizeHtml(description, { allowedTags: [], allowedAttributes: {} });
+      return textOnly.length > 100
+        ? textOnly.substring(0, 100) + "..."
+        : textOnly;
+    };
 
   const handleCreateNewIdea = () => {
     setShowForm(true);
