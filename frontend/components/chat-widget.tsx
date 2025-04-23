@@ -27,8 +27,9 @@ type ChatWindow = {
 };
 
 export default function ChatWidget() {
-  const isAuthenticated = useAuthStore.getState().isAuthenticated;
-  const currentUser = useAuthStore.getState().currentUser;
+  const isAuthenticated = useAuthStore(state => state.isAuthenticated);
+  const currentUser = useAuthStore(state => state.currentUser);
+
 
   const [openChats, setOpenChats] = useState<ChatWindow[]>([]);
   const [chatMenuOpen, setChatMenuOpen] = useState(false);
