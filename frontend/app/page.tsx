@@ -5,36 +5,15 @@ import styles from ".//styles/home.module.css"; // ✅ Fixed Import Path
 import ".//styles/globals.css"; // ✅ Fixed Import Path
 import React from "react";
 import Image from "next/image";
+import NavBar from "@/components/nav-bar";
 
 export default function Home() {
   return (
     <div className={styles.container}>
       {/* Navigation Bar */}
 
-      <nav className={styles.navContainer}>
-        <div className={styles.logo}>
-          <Link href="/get-started" title="Get-Started" className="flex items-center gap-2">
-            <Image
-              src="/Images/iHive.png"
-              alt="Logo"
-              title="Home"
-              width={35}
-              height={35}
-              className={styles.logoImage}
-            />
-            <span>iHive-Home</span>
-          </Link>
-        </div>
-
-        {/* 
-        Maybe we don't need these: since a one-time page
-
-        <div className={styles['nav-links']}>
-          <Link href="setting">Settings</Link>
-          <Link href="get-started">Signout</Link> 
-        </div>
-        */}
-
+      <nav className={styles.navBar}>
+        <NavBar />
       </nav>
 
       {/* Split Layout */}

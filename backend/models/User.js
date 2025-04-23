@@ -20,20 +20,20 @@ const getUserById = async (id) => {
     return data;
 };
 
-const createUser = async (username, email, password, bio) => {
-    const { data: authData, error: authError } = await supabase.auth.signUp({ email, password });
-
-    if (authError) throw new Error(authError.message);
-
-    const userId = authData.user.id;
+const createUser = async (user) => {
+    const { username, email, bio, id } = user;
 
     const { data, error } = await supabase
         .from("users")
-        .insert([{ id: userId, username, email, bio }])
+        .insert([{id, username, email, bio }])
         .select()
         .single();
 
-    if (error) throw new Error(error.message);
+    if (error) {
+        console.error("Database error:", error.message);
+        throw new Error(error.message);
+    }
+
     return data;
 };
 
@@ -64,10 +64,22 @@ const deleteUser = async (id) => {
     return data;
 };
 
+const getUsersByQuery = async (query, excludeId) => {
+    const { data, error } = await supabase
+        .from('users')
+        .select('id, username')
+        .ilike('username', `%${query}%`)
+        .neq('id', excludeId);
+
+    if (error) throw error;
+    return data;
+};
+
 module.exports = {
     getAllUsers,
     getUserById,
     createUser,
     updateUser,
-    deleteUser
+    deleteUser,
+    getUsersByQuery
 };

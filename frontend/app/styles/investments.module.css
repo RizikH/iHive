@@ -1,11 +1,10 @@
 .investmentsContainer {
-    max-width: 800px;
-    margin: 20px auto;
-    padding: 20px;
-    background-color: #ffffff;
-    border-radius: 8px;
-    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  max-width: 100%; /* full width */
+  width: 90vw; /* or a fixed size like 1200px */
+  margin: 40px auto;
+  padding: 40px;
 }
+
 
 .investmentsTitle {
     text-align: center;
@@ -18,16 +17,18 @@
     width: 100%;
     border-collapse: collapse;
     text-align: left;
+    font-size: 1.1rem;
+    table-layout: fixed;
 }
 
 .investmentsTable th,
 .investmentsTable td {
-    padding: 12px;
-    border-bottom: 1px solid #ddd;
+    padding: 20px 24px;
+    word-wrap: break-word;
 }
 
 .investmentsTable th {
-    background-color: #007bff;
+    background-color:#1a1a1a;
     color: white;
     font-weight: bold;
 }
@@ -114,3 +115,107 @@
     background-color: transparent;
     text-decoration: none;
 }
+
+.investorTableWrapper {
+    overflow-x: auto;
+    margin-top: 2rem;
+  }
+  
+  .investorTable {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 1rem;
+  }
+  
+  .investorTable th,
+  .investorTable td {
+    border: 1px solid #ddd;
+    padding: 12px;
+    text-align: left;
+  }
+  
+  .investorTable th {
+    background-color: #f5f5f5;
+    font-weight: bold;
+  }
+  
+  .acceptBtn {
+    background-color: #28a745;
+    color: white;
+    padding: 6px 12px;
+    border: none;
+    border-radius: 4px;
+    margin-right: 8px;
+    cursor: pointer;
+  }
+  
+  .rejectBtn {
+    background-color: #dc3545;
+    color: white;
+    padding: 6px 12px;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+  }
+  
+  .acceptBtn:hover {
+    background-color: #218838;
+  }
+  
+  .rejectBtn:hover {
+    background-color: #c82333;
+  }
+
+  .container {
+    padding: 2rem;
+  }
+  
+  .main {
+    padding: 2rem;
+    background-color: #f9f9f9;
+    border-radius: 12px;
+  }
+  
+  .title {
+    font-size: 2rem;
+    margin-bottom: 1.5rem;
+    text-align: center;
+  }
+  
+  .table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 1rem;
+    background-color: white;
+  }
+  
+  .table th,
+  .table td {
+    border: 1px solid #ddd;
+    padding: 0.75rem;
+    text-align: center;
+  }
+  
+  .table th {
+    background-color: #f2f2f2;
+  }
+  
+  .accept {
+    background-color: #4caf50;
+    color: white;
+    padding: 0.5rem 1rem;
+    margin-right: 0.5rem;
+    border: none;
+    border-radius: 6px;
+    cursor: pointer;
+  }
+  
+  .reject {
+    background-color: #f44336;
+    color: white;
+    padding: 0.5rem 1rem;
+    border: none;
+    border-radius: 6px;
+    cursor: pointer;
+  }
+  

@@ -1,11 +1,13 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import styles from "../styles/investments.module.css";
 import Head from "next/head";
 import NavBar from "@/components/nav-bar";
 import Image from "next/image";
 import Footer from "@/components/footer";
+import { useRouter } from "next/navigation";
+import { useAuthStore } from "@/app/stores/useAuthStore";
 
 interface Investment {
   id: number;
@@ -23,6 +25,19 @@ const mockInvestments: Investment[] = [
 
 const InvestmentsTab = () => {
   const [investments] = useState<Investment[]>(mockInvestments);
+  const isAuthenticated = useAuthStore((state) => state.isAuthenticated);
+  const router = useRouter();
+
+  useEffect(() => {
+    if (!isAuthenticated) {
+      const timeout = setTimeout(() => router.push("/get-started"), 1500);
+      return () => clearTimeout(timeout);
+    }
+  }, [isAuthenticated, router]);
+
+  if (!isAuthenticated) {
+    return <p style={{ padding: "2rem", textAlign: "center" }}>Please log in to view this page...</p>;
+  }
 
   return (
     <>

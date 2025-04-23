@@ -2,7 +2,6 @@
 *.zip
 
 # Ignore Node.js dependencies
-node_modules/
 package-lock.json
 
 # Ignore build outputs
@@ -48,3 +47,4 @@ generated/
 .gitconfig
 .vercel
 .env
+node_modules

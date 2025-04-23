@@ -1,26 +1,20 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { FiMail, FiLock, FiUser, FiX } from "react-icons/fi";
 import styles from "@/app/styles/auth-form.module.css";
 import { fetcher } from "@/app/utils/fetcher";
-
-// =============================================
-// Types and Interfaces
-// =============================================
+import { useAuthStore } from "@/app/stores/useAuthStore";
 
 interface AuthFormProps {
   initialView?: "login" | "register";
   onClose?: () => void;
 }
 
-// =============================================
-// Authentication Form Component
-// =============================================
-
 export const AuthForm = ({ initialView = "login", onClose }: AuthFormProps) => {
   const router = useRouter();
+  const setAuthenticated = useAuthStore((state) => state.setAuthenticated);
 
   const [isActive, setIsActive] = useState(initialView === "register");
   const [isVisible, setIsVisible] = useState(true);
@@ -39,9 +33,17 @@ export const AuthForm = ({ initialView = "login", onClose }: AuthFormProps) => {
     termsAccepted: false,
   });
 
-  // =============================================
-  // Utility Functions
-  // =============================================
+  useEffect(() => {
+    const savedUser = sessionStorage.getItem("auth_user");
+    if (savedUser) {
+      try {
+        const parsed = JSON.parse(savedUser);
+        setAuthenticated(parsed);
+      } catch (e) {
+        console.warn("Failed to restore session", e);
+      }
+    }
+  }, [setAuthenticated]);
 
   const hideForm = () => {
     setIsVisible(false);
@@ -62,41 +64,41 @@ export const AuthForm = ({ initialView = "login", onClose }: AuthFormProps) => {
     }));
   };
 
-  const storeUserLocally = (data: any) => {
-    localStorage.setItem("username", data.username || "");
-    localStorage.setItem("role", data.role || "");
-    if (data.jobTitle) localStorage.setItem("jobTitle", data.jobTitle);
-    if (data.skills) localStorage.setItem("skills", data.skills);
+  const handleLogin = async () => {
+    try {
+      const response = await fetcher("/users/login", "POST", {
+        email: formData.email,
+        password: formData.password,
+      });
+
+      const { user } = response;
+
+      if (!Array.isArray(user) || user.length === 0) {
+        throw new Error("Login failed. No user returned.");
+      }
+
+      const currentUser = user[0];
+      const userData = {
+        id: currentUser.id,
+        username: currentUser.username,
+        avatar: currentUser.avatar || "/Images/sample.jpeg",
+      };
+
+      setAuthenticated(userData);
+      sessionStorage.setItem("auth_user", JSON.stringify(userData));
+
+      setSuccess("Login successful!");
+
+      setTimeout(() => {
+        hideForm();
+        router.push("/");
+      }, 1000);
+    } catch (err) {
+      console.error("Login error:", err);
+      setError("Login failed. Please try again.");
+    }
   };
 
-  const handleLogin = async () => {
-    const data = await fetcher("/users/login", "POST", {
-      email: formData.email,
-      password: formData.password,
-    });
-  
-    setSuccess("Login successful!");
-  
-    // ✅ Set cookie (let backend handle auth via cookie-parser)
-    if (data.token) {
-      // ✅ Decode token to store sub (user_id) and email for UI
-      const payloadBase64 = data.token.split(".")[1];
-      const decoded = JSON.parse(atob(payloadBase64));
-  
-      localStorage.setItem("user_id", decoded.sub);
-      localStorage.setItem("email", decoded.email);
-      localStorage.setItem("role", decoded.role || "");
-    }
-  
-    // ✅ Store additional fields from response
-    storeUserLocally(data);
-  
-    setTimeout(() => {
-      hideForm();
-      router.push("/");
-    }, 1000);
-  };
-  
   const handleRegister = async () => {
     if (!formData.role) throw new Error("Please select a role (Entrepreneur or Investor).");
     if (!formData.termsAccepted) throw new Error("You must accept the Terms & Privacy Policy.");
@@ -113,13 +115,10 @@ export const AuthForm = ({ initialView = "login", onClose }: AuthFormProps) => {
       payload.skills = formData.skills;
     }
 
-    await fetcher("/users/register", "POST", payload);
+    const user = await fetcher("/users/register", "POST", payload);
+    if (!user) throw new Error("Registration failed. Please try again.");
     setSuccess("Registration successful! You can now log in.");
   };
-
-  // =============================================
-  // Form Submission Handler
-  // =============================================
 
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
@@ -139,15 +138,14 @@ export const AuthForm = ({ initialView = "login", onClose }: AuthFormProps) => {
     } finally {
       setLoading(false);
     }
-
   };
-
-  // =============================================
-  // JSX
-  // =============================================
 
   return (
     <div className={`${styles.wrapper} ${isVisible ? styles.activePopup : ""} ${isActive ? styles.active : ""}`}>
+      <button className={styles.iconClose} onClick={hideForm} type="button" aria-label="Close">
+        <FiX />
+      </button>
+
       {/* Login Form */}
       <div className={`${styles.formBox} ${styles.login}`} style={{ display: isActive ? "none" : "block" }}>
         <h2>Login</h2>
@@ -206,7 +204,6 @@ export const AuthForm = ({ initialView = "login", onClose }: AuthFormProps) => {
             <label>Password</label>
           </div>
 
-          {/* Role Selection */}
           <div className={styles.roleSelection}>
             <p className={styles.roleTitle}>Select your role:</p>
             <div className={styles.roleOptions}>
@@ -225,7 +222,6 @@ export const AuthForm = ({ initialView = "login", onClose }: AuthFormProps) => {
             </p>
           </div>
 
-          {/* Entrepreneur-only fields */}
           {formData.role === "entrepreneur" && (
             <div className={styles.entrepreneurFields}>
               <div className={styles.inputBox}>
@@ -239,10 +235,15 @@ export const AuthForm = ({ initialView = "login", onClose }: AuthFormProps) => {
             </div>
           )}
 
-          {/* Terms */}
           <div className={styles.rememberForgot}>
             <label>
-              <input type="checkbox" name="termsAccepted" checked={formData.termsAccepted} onChange={handleChange} required />
+              <input
+                type="checkbox"
+                name="termsAccepted"
+                checked={formData.termsAccepted}
+                onChange={handleChange}
+                required
+              />
               I agree to the <a href="/terms">Terms</a> & <a href="/privacy">Privacy</a>
             </label>
           </div>
