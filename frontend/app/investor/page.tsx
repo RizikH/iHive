@@ -3,8 +3,11 @@
 import React, { useEffect, useState, useCallback } from "react";
 import Head from "next/head";
 import Link from "next/link";
+import Image from "next/image";
+import { useSearchParams } from "next/navigation";
 import styles from "../styles/investor.module.css";
 import { fetcher } from "@/app/utils/fetcher";
+import RepositoryModal from "@/components/repository-modal";
 
 interface Tag {
     id: number;
@@ -40,6 +43,9 @@ const InvestorPage = () => {
   const [filteredTags, setFilteredTags] = useState<Tag[]>([]);
   const [allIdeas, setAllIdeas] = useState<Idea[]>([]);
   const [dropdownVisible, setDropdownVisible] = useState(false);
+  const [selectedRepo, setSelectedRepo] = useState<string | null>(null);
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [authChecked, setAuthChecked] = useState(true);
 
     useEffect(() => {
         const fetchIdeas = async () => {
@@ -278,7 +284,12 @@ const InvestorPage = () => {
                   ? idea.idea_tags.map(tag => tag.tags.name).join(", ")
                   : "No tags available"}
               </p>
-              <button className={styles.investButton}>💰 Invest</button>
+              <button 
+                onClick={() => {
+                  setSelectedRepo(idea.id.toString());
+                  setIsModalOpen(true);
+                }}
+                className={styles.investButton}>💰 Invest</button>
             </div>
           ))}
         </div>
