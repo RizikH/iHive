@@ -5,7 +5,7 @@ import { useSearchParams } from "next/navigation";
 import NavBar from "@/components/nav-bar";
 import Footer from "@/components/footer";
 import { fetcher } from "@/app/utils/fetcher";
-import styles from "@/app/styles/repository.module.css";
+import styles from "@/app/styles/collab.module.css";
 import { permission } from "process";
 
 export default function RepositorySettingsClient() {

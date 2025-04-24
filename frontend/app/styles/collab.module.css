@@ -1,0 +1,155 @@
+.pageContainer {
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    background-color: #fff;
+    color: #000;
+}
+
+.mainContent {
+    display: flex;
+    justify-content: center;
+    flex-direction: row;
+    min-height: calc(100vh - 150px);
+    padding: 2rem;
+    gap: 2rem;
+}
+
+.settingsContainer h1 {
+    font-size: 2rem;
+    margin-bottom: 0.5rem;
+}
+
+.settingsContainer p {
+    color: #666;
+    margin-bottom: 1.5rem;
+}
+
+.addCollaboratorForm {
+    display: flex;
+    justify-content: space-between;  /* Space out form items evenly */
+    align-items: center;  /* Vertically aligns items */
+    gap: 1rem;
+    margin-bottom: 2rem;
+    width: 100%;
+    max-width: 600px; /* Set max width for form */
+    text-align: left; /* Left-align form elements */
+}
+
+.input,
+.select {
+    padding: 0.6rem 1rem;
+    border: 1px solid #ccc;
+    border-radius: 8px;
+    font-size: 1rem;
+    flex: 1;
+    min-width: 200px;
+    margin-bottom: 0; /* Remove bottom margin to avoid spacing issues */
+}
+
+.addButton {
+    background-color: #0070f3;
+    color: white;
+    border: none;
+    padding: 0.5rem 1.0rem;
+    border-radius: 8px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: background-color 0.2s ease;
+    display: inline-block; /* Ensures the button stays aligned with the form */
+    text-align: center; /* Centers button text */
+    min-width: 120px; /* Set a minimum width for the button */
+}
+
+.addButton:hover {
+    background-color: #0059c1;
+}
+
+.error {
+    color: #e63946;
+    font-weight: bold;
+}
+
+.collaboratorTableContainer {
+    width: 100%;
+    max-width: 1000px; /* Set max width for table container */
+    height: 400px; /* Adjust this value for desired height */
+    overflow: auto;
+    border-radius: 8px;
+    border: 1px solid #ccc;
+    margin-top: 2rem; /* Space between the form and table */
+    display: flex;
+    justify-content: center; /* Centers the table horizontally */
+}
+
+.collaboratorTable {
+    width: 100%;
+    min-width: 600px; /* Adjust this value for table width */
+    border-collapse: collapse;
+    text-align: left;
+    margin: 0 auto; /* Centers the table horizontally */
+}
+
+.collaboratorTable th,
+.collaboratorTable td {
+    padding: 1rem;
+    border: 1px solid #ddd;
+    font-size: 1rem;
+}
+
+.collaboratorTable th {
+    background-color: #f4f4f4;
+    font-weight: 600;
+}
+
+.collaboratorTable td {
+    background-color: #fff;
+}
+
+.collaboratorTable tbody tr:hover {
+    background-color: #f0f0f0;
+}
+
+.collaboratorTable .collaboratorName {
+    font-weight: bold;
+}
+
+.collaboratorTable .permissions {
+    color: #0070f3;
+}
+
+.permissionSelect {
+    padding: 0.5rem;
+    border-radius: 6px;
+}
+
+.deleteButton,
+.updateButton {
+    padding: 0.5rem 1rem;
+    border: none;
+    border-radius: 6px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: background-color 0.2s ease;
+    margin-top: 0.5rem; /* Space between buttons */
+    display: inline-block; /* Ensures the buttons stay aligned within their container */
+    text-align: center; /* Centers button text */
+}
+
+.deleteButton {
+    background-color: #e63946;
+    color: white;
+}
+
+.deleteButton:hover {
+    background-color: #c5303e;
+}
+
+.updateButton {
+    background-color: #34a853; /* Google green */
+    color: white;
+}
+
+.updateButton:hover {
+    background-color: #2c8c46;
+}
