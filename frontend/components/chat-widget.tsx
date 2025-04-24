@@ -45,6 +45,11 @@ export default function ChatWidget() {
   const connectedRef = useRef(false);
 
   useEffect(() => {
+    if (!isAuthenticated || !currentUser.id) {
+      setOpenChats([]); // Reset chat windows
+      return;
+    }
+
     const fetchExistingContacts = async () => {
       try {
         const contacts = await fetcher(`/chat/contacts/${currentUser.id}`);
@@ -54,10 +59,9 @@ export default function ChatWidget() {
       }
     };
 
-    if (isAuthenticated && currentUser.id) {
-      fetchExistingContacts();
-    }
+    fetchExistingContacts();
   }, [currentUser.id, isAuthenticated]);
+
 
   useEffect(() => {
     if (!isAuthenticated) return;
@@ -142,15 +146,20 @@ export default function ChatWidget() {
     };
   }, [currentUser.id, isAuthenticated]);
 
+  // Clean up on logout
   useEffect(() => {
-    return () => {
+    if (!isAuthenticated) {
       if (socket) {
         socket.disconnect();
         socket = null;
         connectedRef.current = false;
       }
-    };
-  }, []);
+      setOpenChats([]);
+      setSearchResults([]);
+      setExistingContacts([]);
+    }
+  }, [isAuthenticated]);
+
 
   useEffect(() => {
     openChats.forEach(chat => {
@@ -320,7 +329,15 @@ export default function ChatWidget() {
         >
           <div className="flex justify-between items-center bg-gray-200 px-3 py-2">
             <div className="flex items-center gap-2">
-              {chat.avatar && <Image src={chat.avatar} className="w-6 h-6 rounded-full" alt={''} />}
+              {chat.avatar && (
+                <Image
+                  src={chat.avatar}
+                  width={24} // Explicitly set the width
+                  height={24} // Explicitly set the height
+                  className="w-6 h-6 rounded-full"
+                  alt={chat.username || 'User Avatar'}
+                />
+              )}
               <span className="font-medium text-sm">{chat.username}</span>
             </div>
             <div className="flex gap-2">

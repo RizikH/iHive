@@ -1,4 +1,3 @@
-const { createClient } = require('@supabase/supabase-js');
 const supabase = require("../config/db"); // Supabase client configured with URL and KEY
 const User = require('./User'); // User model for fetching user details
 

@@ -12,6 +12,7 @@ const ideaRoutes = require("./routes/ideaRoutes");
 const tagRoutes = require("./routes/tagRoutes");
 const fileRoutes = require("./routes/fileRoutes");
 const chatRoutes = require('./routes/chatRoutes');
+const collabRoutes = require('./routes/collabRoutes');
 
 const app = express();
 const server = http.createServer(app);
@@ -46,6 +47,7 @@ app.use("/api/ideas", ideaRoutes);
 app.use("/api/tags", tagRoutes);
 app.use("/api/files", fileRoutes);
 app.use('/api/chat', chatRoutes);
+app.use("/api/collab", collabRoutes);
 
 
 
