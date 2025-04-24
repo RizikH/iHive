@@ -5,18 +5,22 @@
 
 ## 🚀 Overview
 
-iHive is a **GitHub-inspired repository platform for ideas**, designed to connect **innovators** and **investors**. It enables users to showcase their ideas, find potential funding, and collaborate on impactful projects. With **AI-powered tag generation**, **advanced search**, and plans for **investor-idea matching**, iHive aims to revolutionize idea sharing.
+iHive is a **GitHub-inspired repository platform for ideas**, designed to connect **innovators** and **investors**. It enables users to showcase their ideas, find potential funding, and collaborate on impactful projects. With **AI-powered tag generation**, **advanced search**, and **collaboration tools**, iHive aims to revolutionize idea sharing.
 
 🔗 **Live Demo:** [iHive on Vercel](https://ihive.vercel.app/)
 
 ## ✨ Features
 
 - **Idea Repository** – Entrepreneurs can submit, categorize, and manage ideas.
+- **Collaboration Tools** – Add collaborators with hierarchical permissions:
+  - **Public Permissions**: View and modify public files only.
+  - **Protected Permissions**: View private files, edit protected and public files.
+  - **Private Permissions**: View and edit all files.
 - **Investor Matching (Planned)** – AI will suggest ideas to investors based on interests.
 - **AI-Powered Tags** – ChatGPT API automatically generates relevant tags for ideas.
 - **Advanced Search** – Keyword-based and AI-enhanced filtering for better idea discovery.
 - **User Authentication** – Secure login/signup via **Supabase Auth**.
-- **Work-in-Progress Chat Feature** – Future implementation to connect investors & innovators.
+- **Chat Functionality** – Real-time messaging between investors and innovators using **WebSockets**.
 - **Responsive Frontend** – Built with **Next.js & TailwindCSS**.
 - **Scalable Backend** – Developed with **Node.js (Express) & Supabase (PostgreSQL).**
 
@@ -28,6 +32,7 @@ iHive is a **GitHub-inspired repository platform for ideas**, designed to connec
 | **Backend**        | Node.js, Express.js, Supabase (PostgreSQL)    |
 | **Authentication** | Supabase Auth                                 |
 | **AI Integration** | OpenAI GPT API (for automatic tag generation) |
+| **WebSockets**     | $\text{Socket.IO}$ (for real-time chat)                |
 | **Deployment**     | Vercel (Frontend), Render (Backend)           |
 
 ## 🔧 Setup & Installation
@@ -55,7 +60,7 @@ npm install
 
 Create a `.env` file in both `backend/` and `frontend/` with the required API keys and database credentials. Example:
 
-**Backend (**``**):**
+**Backend:**
 
 ```env
 SUPABASE_URL=your_supabase_url
@@ -63,7 +68,7 @@ SUPABASE_KEY=your_supabase_key
 OPENAI_API_KEY=your_openai_api_key
 ```
 
-**Frontend (**``**):**
+**Frontend:**
 
 ```env
 NEXT_PUBLIC_API_BASE_URL=your_backend_url
@@ -122,9 +127,7 @@ This project is licensed under the **MIT License** – feel free to use and modi
 Have questions? Reach out to us!
 
 - **GitHub Issues:** [Open an Issue](https://github.com/RizikH/iHive/issues)
-- **Email:** [support@ihive.com](mailto\:support@ihive.com)
 
 ---
 
 🚀 **iHive – Turning Ideas into Reality!**
-
