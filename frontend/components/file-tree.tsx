@@ -343,13 +343,8 @@ const FileTree = ({ files, onSelect, onRefresh, selectedId, ideaId }: FileTreePr
           <input
             type="file"
             onChange={handleUpload}
-            ref={(input) => {
-              if (input) {
-                input.setAttribute("webkitdirectory", "false");
-                input.setAttribute("directory", "false");
-              }
-            }}
           />
+
 
         </label>
       </div>
