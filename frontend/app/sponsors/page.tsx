@@ -131,7 +131,6 @@ const Sponsors = () => {
                     <th>Idea</th>
                     <th>Investor</th>
                     <th>Amount ($)</th>
-                    <th>Message</th>
                     <th>Status</th>
                     <th>Action</th>
                   </tr>
@@ -142,7 +141,6 @@ const Sponsors = () => {
                       <td>{ideaTitle}</td>
                       <td>{investment.users?.username || investment.username}</td>
                       <td>{investment.amount.toLocaleString()}</td>
-                      <td>{investment.message}</td>
                       <td>{investment.status}</td>
                       <td>
                         {investment.status === "pending" ? (
