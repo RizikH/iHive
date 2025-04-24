@@ -204,9 +204,9 @@ const InvestorPage = () => {
                 </div>
                 <div className={styles["nav-links"]}>
                     <Link href="/investments">Investments</Link>
-                    <Link href="#setting">Settings</Link>
-                    <Link href="#get-started">Signout</Link>
-                    <Link href="/investor-profile">
+                    <Link href="setting">Settings</Link>
+                    <Link href="get-started">Signout</Link>
+                    <Link href="setting">
                         <Image
                             src="/Images/Yixi.jpeg"
                             alt="Investor Profile"
