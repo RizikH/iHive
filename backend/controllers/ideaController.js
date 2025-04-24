@@ -1,7 +1,6 @@
 const Idea = require("../models/Idea");
 const supabase = require("../config/db");
 const { getLevel } = require("../utils/getLevel");
-const { canAccess } = require("../utils/permissions"); // Assuming you have a utility function for access control
 
 // ✅ GET /api/ideas
 const getAllIdeas = async (req, res) => {
