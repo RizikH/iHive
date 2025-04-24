@@ -82,6 +82,7 @@ export const AuthForm = ({ initialView = "login", onClose }: AuthFormProps) => {
         id: currentUser.id,
         username: currentUser.username,
         user_type: currentUser.user_type,
+        avatar: currentUser.avatar || "https://avatar.vercel.sh/jack",
       };
 
       setAuthenticated(userData);
@@ -91,7 +92,12 @@ export const AuthForm = ({ initialView = "login", onClose }: AuthFormProps) => {
 
       setTimeout(() => {
         hideForm();
-        userData.user_type === "entrepreneur"? router.push("/entrepreneur/") : router.push("/investor/");
+        if (userData.user_type === "entrepreneur") {
+          router.push("/entrepreneur/");
+        } else {
+          router.push("/investor/");
+        }
+
       }, 1000);
     } catch (err) {
       console.error("Login error:", err);

@@ -4,6 +4,7 @@ type User = {
   id: string;
   username: string;
   user_type: string;
+  avatar: string;
 };
 
 type AuthState = {
@@ -16,18 +17,18 @@ type AuthState = {
 
 export const useAuthStore = create<AuthState>((set) => ({
   isAuthenticated: false,
-  currentUser: { id: "", username: "", user_type: "" },
+  currentUser: { id: "", username: "", user_type: "", avatar: "" },
   setAuthenticated: (user) => {
     if (user) {
       set({ isAuthenticated: true, currentUser: user });
       sessionStorage.setItem("auth_user", JSON.stringify(user));
     } else {
-      set({ isAuthenticated: false, currentUser: { id: "", username: "", user_type: "" } });
+      set({ isAuthenticated: false, currentUser: { id: "", username: "", user_type: "", avatar: "" } });
       sessionStorage.removeItem("auth_user");
     }
   },
   logout: () => {
-    set({ isAuthenticated: false, currentUser: { id: "", username: "", user_type: "" } });
+    set({ isAuthenticated: false, currentUser: { id: "", username: "", user_type: "", avatar: "" } });
     sessionStorage.removeItem("auth_user");
   },
   initializeFromSession: () => {
