@@ -7,7 +7,8 @@ import NavBar from "@/components/nav-bar";
 import Image from "next/image";
 import Footer from "@/components/footer";
 import { useRouter } from "next/navigation";
-import { useAuthStore } from "@/app/stores/useAuthStore";
+import { fetcher } from "../utils/fetcher";
+import { useAuthStore } from '@/app/stores/useAuthStore';
 
 interface Investment {
   id: number;
@@ -25,38 +26,30 @@ const InvestmentsTab = () => {
   const [error, setError] = useState<string | null>(null);
 
   const user = useAuthStore((state) => state.currentUser);
-  const isAuthenticated = useAuthStore((state) => state.isAuthenticated);
   const router = useRouter();
 
+  const isAuthenticated = useAuthStore(state => state.isAuthenticated);
+  const currentUser = useAuthStore(state => state.currentUser);
+
   useEffect(() => {
-    if (!isAuthenticated || !user?.id) {
+    if (!isAuthenticated || !currentUser?.id) {
       const timeout = setTimeout(() => router.push("/get-started"), 1500);
       return () => clearTimeout(timeout);
     }
 
     const fetchInvestments = async () => {
       try {
-        const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/investments/user/${user.id}`);
-        const data = await res.json();
-
-        console.log("RAW investment response:", data);
-
-        if (Array.isArray(data)) {
-          setInvestments(data);
-        } else {
-          console.error("Expected array, got:", data);
-          setInvestments([]);
-        }
+        const data = await fetcher(`/investments/user/${currentUser.id}`);
+        setInvestments(data);
+        setLoading(false);
       } catch (err) {
-        setError("Failed to load investments.");
-        console.error(err);
-      } finally {
+        setError("Failed to fetch investments");
         setLoading(false);
       }
     };
 
     fetchInvestments();
-  }, [isAuthenticated, user, router]);
+  }, [isAuthenticated, currentUser?.id, router]);
 
   if (!isAuthenticated) {
     return <p style={{ padding: "2rem", textAlign: "center" }}>Please log in to view this page...</p>;

@@ -24,20 +24,20 @@ const addInvestment = async ({ idea_id, user_id, amount, invested_at }) => {
 
 // Get all investments made by a specific user
 const getInvestmentsByUserId = async (user_id) => {
-    const { data, error } = await supabase
-      .from('investments')
-      .select('*')
-      .eq('user_id', user_id);
-  
-    if (error) throw error;
-    return Array.isArray(data) ? data : [];
-  };  
+  const { data, error } = await supabase
+    .from('investments')
+    .select('*, ideas(*)')
+    .eq('user_id', user_id);
+
+  if (error) throw error;
+  return Array.isArray(data) ? data : [];
+}; 
 
   const getInvestmentsForEntrepreneur = async (entrepreneur_id) => {
     const { data, error } = await supabase
       .from('investments')
-      .select('id, amount, invested_at, status, message, idea!inner(user_id), user(username)')
-      .eq('idea.user_id', entrepreneur_id);
+      .select('*, users(*)')
+      .eq('user_id', entrepreneur_id);
   
     if (error) throw error;
     return data;

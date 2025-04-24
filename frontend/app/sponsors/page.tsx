@@ -8,13 +8,14 @@ import styles from "../styles/sponsors.module.css";
 import "../styles/globals.css";
 import { useAuthStore } from "@/app/stores/useAuthStore";
 import { useRouter } from "next/navigation";
+import { fetcher } from "../utils/fetcher";
 
 interface Investor {
   id: number;
   amount: number;
   message: string;
   status: "Pending" | "Accepted" | "Rejected";
-  user: {
+  users?: {
     username: string;
   };
 }
@@ -24,41 +25,31 @@ const Sponsors = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
-  const isAuthenticated = useAuthStore((state) => state.isAuthenticated);
-  const user = useAuthStore((state) => state.currentUser);
   const router = useRouter();
 
+  const isAuthenticated = useAuthStore(state => state.isAuthenticated);
+  const currentUser = useAuthStore(state => state.currentUser);
+
   useEffect(() => {
-    if (!isAuthenticated) {
+    if (!isAuthenticated || !currentUser?.id) {
       const timeout = setTimeout(() => router.push("/get-started"), 1500);
       return () => clearTimeout(timeout);
     }
-  }, [isAuthenticated, router]);
 
-  useEffect(() => {
-    const fetchInvestorOffers = async () => {
-      if (!user?.id) return;
-
+    const fetchInvestments = async () => {
       try {
-        const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/investments/entrepreneur/${user.id}`);
-        const data = await res.json();
-
-        if (Array.isArray(data)) {
-          setInvestors(data);
-        } else {
-          console.error("Expected array, got:", data);
-          setError("Unexpected response from server.");
-        }
+        const data = await fetcher(`/investments/entrepreneur/${currentUser.id}`);
+        setInvestors(data);
       } catch (err) {
-        console.error("Failed to fetch sponsor offers:", err);
-        setError("Could not load investor offers.");
+        console.error("Fetch error:", err);
+        setError("Failed to fetch investments");
       } finally {
         setLoading(false);
       }
     };
 
-    fetchInvestorOffers();
-  }, [user]);
+    fetchInvestments();
+  }, [isAuthenticated, currentUser?.id, router]);
 
   const handleAction = async (id: number, action: "Accepted" | "Rejected") => {
     try {
@@ -70,8 +61,9 @@ const Sponsors = () => {
         body: JSON.stringify({ status: action }),
       });
 
-      setInvestors((prev) =>
-        prev.map((inv) =>
+      // Refresh the list after update
+      setInvestors(prev =>
+        prev.map(inv =>
           inv.id === id ? { ...inv, status: action } : inv
         )
       );
@@ -79,10 +71,6 @@ const Sponsors = () => {
       console.error("Failed to update status:", err);
     }
   };
-
-  if (!isAuthenticated) {
-    return <p style={{ textAlign: "center", padding: "2rem" }}>Please log in to view this page...</p>;
-  }
 
   return (
     <>
@@ -108,7 +96,6 @@ const Sponsors = () => {
 
           {loading && <p>Loading offers...</p>}
           {error && <p className="text-red-500">{error}</p>}
-
           {!loading && investors.length === 0 && <p>No investor offers found.</p>}
 
           {investors.length > 0 && (
@@ -124,9 +111,9 @@ const Sponsors = () => {
                   </tr>
                 </thead>
                 <tbody>
-                  {investors.map((inv) => (
+                  {investors.map(inv => (
                     <tr key={inv.id}>
-                      <td>{inv.user?.username || "Unknown"}</td>
+                      <td>{inv.users?.username || "Unknown"}</td>
                       <td>{inv.amount.toLocaleString()}</td>
                       <td>{inv.message}</td>
                       <td>{inv.status}</td>
