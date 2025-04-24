@@ -171,9 +171,39 @@ const InvestorPage = () => {
         setDropdownVisible(!dropdownVisible);
     };
 
-    const handleInvest = (repoId: string) => {
-        console.log(`Investing in idea ${repoId}`);
-    };
+    const handleInvest = async (ideaId: string, amount: number) => {
+        const userId = user?.id;
+      
+        if (!userId) {
+          alert("You must be logged in to invest.");
+          return;
+        }
+      
+        try {
+          const res = await fetch(`${API_URL}/investments`, {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+            },
+            body: JSON.stringify({
+              idea_id: ideaId,
+              user_id: userId,
+              amount,
+            }),
+          });
+      
+          const data = await res.json();
+      
+          if (res.ok) {
+            alert("Investment successful!");
+          } else {
+            alert(`Investment failed: ${data.error}`);
+          }
+        } catch (err) {
+          console.error("Investment error:", err);
+          alert("Something went wrong while processing your investment.");
+        }
+      };    
 
     // Fetch files for the selected idea
     const searchParams = useSearchParams();
@@ -332,7 +362,7 @@ const InvestorPage = () => {
                     repoId={selectedRepo}
                     title="Repository Preview"
                     isInvestorView={true}
-                    onInvest={handleInvest}
+                    onInvest={(ideaId: string, amount: number) => handleInvest(ideaId, amount)}
                 />
             )}
 
