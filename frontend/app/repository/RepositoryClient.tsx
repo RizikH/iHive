@@ -65,7 +65,7 @@ export default function Repository() {
         console.log("idea.user_id:", idea.user_id);
         console.log("currentUser.id:", currentUser);
 
-        if (idea.user_id !== currentUser.id) {
+        if (idea?.error === "You do not have access to this idea.") {
           setUnauthorized(true);
         } else {
           await fetchFiles();
