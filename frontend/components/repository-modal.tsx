@@ -22,7 +22,7 @@ const RepositoryModal = ({
   repoId: string;
   title: string;
   isInvestorView?: boolean;
-  onInvest?: (repoId: string) => void;
+  onInvest?: (repoId: string, amount: number) => void;
 }) => {
   const [content, setContent] = useState<string>("");
   const [files, setFiles] = useState<FileItem[]>([]);
@@ -31,6 +31,8 @@ const RepositoryModal = ({
   const [repoDetails, setRepoDetails] = useState<any>(null);
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const [error, setError] = useState<string | null>(null);
+  const [investmentAmount, setInvestmentAmount] = useState<number>(0);
+  const [successMessage, setSuccessMessage] = useState<string | null>(null);
 
   const isReadOnly = true;
 
@@ -89,7 +91,7 @@ const RepositoryModal = ({
     }
   };
 
-  const handleRefresh = () => {};
+  const handleRefresh = () => { };
 
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
@@ -157,22 +159,53 @@ const RepositoryModal = ({
                       {/* handle investor view */}
                       {isInvestorView && (
                         <div className="mt-4 border-t pt-4">
-                          <div className="flex justify-between items-center">
-                            <div>
-                              <h4 className="text-sm font-medium">Interested in this idea?</h4>
-                              <p className="text-xs text-gray-600 mt-1">Support this entrepreneur by investing</p>
+                          <div>
+                            <h4 className="text-sm font-medium">Interested in this idea?</h4>
+                            <p className="text-xs text-gray-600 mt-1 mb-2">Support this entrepreneur by investing</p>
+
+                            <label className="text-xs text-gray-700">Amount ($):</label>
+                            <div className="relative">
+                              <span className="absolute left-2 top-1/2 -translate-y-1/2 text-gray-500 text-sm">$</span>
+                              <input
+                                type="number"
+                                className="border rounded pl-6 pr-2 py-1 mt-1 w-full text-sm"
+                                min={1}
+                                value={investmentAmount === 0 ? "" : investmentAmount}
+                                placeholder="Enter investment amount here"
+                                onChange={(e) => {
+                                  const val = e.target.value.replace(/^0+/, "");
+                                  setInvestmentAmount(Number(val || 0));
+                                }}
+                              />
                             </div>
-                            <button 
-                              onClick={() => onInvest && onInvest(repoId)}
-                              className={styles.investButton}
+
+                            <button
+                              onClick={async () => {
+                                if (onInvest) {
+                                  try {
+                                    await onInvest(repoId, investmentAmount);
+                                    setSuccessMessage("Investment successful!");
+                                    setTimeout(() => setSuccessMessage(null), 3000); // hide after 3 sec
+                                  } catch (e) {
+                                    console.error("Investment failed:", e);
+                                  }
+                                }
+                              }}
+                              className={`${styles.investButton} mt-2`}
                             >
                               <span className={styles.investButtonIcon}>💰</span>
-                              Invest
+                              Confirm Investment
                             </button>
+                            {successMessage && (
+                              <div className="mt-2 text-green-600 text-sm font-medium">
+                                {successMessage}
+                              </div>
+                            )}
                           </div>
                         </div>
                       )}
-                      
+
+
                       {/* handle entrepreneur view */}
                       {!isInvestorView && (
                         <div className="mt-4 border-t pt-4">
@@ -181,7 +214,7 @@ const RepositoryModal = ({
                               <h4 className="text-sm font-medium">Want to see the full repository?</h4>
                               <p className="text-xs text-gray-600 mt-1">Open the complete repository editor</p>
                             </div>
-                            <Link 
+                            <Link
                               href={`/repository?id=${repoId}`}
                               className={styles.viewRepositoryButton}
                             >
