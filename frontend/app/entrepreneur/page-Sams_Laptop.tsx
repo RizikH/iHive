@@ -64,7 +64,7 @@ const EntrepreneurProfile = () => {
     };
 
     checkAuth();
-  }, []);
+  }, [router]);
 
 
   const loadFromLocalStorage = () => {

@@ -25,7 +25,7 @@ const createUser = async (user) => {
 
     const { data, error } = await supabase
         .from("users")
-        .insert([{id, username, email, bio }])
+        .insert([{ id, username, email, bio }])
         .select()
         .single();
 
@@ -64,6 +64,16 @@ const deleteUser = async (id) => {
     return data;
 };
 
+const getUserByEmail = async (email) => {
+    const { data, error } = await supabase
+        .from("users")
+        .select("*")
+        .eq("email", email)
+        .single();
+
+    if (error) throw error;
+    return data;
+}
 const getUsersByQuery = async (query, excludeId) => {
     const { data, error } = await supabase
         .from('users')
@@ -81,5 +91,6 @@ module.exports = {
     createUser,
     updateUser,
     deleteUser,
-    getUsersByQuery
+    getUsersByQuery,
+    getUserByEmail,
 };

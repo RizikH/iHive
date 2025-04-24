@@ -15,8 +15,8 @@ const getCollabs = async (req, res) => {
 
 const addCollab = async (req, res) => {
     try {
-        const { ideaId, userId, permissions } = req.body;
-        const newCollab = await Collab.addcollabs(ideaId, userId, permissions);
+        const { ideaId, email, permission } = req.body;
+        const newCollab = await Collab.addcollabs(ideaId, email, permission);
         res.status(201).json(newCollab);
     } catch (error) {
         console.error("❌ Error while adding collaboration:", error);

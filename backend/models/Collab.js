@@ -19,7 +19,6 @@ const getCollabs = async (ideaId) => {
             `)
             .eq('idea_id', ideaId);
 
-        console.log("Data fetched from Supabase:", data); // Debugging line
         return data;
 
     } catch (err) {
@@ -28,9 +27,14 @@ const getCollabs = async (ideaId) => {
     }
 };
 
-const addcollabs = async (ideaId, userId, permissions) => {
-    if (!ideaId || !userId || !permissions) {
-        throw new Error("Missing required parameters: ideaId, userId, or permissions");
+const addcollabs = async (ideaId, email, permissions) => {
+    if (!ideaId || !email || !permissions) {
+        throw new Error("Missing required parameters: ideaId, email, or permissions");
+    }
+
+    const user = await User.getUserByEmail(email);
+    if (!user) {
+        throw new Error(`User with email ${email} not found`);
     }
 
     try {
@@ -39,11 +43,11 @@ const addcollabs = async (ideaId, userId, permissions) => {
             .insert([
                 {
                     idea_id: ideaId,
-                    user_id: userId,
+                    user_id: user.id,
                     permissions: permissions,
                 },
             ])
-            .select('*');
+            .select('*, users(username, email)');
 
         if (error) {
             throw new Error(`Error in addcollabs: ${error.message}`);

@@ -35,12 +35,15 @@ const getInvestmentsByUserId = async (user_id) => {
 
 const getInvestmentsForEntrepreneur = async (entrepreneur_id) => {
   const { data, error } = await supabase
-    .from('investments')
-    .select('*, users(*)')
-    .eq('user_id', entrepreneur_id);
+    .from('ideas')
+    .select('*, investments(*, users(username))') // Ensure investments is the correct relation
+    .eq('user_id', entrepreneur_id); // Ensure user_id is the correct column
 
-  if (error) throw error;
-  return data;
+  if (error) {
+    console.error('Error fetching investments:', error); // Log the error for debugging
+    throw error; // Rethrow the error for further handling
+  }
+  return data; // Return the fetched data
 };
 
 const updateStatus = async (investment_id, status) => {
