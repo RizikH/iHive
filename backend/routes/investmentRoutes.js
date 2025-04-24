@@ -13,5 +13,7 @@ router.get('/user/:user_id', investmentController.getInvestmentsByUser);
 
 router.get('/entrepreneur/:user_id', investmentController.getEntrepreneurInvestments);
 
+router.put('/:investment_id', investmentController.updateStatus);
+
 
 module.exports = router;

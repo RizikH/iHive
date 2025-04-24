@@ -14,7 +14,7 @@ interface Investor {
   id: number;
   amount: number;
   message: string;
-  status: "Pending" | "Accepted" | "Rejected";
+  status: "pending" | "accepted" | "rejected";
   users?: {
     username: string;
   };
@@ -26,7 +26,6 @@ const Sponsors = () => {
   const [error, setError] = useState<string | null>(null);
 
   const router = useRouter();
-
   const isAuthenticated = useAuthStore(state => state.isAuthenticated);
   const currentUser = useAuthStore(state => state.currentUser);
 
@@ -42,7 +41,7 @@ const Sponsors = () => {
         setInvestors(data);
       } catch (err) {
         console.error("Fetch error:", err);
-        setError("Failed to fetch investments");
+        setError("Failed to fetch investments.");
       } finally {
         setLoading(false);
       }
@@ -51,24 +50,17 @@ const Sponsors = () => {
     fetchInvestments();
   }, [isAuthenticated, currentUser?.id, router]);
 
-  const handleAction = async (id: number, action: "Accepted" | "Rejected") => {
+  const handleAction = async (id: number, action: "accepted" | "rejected") => {
     try {
-      await fetch(`${process.env.NEXT_PUBLIC_API_URL}/investments/${id}`, {
-        method: "PUT",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({ status: action }),
-      });
-
-      // Refresh the list after update
+      await fetcher(`/investments/${id}`, "PUT", { status: action });
       setInvestors(prev =>
         prev.map(inv =>
           inv.id === id ? { ...inv, status: action } : inv
         )
       );
     } catch (err) {
-      console.error("Failed to update status:", err);
+      console.error("Action error:", err);
+      setError("Failed to update investment status.");
     }
   };
 
@@ -118,17 +110,17 @@ const Sponsors = () => {
                       <td>{inv.message}</td>
                       <td>{inv.status}</td>
                       <td>
-                        {inv.status === "Pending" ? (
+                        {inv.status === "pending" ? (
                           <>
                             <button
                               className={styles.acceptBtn}
-                              onClick={() => handleAction(inv.id, "Accepted")}
+                              onClick={() => handleAction(inv.id, "accepted")}
                             >
                               Accept
                             </button>
                             <button
                               className={styles.rejectBtn}
-                              onClick={() => handleAction(inv.id, "Rejected")}
+                              onClick={() => handleAction(inv.id, "rejected")}
                             >
                               Reject
                             </button>

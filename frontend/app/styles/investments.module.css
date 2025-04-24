@@ -218,4 +218,20 @@
     border-radius: 6px;
     cursor: pointer;
   }
+
+  .accepted {
+    color: green;
+    font-weight: bold;
+  }
+  
+  .rejected {
+    color: red;
+    font-weight: bold;
+  }
+  
+  .pending {
+    color: orange;
+    font-weight: bold;
+  }
+  
   

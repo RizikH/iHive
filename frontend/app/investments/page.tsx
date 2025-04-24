@@ -15,7 +15,8 @@ interface Investment {
   idea_id: number;
   amount: number;
   invested_at: string;
-  idea?: {
+  status: string;
+  ideas?: {
     title: string;
   };
 }
@@ -92,10 +93,18 @@ const InvestmentsTab = () => {
             <tbody>
               {investments.map((investment) => (
                 <tr key={investment.id}>
-                  <td>{investment.idea?.title || "Unknown"}</td>
+                  <td>{investment.ideas?.title || "Unknown"}</td>
                   <td>${investment.amount.toLocaleString()}</td>
                   <td>{new Date(investment.invested_at).toLocaleDateString()}</td>
-                  <td className={styles.completed}>Completed</td>
+                  <td className={
+                    investment.status?.toLowerCase() === "accepted"
+                      ? styles.accepted
+                      : investment.status?.toLowerCase() === "rejected"
+                        ? styles.rejected
+                        : styles.pending
+                  }>
+                    {investment.status || "Unknown"}
+                  </td>
                 </tr>
               ))}
             </tbody>
