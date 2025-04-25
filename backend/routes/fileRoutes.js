@@ -26,6 +26,8 @@ router.get('/:id/view', authenticate, fileController.streamFile);
 // Gets a file by ID
 router.get('/:id', authenticate, fileController.getFileById);
 
+router.get('/public', fileController.getPublicFiles);
+
 // 🔐 Protected Routes
 router.post('/', authenticate, fileController.createFile);
 router.put('/:id', authenticate, fileController.updateFile);

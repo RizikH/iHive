@@ -8,6 +8,7 @@ import { VisuallyHidden } from "@radix-ui/react-visually-hidden";
 import FileTree, { FileItem } from "@/components/file-tree";
 import FileViewer from "@/components/file-viewer";
 import Link from "next/link";
+import { idea } from "react-syntax-highlighter/dist/esm/styles/hljs";
 
 const RepositoryModal = ({
   isOpen,
@@ -53,13 +54,10 @@ const RepositoryModal = ({
 
   const fetchFiles = useCallback(async () => {
     try {
-      const filesData = await fetcher(`/files?idea_id=${repoId}`);
-      if (Array.isArray(filesData)) {
-        setFiles(filesData);
-      } else {
-        console.warn("Invalid files data format:", filesData);
-        setFiles([]);
-      }
+      const filesData = await fetcher(`/files/public?idea_id=${repoId}`, 'GET');
+      if (!filesData) throw new Error("Failed to load files data");
+
+      setFiles(filesData);
       return filesData;
     } catch (err) {
       console.error("Error fetching files:", err);
