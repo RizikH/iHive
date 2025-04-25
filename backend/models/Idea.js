@@ -5,7 +5,7 @@ const getAllIdeas = async () => {
     const { data, error } = await supabase
         .from("ideas")
         .select(`
-            *,
+            *, users(*),
             idea_tags (
                 *,
                 tags (*)
