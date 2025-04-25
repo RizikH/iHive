@@ -93,7 +93,18 @@ const InvestmentsTab = () => {
             <tbody>
               {investments.map((investment) => (
                 <tr key={investment.id}>
-                  <td>{investment.ideas?.title || "Unknown"}</td>
+                  <td>
+                    {investment.ideas?.title ? (
+                      <a
+                        href={`/repository?id=${investment.idea_id}`}
+                        className={styles.linkTitle}
+                      >
+                        {investment.ideas.title}
+                      </a>
+                    ) : (
+                      "Unknown"
+                    )}
+                  </td>
                   <td>${investment.amount.toLocaleString()}</td>
                   <td>{new Date(investment.invested_at).toLocaleDateString()}</td>
                   <td className={

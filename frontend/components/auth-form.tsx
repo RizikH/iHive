@@ -69,6 +69,7 @@ export const AuthForm = ({ initialView = "login", onClose }: AuthFormProps) => {
       const response = await fetcher("/users/login", "POST", {
         email: formData.email,
         password: formData.password,
+        userTpe: formData.role,
       });
 
       const { user } = response;
@@ -113,7 +114,7 @@ export const AuthForm = ({ initialView = "login", onClose }: AuthFormProps) => {
       username: formData.username,
       email: formData.email,
       password: formData.password,
-      role: formData.role,
+      userType: formData.role,
     };
 
     if (formData.role === "entrepreneur") {
