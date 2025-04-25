@@ -589,3 +589,25 @@
   border-radius: 8px;
   overflow-x: auto;
 }
+
+/* Lock icon in the file name */
+.lockIcon {
+  margin-left: 8px;
+  color: #888;
+  font-size: 14px;
+  display: inline-flex;
+  align-items: center;
+}
+
+/* Locked file message below editor */
+.lockedFileMessage {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  background-color: #f8f8f8;
+  color: #666;
+  padding: 10px;
+  border-top: 1px solid #eaeaea;
+  font-size: 14px;
+}

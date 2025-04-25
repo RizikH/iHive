@@ -137,16 +137,20 @@
   flex: 1;
 }
 .lockedItem {
-  white-space: nowrap;
-  display: flex;
-  align-items: center;
-  gap: 5px;
-  font-size: 0.9rem;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
-  cursor: pointer;
-  color: gray;
+  color: #999 !important;
+  cursor: not-allowed !important;
+  pointer-events: none;
+  opacity: 0.7;
+}
+
+.lockedItem .fileItemName {
+  cursor: not-allowed !important;
+}
+
+.lockIconRight {
+  margin-left: 5px;
+  color: #999;
+  font-size: 12px;
 }
 
 .toggleIcon {
