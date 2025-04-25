@@ -542,3 +542,50 @@
   border-radius: 4px;
   box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
 }
+
+/* -----------------------------------------------------------------------------
+   Markdown Viewer Styles
+   ----------------------------------------------------------------------------- */
+.markdownViewer {
+  font-family: Arial, sans-serif;
+  line-height: 1.6;
+  color: #333;
+}
+
+.markdownViewer h1,
+.markdownViewer h2,
+.markdownViewer h3 {
+  border-bottom: 1px solid #ddd;
+  padding-bottom: 0.3em;
+  margin-bottom: 1em;
+}
+
+.markdownViewer hr {
+  border: none;
+  border-top: 1px solid #ddd;
+  margin: 1.5em 0;
+}
+
+.markdownViewer p {
+  margin: 1em 0;
+}
+
+.markdownViewer ul,
+.markdownViewer ol {
+  margin: 1em 0;
+  padding-left: 1.5em;
+}
+
+.markdownViewer code {
+  background: #f4f4f4;
+  padding: 0.2em 0.4em;
+  border-radius: 4px;
+  font-family: monospace;
+}
+
+.markdownViewer pre {
+  background: #f4f4f4;
+  padding: 1em;
+  border-radius: 8px;
+  overflow-x: auto;
+}

@@ -1,8 +1,8 @@
 "use client";
 
 import Link from "next/link";
-import styles from ".//styles/home.module.css"; // ✅ Fixed Import Path
-import ".//styles/globals.css"; // ✅ Fixed Import Path
+import styles from "@/app/styles/home.module.css"; // ✅ Fixed Import Path
+import "@/components/"; // ✅ Fixed Import Path
 import React from "react";
 import Image from "next/image";
 import NavBar from "@/components/nav-bar";

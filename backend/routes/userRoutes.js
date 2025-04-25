@@ -5,10 +5,20 @@ const authMiddleware = require("../middleware/authMiddleware");
 const rateLimit = require("express-rate-limit");
 const isProduction = process.env.NODE_ENV === "production";
 
-// ✅ Public Routes (Authentication)
-router.post("/register", controller.addUser);
-router.post("/login", controller.loginUser);
 
+// ✅ NEW: Get current user info from token
+const authRateLimiter = rateLimit({
+  windowMs: 15 * 60 * 1000, // 15 minutes
+  max: 100, // max 100 requests per windowMs
+  message: "Too many requests from this IP, please try again later.",
+});
+
+// ✅ Public Routes (Authentication)
+router.post("/register", authRateLimiter, controller.addUser);
+router.post("/login", authRateLimiter, controller.loginUser);
+
+
+router.use(authRateLimiter);
 // ✅ Protected Routes (Require Authentication)
 router.get("/all", authMiddleware, controller.getUsers);
 router.post("/all", authMiddleware, controller.getUsersByQuery);
@@ -16,6 +26,7 @@ router.post("/all", authMiddleware, controller.getUsersByQuery);
 router.get("/get/:id", authMiddleware, controller.getUser);
 router.put("/update/:id", authMiddleware, controller.updateUser);
 router.delete("/delete/:id", authMiddleware, controller.deleteUser);
+
 router.post("/logout", (req, res) => {
   res.clearCookie("token", {
     httpOnly: true,
@@ -26,12 +37,8 @@ router.post("/logout", (req, res) => {
   res.status(200).json({ message: "Logged out successfully" });
 });
 
-// ✅ NEW: Get current user info from token
-const authRateLimiter = rateLimit({
-  windowMs: 15 * 60 * 1000, // 15 minutes
-  max: 100, // max 100 requests per windowMs
-});
-router.get("/me", authRateLimiter, authMiddleware, (req, res) => {
+
+router.get("/me", authMiddleware, (req, res) => {
   const user = req.user;
   res.json({
     id: user.sub,
@@ -39,6 +46,5 @@ router.get("/me", authRateLimiter, authMiddleware, (req, res) => {
     username: user.user_metadata?.username || null
   });
 });
-
 
 module.exports = router;

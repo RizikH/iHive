@@ -6,6 +6,7 @@ import { oneDark } from "react-syntax-highlighter/dist/esm/styles/prism";
 import { fetcher } from "@/app/utils/fetcher";
 import ReactMarkdown from "react-markdown";
 import remarkGfm from "remark-gfm";
+import rehypeRaw from "rehype-raw";
 import Image from "next/image";
 
 type Props = {
@@ -54,7 +55,6 @@ const FileViewer = ({ file }: Props) => {
     }
   };
 
-
   const isCodeFile = (filename: string): boolean => {
     const codeExtensions = [
       "js", "jsx", "ts", "tsx", "py", "java", "c", "cpp", "cc", "cxx",
@@ -63,7 +63,6 @@ const FileViewer = ({ file }: Props) => {
     const ext = filename.split(".").pop()?.toLowerCase();
     return codeExtensions.includes(ext || "");
   };
-
 
   useEffect(() => {
     let objectUrl: string;
@@ -96,7 +95,6 @@ const FileViewer = ({ file }: Props) => {
     };
   }, [file]);
 
-
   const renderCodeBlock = (content: string) => (
     <SyntaxHighlighter
       language={getLanguage(file.name)}
@@ -113,6 +111,7 @@ const FileViewer = ({ file }: Props) => {
     <div className={styles.markdownViewer}>
       <ReactMarkdown
         remarkPlugins={[remarkGfm]}
+        rehypePlugins={[rehypeRaw]} // Added rehypeRaw for HTML rendering
         components={{
           code: (props: any) => {
             const { inline, className, children, ...rest } = props;
@@ -138,9 +137,6 @@ const FileViewer = ({ file }: Props) => {
       </ReactMarkdown>
     </div>
   );
-
-
-
 
   const renderUploadPreview = () => {
     const isImage = file.mime_type?.startsWith("image/");

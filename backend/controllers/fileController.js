@@ -3,6 +3,9 @@ const { v4: uuidv4 } = require('uuid');
 const File = require('../models/File');
 const path = require('path');
 const Idea = require('../models/Idea');
+const { getLevel } = require('../utils/getLevel');
+const { canAccess } = require('../utils/permissions');
+
 
 const BUCKET_NAME = process.env.AWS_BUCKET_NAME;
 if (!BUCKET_NAME) {
@@ -18,12 +21,26 @@ const uploadFile = async (req, res) => {
     const ideaId = req.body.idea_id;
     if (!ideaId) return res.status(400).json({ error: 'Invalid or missing idea_id' });
 
+    const userId = req.user?.sub;
+    if (!userId) return res.status(401).json({ error: "Unauthorized: User information is missing." });
+
     const idea = await Idea.getIdeaById(ideaId);
     if (!idea) return res.status(404).json({ error: 'Idea not found' });
 
-    const userId = req.user?.sub;
-    if (!userId) return res.status(401).json({ error: "Unauthorized: User information is missing." });
-    if (idea.user_id !== userId) return res.status(403).json({ error: 'You are not the owner of this idea' });
+    const isOwner = idea.user_id === userId;
+    let userLevel = null;
+    if (!isOwner) {
+      try {
+        userLevel = await getLevel(userId, ideaId);
+      } catch {
+        return res.status(403).json({ error: 'Insufficient permissions to upload' });
+      }
+    }
+
+    // allow collaborators to upload at any level (public = 0, protected = 1, private = 2)
+    if (!isOwner && userLevel == null) {
+      return res.status(403).json({ error: 'Only collaborators or owner can upload files' });
+    }
 
     const uniqueName = `${uuidv4()}_${file.name}`;
     const params = {
@@ -33,13 +50,7 @@ const uploadFile = async (req, res) => {
       ContentType: file.mimetype,
     };
 
-    let result;
-    try {
-      result = await s3.upload(params).promise();
-    } catch (uploadError) {
-      console.error("❌ S3 Upload error:", uploadError);
-      return res.status(500).json({ error: "Failed to upload file to S3." });
-    }
+    const result = await s3.upload(params).promise();
 
     const saved = await File.create({
       name: file.name,
@@ -57,6 +68,7 @@ const uploadFile = async (req, res) => {
     res.status(500).json({ error: err.message });
   }
 };
+
 
 // Delete a file
 const deleteFile = async (req, res) => {
@@ -92,20 +104,41 @@ const deleteFile = async (req, res) => {
   }
 };
 
-// Get all files for an idea
 const getFiles = async (req, res) => {
   try {
     const ideaId = req.query.idea_id;
     const userId = req.user?.sub;
 
+    const idea = await Idea.getIdeaById(ideaId);
+    if (!idea) {
+      return res.status(404).json({ error: "Idea not found" });
+    }
+
+    const isOwner = idea.user_id === userId;
     const files = await File.getAll(ideaId);
 
-    const sanitizedFiles = files.map(file => {
-      const isOwner = file.user_id === userId;
-      const isPublic = file.is_public === true || file.is_public === "true";
-      const isLocked = !isPublic && !isOwner;
+    // Determine the user's permission level (if not owner)
+    let userLevel = null;
+    if (!isOwner) {
+      try {
+        userLevel = await getLevel(userId, ideaId); // '0' | '1' | '2'
+      } catch {
+        userLevel = null;
+      }
+    }
 
-      if (isLocked) {
+    const filteredFiles = files.map((file) => {
+      const fileLevel = file.is_public === "public"
+        ? 0
+        : file.is_public === "protected"
+        ? 1
+        : 2;
+
+      const canView = isOwner || (userLevel !== null && canAccess(fileLevel, userLevel));
+
+      if (canView) {
+        return { ...file, is_locked: false };
+      } else {
         const {
           id, name, type, idea_id, parent_id, user_id,
           mime_type, created_at, updated_at, is_public
@@ -125,21 +158,16 @@ const getFiles = async (req, res) => {
           is_locked: true
         };
       }
-
-      return {
-        ...file,
-        is_locked: false
-      };
     });
 
-    res.json(sanitizedFiles);
+    res.json(filteredFiles);
   } catch (err) {
     console.error("❌ Error in getFiles:", err);
     res.status(500).json({ error: err.message });
   }
 };
 
-// Get file by ID
+
 const getFileById = async (req, res) => {
   try {
     const file = await File.getById(req.params.id);
@@ -147,25 +175,40 @@ const getFileById = async (req, res) => {
 
     const userId = req.user?.sub;
     const isOwner = file.user_id === userId;
-    const isPublic = file.is_public === true || file.is_public === "true";
 
-    if (file.type === "upload" && file.path) {
-      const key = path.basename(file.path);
-
-      if (isPublic || isOwner) {
-        const signedUrl = s3.getSignedUrl("getObject", {
-          Bucket: BUCKET_NAME,
-          Key: key,
-          Expires: 60 * 5,
-        });
-        file.path = signedUrl;
-      } else {
-        delete file.path;
+    let userLevel = null;
+    if (!isOwner) {
+      try {
+        userLevel = await getLevel(userId, file.idea_id);
+      } catch {
+        userLevel = null;
       }
     }
 
-    if (!isPublic && !isOwner && file.type === 'text') {
+    const fileLevel = file.is_public === "public" ? 0
+                    : file.is_public === "protected" ? 1
+                    : 2;
+
+    const canView = isOwner || (userLevel !== null && canAccess(fileLevel, userLevel));
+
+    if (!canView) {
+      return res.status(403).json({ error: "You do not have access to this file." });
+    }
+
+    // Lock file content if not owner and it's a text file
+    if (!isOwner && file.type === 'text') {
       delete file.content;
+    }
+
+    // For uploads, provide a signed URL only if access is granted
+    if (file.type === "upload" && file.path) {
+      const key = path.basename(file.path);
+      const signedUrl = s3.getSignedUrl("getObject", {
+        Bucket: BUCKET_NAME,
+        Key: key,
+        Expires: 60 * 5,
+      });
+      file.path = signedUrl;
     }
 
     res.json(file);
@@ -175,14 +218,27 @@ const getFileById = async (req, res) => {
   }
 };
 
+
 // Create a new file
 const createFile = async (req, res) => {
   try {
     const { name, type, idea_id, parent_id, content } = req.body;
     const user_id = req.user?.sub;
-
     if (!name || !type || !idea_id) {
       return res.status(400).json({ error: 'Missing required fields' });
+    }
+
+    const idea = await Idea.getIdeaById(idea_id);
+    if (!idea) return res.status(404).json({ error: "Idea not found" });
+
+    const isOwner = idea.user_id === user_id;
+    let userLevel = null;
+    if (!isOwner) {
+      try {
+        userLevel = await getLevel(user_id, idea_id);
+      } catch {
+        return res.status(403).json({ error: 'Insufficient permissions to create files' });
+      }
     }
 
     const file = await File.create({
@@ -192,6 +248,7 @@ const createFile = async (req, res) => {
       parent_id,
       user_id,
       content,
+      is_public: isOwner ? 'private' : (userLevel === 0 ? 'public' : userLevel === 1 ? 'protected' : 'private')
     });
 
     res.status(201).json(file);
@@ -231,7 +288,6 @@ const updateFile = async (req, res) => {
   }
 };
 
-// Stream file from S3
 const streamFile = async (req, res) => {
   try {
     const file = await File.getById(req.params.id);
@@ -242,10 +298,24 @@ const streamFile = async (req, res) => {
     }
 
     const isOwner = file.user_id === userId;
-    const isPublic = file.is_public === true || file.is_public === "true";
 
-    if (!isOwner && !isPublic) {
-      return res.status(403).json({ error: "You do not have access to this file." });
+    let userLevel = null;
+    if (!isOwner) {
+      try {
+        userLevel = await getLevel(userId, file.idea_id);
+      } catch {
+        userLevel = null;
+      }
+    }
+
+    const fileLevel = file.is_public === "public" ? 0
+                    : file.is_public === "protected" ? 1
+                    : 2;
+
+    const canStream = isOwner || (userLevel !== null && canAccess(fileLevel, userLevel));
+
+    if (!canStream) {
+      return res.status(403).json({ error: "You do not have access to stream this file." });
     }
 
     const key = path.basename(file.path);
@@ -262,6 +332,7 @@ const streamFile = async (req, res) => {
     res.status(500).json({ error: "Failed to stream file." });
   }
 };
+
 
 // Move file to a different parent folder
 const moveFile = async (req, res) => {

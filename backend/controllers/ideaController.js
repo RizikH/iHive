@@ -1,5 +1,6 @@
 const Idea = require("../models/Idea");
 const supabase = require("../config/db");
+const { getLevel } = require("../utils/getLevel");
 
 // ✅ GET /api/ideas
 const getAllIdeas = async (req, res) => {
@@ -11,19 +12,29 @@ const getAllIdeas = async (req, res) => {
     }
 };
 
-// ✅ GET /api/ideas/:id
 const getIdeaById = async (req, res) => {
-
     try {
         const idea = await Idea.getIdeaById(req.params.id);
-        if (!idea) {
-            return res.status(404).json({ message: "Idea not found" });
+        if (!idea) return res.status(404).json({ message: "Idea not found" });
+
+        const userId = req.user?.sub;
+        const isOwner = idea.user_id === userId;
+
+        if (!isOwner) {
+            try {
+                await getLevel(userId, idea.id); // Just check if collaborator exists
+            } catch {
+                return res.status(403).json({ error: "You do not have access to this idea." });
+            }
         }
+
         res.json(idea);
     } catch (error) {
+        console.error("❌ Error getting idea:", error.message);
         res.status(500).json({ error: error.message });
     }
 };
+
 
 const createIdea = async (req, res) => {
     try {
