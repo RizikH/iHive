@@ -133,6 +133,8 @@ const getFiles = async (req, res) => {
         : file.is_public === "protected"
           ? 1
           : 2;
+          ? 1
+          : 2;
 
       const canView = isOwner || (userLevel !== null && canAccess(fileLevel, userLevel));
 
@@ -186,6 +188,8 @@ const getFileById = async (req, res) => {
     }
 
     const fileLevel = file.is_public === "public" ? 0
+      : file.is_public === "protected" ? 1
+        : 2;
       : file.is_public === "protected" ? 1
         : 2;
 
@@ -311,6 +315,8 @@ const streamFile = async (req, res) => {
     const fileLevel = file.is_public === "public" ? 0
       : file.is_public === "protected" ? 1
         : 2;
+      : file.is_public === "protected" ? 1
+        : 2;
 
     const canStream = isOwner || (userLevel !== null && canAccess(fileLevel, userLevel));
 
@@ -355,7 +361,6 @@ const moveFile = async (req, res) => {
   }
 };
 
-
 const getPublicFiles = async (req, res) => {
   try {
     const ideaId = req.query.idea_id;
@@ -397,6 +402,7 @@ const getPublicFiles = async (req, res) => {
     res.status(500).json({ error: err.message });
   }
 };
+
 module.exports = {
   uploadFile,
   deleteFile,
@@ -407,4 +413,5 @@ module.exports = {
   streamFile,
   moveFile,
   getPublicFiles
+  getPublicFiles,
 };

@@ -3,7 +3,7 @@ import InvestorClient from "./InvestorClient";
 
 export default function InvestorPageWrapper() {
   return (
-    <Suspense fallback={<div>Loading investor dashboard...</div>}>
+    <Suspense fallback={<div>Loading...</div>}>
       <InvestorClient />
     </Suspense>
   );

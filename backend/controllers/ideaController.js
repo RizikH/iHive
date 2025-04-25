@@ -35,6 +35,18 @@ const getIdeaById = async (req, res) => {
     }
 };
 
+const getPublicIdeaById = async (req, res) => {
+    try {
+        const idea = await Idea.getIdeaById(req.query.id);
+        if (!idea) return res.status(404).json({ message: "Idea not found" });
+
+        res.json(idea);
+    } catch (error) {
+        console.error("❌ Error getting idea:", error.message);
+        res.status(500).json({ error: error.message });
+    }
+};
+
 
 const createIdea = async (req, res) => {
     try {
@@ -160,5 +172,6 @@ module.exports = {
     updateIdea,
     deleteIdea,
     searchIdeasByTitle,
-    advancedSearchTags
+    advancedSearchTags,
+    getPublicIdeaById,
 };

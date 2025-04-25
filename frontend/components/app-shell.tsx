@@ -5,7 +5,7 @@ import ChatWidget from "./chat-widget";
 import { useAuthStore } from "@/app/stores/useAuthStore";
 
 export default function AppShell({ children }: { children: React.ReactNode }) {
-  const setAuthenticated = useAuthStore((state) => state.setAuthenticated);
+  const setAuthenticated = useAuthStore((state: any) => state.setAuthenticated);
 
   useEffect(() => {
     const savedUser = sessionStorage.getItem("auth_user");

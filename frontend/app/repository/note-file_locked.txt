@@ -1,0 +1,66 @@
+Note for repository: file.is_locked functionality.
+This file can be deleted when the functionality is completed. 
+
+1. In the file tree:
+  - Locked files are displayed in grey with a lock icon
+  - Locked files cannot be clicked, selected, or dragged
+  - Users cannot delete locked files
+  - Users cannot upload or create files inside locked folders
+2. In the file editor:
+  - The edit button is hidden for locked files
+  - Locked files display a lock icon next to their name
+  - A message is displayed to indicate that the file is locked and cannot be edited
+3. Added CSS styles:
+  - For locked items in the file tree
+  - For the lock icon and locked file message in the editor
+
+
+Database returns: 
+
+Filtered files: [
+  {
+    id: '3afe7ea9-786d-44cb-acf8-d9af1b1d2e04',
+    idea_id: 29,
+    parent_id: null,
+    user_id: '2625c67a-06c1-462c-8f92-6703f38e092e',
+    name: 'Progress',
+    type: 'folder',
+    content: null,
+    path: null,
+    mime_type: null,
+    created_at: '2025-04-24T16:46:18.156944',
+    is_public: false,
+    permission_level: 'private',
+    is_locked: false
+  },
+  {
+    id: '8d69e711-e0c0-451e-8a18-1d12deecb332',
+    idea_id: 29,
+    parent_id: '3afe7ea9-786d-44cb-acf8-d9af1b1d2e04',
+    user_id: '2625c67a-06c1-462c-8f92-6703f38e092e',
+    name: 'Latest README.md',
+    type: 'folder',
+    content: null,
+    path: null,
+    mime_type: null,
+    created_at: '2025-04-24T16:46:32.384327',
+    is_public: false,
+    permission_level: 'private',
+    is_locked: false
+  },
+  {
+    id: 'c1050472-38d7-4b1e-b571-8a42461b414d',
+    idea_id: 29,
+    parent_id: '8d69e711-e0c0-451e-8a18-1d12deecb332',
+    user_id: '2625c67a-06c1-462c-8f92-6703f38e092e',
+    name: 'README.md',
+    type: 'upload',
+    content: null,
+    path: 'https://ihive-uploads.s3.us-east-2.amazonaws.com/40cd44f4-0e7c-4e51-b3a8-feffd6e61a40_README.md',
+    mime_type: 'application/octet-stream',
+    created_at: '2025-04-24T16:46:38.848877',
+    is_public: false,
+    permission_level: 'private',
+    is_locked: false
+  }
+]

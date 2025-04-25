@@ -80,7 +80,7 @@ const FileTree = ({ files, onSelect, onRefresh, selectedId, ideaId }: FileTreePr
   }, [files]);
 
   // REMOVE the global click outside listener that was causing issues
-  // We'll handle deselection only when clicking on empty areas of the tree
+  // Handle deselection only when clicking on empty areas of the tree
 
   const selectedFile = files.find((f) => f.id === selectedId) || null;
 
@@ -93,6 +93,15 @@ const FileTree = ({ files, onSelect, onRefresh, selectedId, ideaId }: FileTreePr
     const parentId = selectedFile && selectedFile.type === "folder"
       ? selectedFile.id
       : null;
+
+    // Check if parent folder is locked
+    if (parentId) {
+      const parentFolder = files.find(f => f.id === parentId);
+      if (parentFolder?.is_locked) {
+        alert("Cannot create files in a locked folder.");
+        return;
+      }
+    }
 
     const name = prompt(`Enter ${type} name:`);
     if (!name) return;
@@ -125,6 +134,15 @@ const FileTree = ({ files, onSelect, onRefresh, selectedId, ideaId }: FileTreePr
       ? selectedFile.id
       : null;
 
+    // Check if parent folder is locked
+    if (parentId) {
+      const parentFolder = files.find(f => f.id === parentId);
+      if (parentFolder?.is_locked) {
+        alert("Cannot upload files to a locked folder.");
+        return;
+      }
+    }
+
     const formData = new FormData();
     formData.append("file", file);
     formData.append("name", file.name);
@@ -146,6 +164,13 @@ const FileTree = ({ files, onSelect, onRefresh, selectedId, ideaId }: FileTreePr
   };
 
   const handleDelete = async (fileId: string) => {
+    // Check if file is locked
+    const fileToDelete = files.find(f => f.id === fileId);
+    if (fileToDelete?.is_locked) {
+      alert("Cannot delete a locked file.");
+      return;
+    }
+
     const confirmDelete = confirm("Are you sure you want to delete this file?");
     if (!confirmDelete) return;
     try {
@@ -246,19 +271,22 @@ const FileTree = ({ files, onSelect, onRefresh, selectedId, ideaId }: FileTreePr
       <div
         key={item.id}
         className={`${styles.treeItem} ${selectedId === item.id ? styles.selected : ""} ${dropTarget === item.id ? styles.dropTarget : ""}`}
-        draggable={!isPreviewMode}
-        onDragStart={(e) => handleDragStart(e, item.id)}
+        draggable={!isPreviewMode && !item.is_locked}
+        onDragStart={(e) => !item.is_locked && handleDragStart(e, item.id)}
         onDragOver={(e) => handleDragOver(e, item.id, item.type)}
         onDragLeave={handleDragLeave}
         onDrop={(e) => handleDrop(e, item.id)}
       >
         <div
-          className={styles.fileItem}
+          className={`${styles.fileItem} ${item.is_locked ? styles.lockedItem : ''}`}
           onClick={(e) => {
             e.stopPropagation();
-            onSelect(item);
-            if (item.type === "folder") {
-              toggleExpand(item.id);
+            // Only allow selection of non-locked files
+            if (!item.is_locked) {
+              onSelect(item);
+              if (item.type === "folder") {
+                toggleExpand(item.id);
+              }
             }
           }}
         >
@@ -268,7 +296,10 @@ const FileTree = ({ files, onSelect, onRefresh, selectedId, ideaId }: FileTreePr
               <span
                 onClick={(e) => {
                   e.stopPropagation();
-                  toggleExpand(item.id);
+                  // Only toggle expansion of non-locked folders
+                  if (!item.is_locked) {
+                    toggleExpand(item.id);
+                  }
                 }}
                 className={styles.toggleIcon}
               >
@@ -290,7 +321,7 @@ const FileTree = ({ files, onSelect, onRefresh, selectedId, ideaId }: FileTreePr
           </div>
 
 
-          {!isPreviewMode && selectedId === item.id && (
+          {!isPreviewMode && selectedId === item.id && !item.is_locked && (
             <button
               onClick={(e) => {
                 e.stopPropagation();

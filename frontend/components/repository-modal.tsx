@@ -40,7 +40,7 @@ const RepositoryModal = ({
   const fetchRepoDetails = useCallback(async () => {
     try {
       setError(null);
-      const ideaData = await fetcher(`/ideas/search/id/${repoId}`);
+      const ideaData = await fetcher(`/ideas/public?id=${repoId}`, 'GET');
       if (!ideaData) throw new Error("Failed to load repository details");
       setRepoDetails(ideaData);
       return ideaData;
@@ -58,6 +58,10 @@ const RepositoryModal = ({
       if (!filesData) throw new Error("Failed to load files data");
 
       setFiles(filesData);
+      const filesData = await fetcher(`/files/public?idea_id=${repoId}`, 'GET');
+      if (!filesData) throw new Error("Failed to load files data");
+  
+      setFiles(filesData);
       return filesData;
     } catch (err) {
       console.error("Error fetching files:", err);
@@ -65,6 +69,7 @@ const RepositoryModal = ({
       return [];
     }
   }, [repoId]);
+  
 
   useEffect(() => {
     if (isOpen && repoId) {

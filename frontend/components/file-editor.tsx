@@ -9,7 +9,8 @@ import {
   FiDownload, 
   FiEdit, 
   FiSave, 
-  FiX 
+  FiX,
+  FiLock
 } from "react-icons/fi";
 
 type Props = {
@@ -117,7 +118,14 @@ const FileEditor = ({ file, onUpdate }: Props) => {
     <div className={styles.editorWrapper}>
       <div className={styles.editorToolbar}>
         <div className={styles.editorInfo}>
-          <span className={styles.filename}>{file.name}</span>
+          <span className={styles.filename}>
+            {file.name} 
+            {file.is_locked && (
+              <span className={styles.lockIcon} title="This file is locked and cannot be edited">
+                <FiLock />
+              </span>
+            )}
+          </span>
           <span className={styles.filesize}>{content.length} bytes</span>
         </div>
         
@@ -138,13 +146,15 @@ const FileEditor = ({ file, onUpdate }: Props) => {
               >
                 <FiDownload /> Download
               </button>
-              <button 
-                className={styles.toolbarButton}
-                onClick={() => setIsEditing(true)}
-                title="Edit file"
-              >
-                <FiEdit /> Edit
-              </button>
+              {!file.is_locked && (
+                <button 
+                  className={styles.toolbarButton}
+                  onClick={() => setIsEditing(true)}
+                  title="Edit file"
+                >
+                  <FiEdit /> Edit
+                </button>
+              )}
             </>
           ) : (
             <>
@@ -168,7 +178,7 @@ const FileEditor = ({ file, onUpdate }: Props) => {
         </div>
       </div>
       
-      {isEditing ? (
+      {isEditing && !file.is_locked ? (
         <textarea
           ref={editorRef as React.RefObject<HTMLTextAreaElement>}
           className={styles.editableContent}
@@ -199,6 +209,12 @@ const FileEditor = ({ file, onUpdate }: Props) => {
               <p>Select or create a file to begin editing.</p>
             </div>
           )}
+        </div>
+      )}
+      
+      {file.is_locked && (
+        <div className={styles.lockedFileMessage}>
+          <FiLock /> This file is locked and cannot be edited
         </div>
       )}
     </div>
