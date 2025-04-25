@@ -1,10 +1,10 @@
 "use client";
 
-import { useEffect, useRef, useState } from 'react';
-import io, { Socket } from 'socket.io-client';
-import { fetcher } from '@/app/utils/fetcher';
-import { useAuthStore } from '@/app/stores/useAuthStore';
-import Image from 'next/image';
+import { useEffect, useRef, useState } from "react";
+import io, { Socket } from "socket.io-client";
+import { fetcher } from "@/app/utils/fetcher";
+import { useAuthStore } from "@/app/stores/useAuthStore";
+import Image from "next/image";
 
 let socket: Socket | null = null;
 
@@ -27,26 +27,24 @@ type ChatWindow = {
 };
 
 export default function ChatWidget() {
-  const isAuthenticated = useAuthStore(state => state.isAuthenticated);
-  const currentUser = useAuthStore(state => state.currentUser);
-
+  const isAuthenticated = useAuthStore((state) => state.isAuthenticated);
+  const currentUser = useAuthStore((state) => state.currentUser);
 
   const [openChats, setOpenChats] = useState<ChatWindow[]>([]);
   const [chatMenuOpen, setChatMenuOpen] = useState(false);
-  const [searchQuery, setSearchQuery] = useState('');
+  const [searchQuery, setSearchQuery] = useState("");
   const [searchResults, setSearchResults] = useState<any[]>([]);
+  const [existingContacts, setExistingContacts] = useState<any[]>([]);
 
   const audioRef = useRef<HTMLAudioElement | null>(null);
   const messageEndRefs = useRef<{ [key: string]: HTMLDivElement | null }>({});
   const inputRefs = useRef<{ [key: string]: HTMLInputElement | null }>({});
-
-  const [existingContacts, setExistingContacts] = useState<any[]>([]);
-
   const connectedRef = useRef(false);
 
+  // Fetch contacts
   useEffect(() => {
     if (!isAuthenticated || !currentUser.id) {
-      setOpenChats([]); // Reset chat windows
+      setOpenChats([]);
       return;
     }
 
@@ -55,61 +53,69 @@ export default function ChatWidget() {
         const contacts = await fetcher(`/chat/contacts/${currentUser.id}`);
         setExistingContacts(contacts);
       } catch (err) {
-        console.error('Failed to fetch contacts:', err);
+        console.error("Failed to fetch contacts:", err);
       }
     };
 
     fetchExistingContacts();
   }, [currentUser.id, isAuthenticated]);
 
-
+  // Init socket and events
   useEffect(() => {
-    if (!isAuthenticated) return;
+    if (!isAuthenticated || !currentUser?.id) return;
+
     if (!socket && !connectedRef.current) {
       const socketUrl =
-        process.env.NODE_ENV === 'production'
-          ? 'https://ihive.onrender.com'
-          : 'http://localhost:5000';
+        process.env.NODE_ENV === "production"
+          ? "https://ihive.onrender.com"
+          : "http://localhost:5000";
 
       socket = io(socketUrl, {
-        transports: ['websocket'], // fallback to polling if needed
+        transports: ["websocket"],
         withCredentials: true,
       });
 
       connectedRef.current = true;
-    }
 
+      // 🔁 Re-join all rooms on connection
+      socket.on("connect", () => {
+        openChats.forEach((chat) => {
+          socket?.emit("joinRoom", {
+            roomId: chat.id,
+            userId: currentUser.id,
+          });
+        });
+      });
+    }
 
     const handleMessage = (msg: Message) => {
       if (msg.sender_id === currentUser.id) return;
 
-      // Play sound for every incoming message
       if (audioRef.current) {
-        audioRef.current.play().catch(() => { });
+        audioRef.current.play().catch(() => {});
       }
 
-      setOpenChats(prev => {
-        const exists = prev.find(chat => chat.id === msg.roomId);
-
+      setOpenChats((prev) => {
+        const exists = prev.find((chat) => chat.id === msg.roomId);
         if (exists) {
-          return prev.map(chat =>
+          return prev.map((chat) =>
             chat.id === msg.roomId
               ? { ...chat, messages: [...chat.messages, msg], typing: false }
               : chat
           );
         }
 
-        // If room hasn't been opened yet, join it
-        socket?.emit('joinRoom', { roomId: msg.roomId, userId: currentUser.id });
+        socket?.emit("joinRoom", {
+          roomId: msg.roomId,
+          userId: currentUser.id,
+        });
 
-        // Create a new minimized chat window
         return [
           ...prev,
           {
             id: msg.roomId!,
-
             username: msg.senderName,
-            avatar: msg.senderAvatar || '/Images/sample.jpeg',
+            avatar: msg.senderAvatar || "/Images/sample.jpeg",
             minimized: true,
             messages: [msg],
             typing: false,
@@ -118,35 +124,40 @@ export default function ChatWidget() {
       });
     };
 
-
-    const handleTyping = ({ roomId, senderId }: { roomId: string; senderId: string }) => {
+    const handleTyping = ({
+      roomId,
+      senderId,
+    }: {
+      roomId: string;
+      senderId: string;
+    }) => {
       if (senderId === currentUser.id) return;
 
-      setOpenChats(prev =>
-        prev.map(chat =>
+      setOpenChats((prev) =>
+        prev.map((chat) =>
           chat.id === roomId ? { ...chat, typing: senderId } : chat
         )
       );
 
       setTimeout(() => {
-        setOpenChats(prev =>
-          prev.map(chat =>
+        setOpenChats((prev) =>
+          prev.map((chat) =>
             chat.id === roomId ? { ...chat, typing: undefined } : chat
           )
         );
       }, 2000);
     };
 
-    socket?.on('message', handleMessage);
-    socket?.on('typing', handleTyping);
+    socket?.on("message", handleMessage);
+    socket?.on("typing", handleTyping);
 
     return () => {
-      socket?.off('message', handleMessage);
-      socket?.off('typing', handleTyping);
+      socket?.off("message", handleMessage);
+      socket?.off("typing", handleTyping);
     };
-  }, [currentUser.id, isAuthenticated]);
+  }, [isAuthenticated, currentUser.id, openChats]);
 
-  // Clean up on logout
+  // Disconnect on logout
   useEffect(() => {
     if (!isAuthenticated) {
       if (socket) {
@@ -160,25 +171,27 @@ export default function ChatWidget() {
     }
   }, [isAuthenticated]);
 
-
+  // Scroll to latest message
   useEffect(() => {
-    openChats.forEach(chat => {
+    openChats.forEach((chat) => {
       const ref = messageEndRefs.current[chat.id];
-      if (ref) ref.scrollIntoView({ behavior: 'smooth' });
+      if (ref) ref.scrollIntoView({ behavior: "smooth" });
     });
   }, [openChats]);
 
+  // Search users
   useEffect(() => {
     const fetchResults = async () => {
-      if (!searchQuery.trim() || !currentUser.id) return setSearchResults([]);
+      if (!searchQuery.trim() || !currentUser.id)
+        return setSearchResults([]);
       try {
-        const users = await fetcher('/users/all', 'POST', {
+        const users = await fetcher("/users/all", "POST", {
           query: searchQuery,
           excludeId: currentUser.id,
         });
         setSearchResults(users);
       } catch (err) {
-        console.error('Search error:', err);
+        console.error("Search error:", err);
       }
     };
 
@@ -187,24 +200,32 @@ export default function ChatWidget() {
   }, [searchQuery, currentUser.id]);
 
   const getReceiverFromRoom = async (roomId: string, userId: string) => {
-    const receiver = await fetcher(`/chat/${roomId}/receiver?userId=${userId}`);
+    const receiver = await fetcher(
+      `/chat/${roomId}/receiver?userId=${userId}`
+    );
     return receiver[0];
   };
 
-  const openChat = async (user: { id: string; username: string; avatar: string }) => {
-    const room = await fetcher('/chat/get-dm-room', 'POST', {
+  const openChat = async (user: {
+    id: string;
+    username: string;
+    avatar: string;
+  }) => {
+    const room = await fetcher("/chat/get-dm-room", "POST", {
       user1: currentUser.id,
       user2: user.id,
     });
-    const roomId = room.id;
-    if (openChats.some(c => c.id === roomId)) return;
 
-    socket?.emit('joinRoom', { roomId, userId: currentUser.id });
+    const roomId = room.id;
+    if (openChats.some((c) => c.id === roomId)) return;
+
+    socket?.emit("joinRoom", { roomId, userId: currentUser.id });
+
     const messages = await fetcher(`/chat/${roomId}/messages`);
     const receiver = await getReceiverFromRoom(roomId, currentUser.id);
 
-    setOpenChats(prev => [
-      ...prev.map(c => ({ ...c, minimized: true })),
+    setOpenChats((prev) => [
+      ...prev.map((c) => ({ ...c, minimized: true })),
       {
         id: roomId,
         username: receiver.username,
@@ -218,6 +239,8 @@ export default function ChatWidget() {
   const sendMessage = async (chatId: string, content: string) => {
     if (!content.trim()) return;
 
+    socket?.emit("joinRoom", { roomId: chatId, userId: currentUser.id }); // 🔁
+
     const msg: Message = {
       sender_id: currentUser.id,
       senderName: currentUser.username,
@@ -226,32 +249,33 @@ export default function ChatWidget() {
       roomId: chatId,
     };
 
-    socket?.emit('joinRoom', { roomId: chatId, userId: currentUser.id });
-    socket?.emit('message', msg);
+    socket?.emit("message", msg);
 
-    setOpenChats(prev =>
-      prev.map(chat =>
-        chat.id === chatId ? { ...chat, messages: [...chat.messages, msg] } : chat
+    setOpenChats((prev) =>
+      prev.map((chat) =>
+        chat.id === chatId
+          ? { ...chat, messages: [...chat.messages, msg] }
+          : chat
       )
     );
 
     try {
-      await fetcher('/chat/send', 'POST', {
+      await fetcher("/chat/send", "POST", {
         roomId: chatId,
         senderId: currentUser.id,
         content,
       });
     } catch (err) {
-      console.error('Failed to save message:', err);
+      console.error("Failed to save message:", err);
     }
   };
 
   const handleTyping = (chatId: string) => {
-    socket?.emit('typing', { roomId: chatId, userId: currentUser.id });
+    socket?.emit("typing", { roomId: chatId, userId: currentUser.id });
   };
 
   if (!isAuthenticated) return null;
-
+  
   return (
     <div className="fixed bottom-4 right-4 z-50 flex flex-row-reverse items-end gap-2">
       <audio ref={audioRef} src="/media/notification.mp3" preload="auto" />
