@@ -1,52 +1,35 @@
 import React, { useState, useEffect } from 'react';
 import styles from '@/app/styles/setting.module.css';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { 
-    faUser, 
-    faEnvelope, 
-    faBriefcase, 
-    faCode 
+import { useAuthStore } from '@/app/stores/useAuthStore';
+import {
+    faUser,
+    faEnvelope,
+    faCalendar
 } from '@fortawesome/free-solid-svg-icons';
-
-// =============================================
-// Basic Information Component
-// =============================================
+import { fetcher } from '@/app/utils/fetcher';
 
 const BasicInfo = () => {
-    // =============================================
-    // State Management
-    // =============================================
+    const currentUser = useAuthStore((state) => state.currentUser);
+
     const [formData, setFormData] = useState({
-        fullName: '',
-        jobTitle: '',
-        skills: '',
-        bio: ''
+        username: '',
+        email: '',
+        created_at: '',
+        bio: '',
     });
     const [successMessage, setSuccessMessage] = useState('');
     const [errorMessage, setErrorMessage] = useState('');
     const [loading, setLoading] = useState(false);
 
-    // =============================================
-    // Effects
-    // =============================================
     useEffect(() => {
-        // Load user profile data from localStorage
-        const fullName = localStorage.getItem('fullName');
-        const jobTitle = localStorage.getItem('jobTitle');
-        const skills = localStorage.getItem('skills');
-        const bio = localStorage.getItem('bio');
-        
-        setFormData({
-            fullName: fullName || '',
-            jobTitle: jobTitle || '',
-            skills: skills || '',
-            bio: bio || ''
-        });
-    }, []);
+        const username = currentUser?.username || '';
+        const bio = localStorage.getItem('bio') || '';
+        const email = currentUser?.email || '';
+        const created_at = currentUser?.created_at || '';
+        setFormData({ username, bio, email, created_at });
+    }, [currentUser]);
 
-    // =============================================
-    // Event Handlers
-    // =============================================
     const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
         const { name, value } = e.target;
         setFormData(prev => ({
@@ -55,117 +38,88 @@ const BasicInfo = () => {
         }));
     };
 
-    const handleSubmit = async (e: React.FormEvent) => {
+    const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
         e.preventDefault();
-        setSuccessMessage('');
-        setErrorMessage('');
-        
+        setLoading(true);
         try {
-            setLoading(true);
-            
-            // Save all profile data to localStorage
-            Object.entries(formData).forEach(([key, value]) => {
-                if (value) {
-                    localStorage.setItem(key, value);
-                }
+            const res = await fetcher(`/users/update/`, 'PUT', {
+                bio: formData.bio,
             });
-            
-            setSuccessMessage('Profile information updated successfully!');
-            
-            // In a real app, you would save to the database here
-            // For example:
-            // await fetch('/api/profile', {
-            //   method: 'PUT',
-            //   headers: { 'Content-Type': 'application/json' },
-            //   body: JSON.stringify(formData)
-            // });
-            
-            // Refresh the page after a short delay to show updated info everywhere
-            setTimeout(() => {
-                window.location.reload();
-            }, 1500);
+
+            if (!res) {
+                throw new Error('Failed to update user information');
+            }
+            setSuccessMessage('User information updated successfully!');
             
         } catch (error) {
-            setErrorMessage('Failed to update profile information');
-            console.error('Error updating profile:', error);
-        } finally {
+            console.error('Error updating user:', error);
+            setErrorMessage('Failed to update user information. Please try again.');
+        }
+        finally {
             setLoading(false);
         }
-    };
+    }
 
     return (
         <div className={styles.settingSection}>
             <h2>Basic Information</h2>
-            
+
             {successMessage && (
                 <div className={styles.successMessage}>{successMessage}</div>
             )}
-            
+
             {errorMessage && (
                 <div className={styles.errorMessage}>{errorMessage}</div>
             )}
-            
+
             <form onSubmit={handleSubmit}>
-                {/*Personal Details Section*/}
+                {/* Username */}
                 <div className={styles.formGroup}>
-                    <label>
+                    <label className={styles.formLabel}>
                         <FontAwesomeIcon icon={faUser} className={styles.icon} />
-                        Full Name
+                        <span className={styles.labelText}>Username:</span>
                     </label>
-                    <input 
-                        type="text" 
-                        name="fullName"
-                        value={formData.fullName}
-                        onChange={handleChange}
-                        placeholder={formData.fullName || "Enter your full name"} 
-                    />
+                    <span className={styles.formValue}>{formData.username}</span>
                 </div>
 
-                {/*Professional Information*/}
+                {/* Email (read-only) */}
                 <div className={styles.formGroup}>
-                    <label>
-                        <FontAwesomeIcon icon={faBriefcase} className={styles.icon} />
-                        Job Title
+                    <label className={styles.formLabel}>
+                        <FontAwesomeIcon icon={faEnvelope} className={styles.icon} />
+                        <span className={styles.labelText}>Email:</span>
                     </label>
-                    <input 
-                        type="text" 
-                        name="jobTitle"
-                        value={formData.jobTitle}
-                        onChange={handleChange}
-                        placeholder={formData.jobTitle || "Enter your job title"} 
-                    />
+                    <span className={styles.formValue}>{currentUser?.email || 'N/A'}</span>
                 </div>
 
+                {/* Date Joined (read-only) */}
                 <div className={styles.formGroup}>
-                    <label>
-                        <FontAwesomeIcon icon={faCode} className={styles.icon} />
-                        Skills
+                    <label className={styles.formLabel}>
+                        <FontAwesomeIcon icon={faCalendar} className={styles.icon} />
+                        <span className={styles.labelText}>Date Joined:</span>
                     </label>
-                    <input 
-                        type="text" 
-                        name="skills"
-                        value={formData.skills}
-                        onChange={handleChange}
-                        placeholder={formData.skills || "Enter your skills"} 
-                    />
+                    <span className={styles.formValue}>
+                        {currentUser?.created_at
+                            ? new Date(currentUser.created_at).toLocaleDateString()
+                            : 'N/A'}
+                    </span>
                 </div>
 
-                {/*Biography Section*/}
+                {/* Bio (editable) */}
                 <div className={styles.formGroup}>
                     <label>Bio</label>
-                    <textarea 
+                    <textarea
                         name="bio"
-                        value={formData.bio}
+                        value={currentUser.bio}
                         onChange={handleChange}
-                        placeholder={formData.bio || "Tell us about yourself"}
+                        placeholder="Tell us about yourself"
                         className={styles.textarea}
                         rows={4}
-                    ></textarea>
+                    />
                 </div>
 
-                {/*Form Submission*/}
-                <button 
-                    type="submit" 
+                {/* Submit */}
+                <button
+                    type="submit"
                     className={styles.saveButton}
                     disabled={loading}
                 >

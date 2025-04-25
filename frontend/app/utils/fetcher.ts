@@ -12,13 +12,17 @@ export const fetcher = async (
 ) => {
   const isFormData = body instanceof FormData;
 
-  const res = await fetch(`${API_URL}${path}`, {
+  const headers = isFormData
+    ? customHeaders
+    : {
+        "Content-Type": "application/json",
+        ...customHeaders,
+      };
+
+  const response = await fetch(`${API_URL}${path}`, {
     method,
-    headers: {
-      ...(isFormData ? {} : { "Content-Type": "application/json" }),
-      ...customHeaders,
-    },
-    credentials: "include",
+    headers,
+    credentials: "include", // includes cookies (for Supabase auth)
     body: body
       ? isFormData
         ? body
@@ -26,14 +30,21 @@ export const fetcher = async (
       : undefined,
   });
 
-  if (!res.ok) {
-    try {
-      const error = await res.json();
-      throw new Error(error.message || "Something went wrong");
-    } catch {
-      throw new Error("Something went wrong");
-    }
+  let data;
+
+  try {
+    data = responseType === "blob"
+      ? await response.blob()
+      : await response.json();
+  } catch (error) {
+    data = {
+      error: "Invalid server response",
+    };
   }
 
-  return responseType === "blob" ? res.blob() : res.json();
+  return {
+    ok: response.ok,
+    status: response.status,
+    data,
+  };
 };

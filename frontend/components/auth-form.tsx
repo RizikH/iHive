@@ -84,6 +84,9 @@ export const AuthForm = ({ initialView = "login", onClose }: AuthFormProps) => {
         username: currentUser.username,
         user_type: currentUser.user_type,
         avatar: currentUser.avatar || "https://avatar.vercel.sh/jack",
+        email: currentUser.email,
+        created_at: currentUser.created_at,
+        bio: currentUser.bio || "",
       };
 
       setAuthenticated(userData);

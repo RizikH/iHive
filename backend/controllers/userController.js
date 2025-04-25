@@ -158,12 +158,7 @@ const updateUser = async (req, res) => {
   }
 
   try {
-    const {
-      username,
-      email,
-      bio
-    } = req.body;
-    const updatedUser = await User.updateUser(userIdFromParams, username, email, bio);
+    const updatedUser = await User.updateUser(userIdFromParams, req.body);
     res.json(updatedUser);
   } catch (error) {
     res.status(500).json({
@@ -171,6 +166,62 @@ const updateUser = async (req, res) => {
     });
   }
 };
+
+// ✅ PUT /api/users/update/login/:id
+const updateUserLogin = async (req, res) => {
+  const userIdFromToken = req.user?.sub;
+  const userIdFromParams = req.body.id;
+
+  if (userIdFromToken !== userIdFromParams) {
+    return res.status(403).json({
+      error: "Forbidden: You can only update your own profile.",
+    });
+  }
+
+  const { currentPassword, newPassword, email } = req.body;
+
+  if (!currentPassword || !newPassword || !email) {
+    return res.status(400).json({
+      error: "Missing current password, new password, or email.",
+    });
+  }
+
+  try {
+    // Step 1: Try to re-authenticate with current password
+    const { error: loginError } = await supabase.auth.signInWithPassword({
+      email,
+      password: currentPassword,
+    });
+
+    if (loginError) {
+      return res.status(401).json({
+        error: "Current password is incorrect.",
+      });
+    }
+
+    // Step 2: Update the password
+    const { error: updateError } = await supabase.auth.updateUser({
+      password: newPassword,
+    });
+
+    if (updateError) {
+      return res.status(400).json({
+        error: updateError.message,
+      });
+    }
+
+    res.json({
+      message: "Password updated successfully.",
+    });
+  } catch (err) {
+    console.error("Error updating password:", err);
+    res.status(500).json({
+      error: err.message,
+    });
+  }
+};
+
+
 
 // ✅ DELETE /api/users/delete/:id
 const deleteUser = async (req, res) => {
@@ -209,4 +260,5 @@ module.exports = {
   updateUser,
   deleteUser,
   getUsersByQuery,
+  updateUserLogin,
 };

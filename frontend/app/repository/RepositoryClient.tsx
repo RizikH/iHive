@@ -50,7 +50,6 @@ export default function Repository() {
   useEffect(() => {
     const checkAuthAndOwnership = async () => {
       const currentUser = await isAuthenticated();
-      console.log("Current User:", currentUser);
 
       if (!currentUser) {
         router.push("/get-started");

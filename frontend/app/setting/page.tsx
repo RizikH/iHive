@@ -18,9 +18,12 @@ import '../styles/globals.css';
 import '@fortawesome/fontawesome-svg-core/styles.css';
 import { useAuthStore } from '@/app/stores/useAuthStore';
 
+
 const Setting = () => {
   const isAuthenticated = useAuthStore((state) => state.isAuthenticated);
+
   const router = useRouter();
+
 
   useEffect(() => {
     if (!isAuthenticated) {
@@ -44,7 +47,7 @@ const Setting = () => {
 
       <div className={styles.pageContainer}>
         {/* Shared NavBar */}
-        <NavBar title="iHive" />
+        <NavBar title="iHive - Settings" />
 
         <main className={styles.mainContainer}>
           {/* Settings Sidebar */}
