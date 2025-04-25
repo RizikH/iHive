@@ -16,6 +16,7 @@ router.use(authRateLimiter);
 
 // 🔓 Public Routes
 router.get("/", ideaController.getAllIdeas);
+router.get("/public", ideaController.getPublicIdeaById);
 router.get("/search/title/:title", authenticate, ideaController.searchIdeasByTitle);
 router.get("/search/id/:id", authenticate, ideaController.getIdeaById);
 router.post("/search/tags", authenticate, ideaController.advancedSearchTags);
