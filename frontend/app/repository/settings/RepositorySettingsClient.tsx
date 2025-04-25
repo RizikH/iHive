@@ -126,29 +126,6 @@ export default function RepositorySettingsClient() {
             })
             .finally(() => setLoading(false));
     }, [ideaId]);
-    
-    if (currentUser.id !== idea?.user_id) {
-        return (
-            <div className={styles.pageContainer}>
-                <NavBar
-                    title="iHive-Entrepreneur"
-                    links={[
-                        { href: "/entrepreneur", label: "Profile" },
-                        { href: "/setting", label: "Setting" },
-                        { href: "/sponsors", label: "Offers" },
-                        { href: "/get-started", label: "Sign Out" },
-                    ]}
-                />
-                <main className={styles.mainContent}>
-                    <h1>Unauthorized</h1>
-                    <p>You do not have permission to view this page.</p>
-                </main>
-                <Footer role="Entrepreneur" />
-            </div>
-        );
-    }
-
-
 
     if (!isAuthenticated) {
         return (

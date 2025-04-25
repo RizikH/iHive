@@ -50,9 +50,10 @@ const getUser = async (req, res) => {
 // ✅ POST /api/users/register
 const addUser = async (req, res) => {
   try {
-    const { username, email, password, bio, avatar } = req.body;
+    const { username, email, password, bio, avatar, userType } = req.body;
+    console.debug("addUser request body:", req.body);
 
-    if (!username || !email || !password) {
+    if (!username || !email || !password || !userType) {
       console.debug("Validation failed: Missing required fields");
       return res.status(400).json({ error: "Username, email, and password are required." });
     }
@@ -77,7 +78,6 @@ const addUser = async (req, res) => {
       return res.status(500).json({ error: "Signup succeeded but no user returned." });
     }
 
-
     // 2. Create user in public.users table
     await User.createUser({
       id: authUser.id,
@@ -85,6 +85,7 @@ const addUser = async (req, res) => {
       email: authUser.email,
       avatar: avatar || null,
       bio: bio || null,
+      user_type: userType,
     });
 
 

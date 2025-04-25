@@ -21,11 +21,11 @@ const getUserById = async (id) => {
 };
 
 const createUser = async (user) => {
-    const { username, email, bio, id } = user;
+    const { username, email, bio, id, user_type } = user;
 
     const { data, error } = await supabase
         .from("users")
-        .insert([{ id, username, email, bio }])
+        .insert([{ id, username, email, bio, user_type }])
         .select()
         .single();
 
