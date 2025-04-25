@@ -95,7 +95,6 @@ const InvestmentsTab = () => {
                 <tr key={investment.id}>
                   <td>
                     {investment.ideas?.title ? (
-
                       investment.status?.toLowerCase() !== "rejected" ? (
                         <a
                           href={`/repository?id=${investment.idea_id}`}
@@ -106,14 +105,6 @@ const InvestmentsTab = () => {
                       ) : (
                         <span className={styles.rejectedTitle}>{investment.ideas.title}</span>
                       )
-
-                      <a
-                        href={`/repository?id=${investment.idea_id}`}
-                        className={styles.linkTitle}
-                      >
-                        {investment.ideas.title}
-                      </a>
-
                     ) : (
                       "Unknown"
                     )}
