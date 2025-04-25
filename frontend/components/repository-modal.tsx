@@ -56,10 +56,6 @@ const RepositoryModal = ({
     try {
       const filesData = await fetcher(`/files/public?idea_id=${repoId}`, 'GET');
       if (!filesData) throw new Error("Failed to load files data");
-
-      setFiles(filesData);
-      const filesData = await fetcher(`/files/public?idea_id=${repoId}`, 'GET');
-      if (!filesData) throw new Error("Failed to load files data");
   
       setFiles(filesData);
       return filesData;

@@ -133,8 +133,6 @@ const getFiles = async (req, res) => {
         : file.is_public === "protected"
           ? 1
           : 2;
-          ? 1
-          : 2;
 
       const canView = isOwner || (userLevel !== null && canAccess(fileLevel, userLevel));
 
@@ -188,8 +186,6 @@ const getFileById = async (req, res) => {
     }
 
     const fileLevel = file.is_public === "public" ? 0
-      : file.is_public === "protected" ? 1
-        : 2;
       : file.is_public === "protected" ? 1
         : 2;
 
@@ -315,8 +311,6 @@ const streamFile = async (req, res) => {
     const fileLevel = file.is_public === "public" ? 0
       : file.is_public === "protected" ? 1
         : 2;
-      : file.is_public === "protected" ? 1
-        : 2;
 
     const canStream = isOwner || (userLevel !== null && canAccess(fileLevel, userLevel));
 
@@ -412,6 +406,5 @@ module.exports = {
   updateFile,
   streamFile,
   moveFile,
-  getPublicFiles
   getPublicFiles,
 };
