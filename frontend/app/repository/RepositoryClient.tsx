@@ -38,7 +38,7 @@ export default function Repository() {
       setLoading(true);
       const path = ideaId ? `/files?idea_id=${ideaId}` : "/files";
       const data = await fetcher(path);
-      setFiles(data);
+      setFiles(data.data);
     } catch (err) {
       console.error("Error fetching files:", err);
       setError(err instanceof Error ? err.message : "An unknown error occurred");
@@ -60,11 +60,11 @@ export default function Repository() {
 
       try {
         const idea = await fetcher(`/ideas/search/id/${ideaId}`);
-        console.log("idea.user_id type:", typeof idea.user_id);
-        console.log("idea.user_id:", idea.user_id);
+        console.log("idea.user_id type:", typeof idea.data.user_id);
+        console.log("idea.user_id:", idea.data.user_id);
         console.log("currentUser.id:", currentUser);
 
-        if (idea?.error === "You do not have access to this idea.") {
+        if (idea?.data.error === "You do not have access to this idea.") {
           setUnauthorized(true);
         } else {
           await fetchFiles();

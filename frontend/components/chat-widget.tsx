@@ -51,7 +51,7 @@ export default function ChatWidget() {
     const fetchExistingContacts = async () => {
       try {
         const contacts = await fetcher(`/chat/contacts/${currentUser.id}`);
-        setExistingContacts(contacts);
+        setExistingContacts(contacts.data);
       } catch (err) {
         console.error("Failed to fetch contacts:", err);
       }
@@ -189,7 +189,7 @@ export default function ChatWidget() {
           query: searchQuery,
           excludeId: currentUser.id,
         });
-        setSearchResults(users);
+        setSearchResults(users.data);
       } catch (err) {
         console.error("Search error:", err);
       }
@@ -203,7 +203,7 @@ export default function ChatWidget() {
     const receiver = await fetcher(
       `/chat/${roomId}/receiver?userId=${userId}`
     );
-    return receiver[0];
+    return receiver.data[0];
   };
 
   const openChat = async (user: {
@@ -216,7 +216,7 @@ export default function ChatWidget() {
       user2: user.id,
     });
 
-    const roomId = room.id;
+    const roomId = room.data.id;
     if (openChats.some((c) => c.id === roomId)) return;
 
     socket?.emit("joinRoom", { roomId, userId: currentUser.id });
@@ -231,7 +231,7 @@ export default function ChatWidget() {
         username: receiver.username,
         avatar: receiver.avatar,
         minimized: false,
-        messages: messages || [],
+        messages: Array.isArray(messages) ? messages : [],
       },
     ]);
   };

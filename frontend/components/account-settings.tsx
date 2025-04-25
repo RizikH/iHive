@@ -39,7 +39,7 @@ const AccountSettings = () => {
       username: username || '',
       email: email || ''
     }));
-  }, []);
+  }, [currentUser?.email, currentUser?.username]);
 
   // =============================================
   // Event Handlers

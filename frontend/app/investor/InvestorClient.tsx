@@ -78,8 +78,8 @@ const InvestorPage = () => {
         const fetchIdeas = async () => {
             try {
                 const data = await fetcher("/ideas");
-                setAllIdeas(data || []);
-                setIdeas(data || []);
+                setAllIdeas(data.data || []);
+                setIdeas(data.data || []);
             } catch (err: any) {
                 setErrorIdeas(err.message || "An unknown error occurred.");
             } finally {
@@ -99,7 +99,7 @@ const InvestorPage = () => {
 
             try {
                 const data = await fetcher(`/ideas/search/title/${encodeURIComponent(searchTerm)}`);
-                setIdeas(data || []);
+                setIdeas(data.data || []);
             } catch (err: any) {
                 setErrorIdeas(err.message || "An unknown error occurred.");
             }
@@ -114,8 +114,8 @@ const InvestorPage = () => {
         const fetchAllTags = async () => {
             try {
                 const data = await fetcher("/tags/all");
-                setAllTags(data || []);
-                setFilteredTags(data || []);
+                setAllTags(data.data || []);
+                setFilteredTags(data.data || []);
             } catch (err) {
                 console.error("Error fetching tags:", err);
             }

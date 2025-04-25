@@ -41,7 +41,7 @@ export default function RepositorySettingsClient() {
         };
 
         fetchIdeas();
-    }, []);
+    }, [ideaId, currentUser?.email, currentUser?.username]);
 
     const getCollaborators = async (ideaId: number) => {
         try {
@@ -119,7 +119,7 @@ export default function RepositorySettingsClient() {
         getCollaborators(ideaId)
             .then((data) => {
                 if (data) {
-                    setCollaborators(data);
+                    setCollaborators(data.data);
                 } else {
                     setError("Failed to load collaborators");
                 }

@@ -41,7 +41,7 @@ const InvestmentsTab = () => {
     const fetchInvestments = async () => {
       try {
         const data = await fetcher(`/investments/user/${currentUser.id}`);
-        setInvestments(data);
+        setInvestments(data.data);
         setLoading(false);
       } catch (err) {
         setError("Failed to fetch investments");

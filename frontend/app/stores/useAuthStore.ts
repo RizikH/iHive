@@ -39,8 +39,13 @@ export const useAuthStore = create<AuthState>((set) => ({
     const stored = sessionStorage.getItem("auth_user");
     if (stored) {
       const parsed = JSON.parse(stored);
-      const user = await fetcher(`/users/${parsed.id}`, "GET");
-      set({ isAuthenticated: true, currentUser: user });
+      const response = await fetcher(`/users/${parsed.id}`, "GET");
+      if (response.ok && response.data) {
+        const user: User = response.data;
+        set({ isAuthenticated: true, currentUser: user });
+      } else {
+        set({ isAuthenticated: false, currentUser: { id: "", username: "", user_type: "", avatar: "", email: "", created_at: "", bio: "" } });
+      }
     }
   },
 }));

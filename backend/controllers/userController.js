@@ -54,11 +54,10 @@ const addUser = async (req, res) => {
     console.debug("addUser request body:", req.body);
 
     if (!username || !email || !password || !userType) {
-      console.debug("Validation failed: Missing required fields");
-      return res.status(400).json({ error: "Username, email, and password are required." });
+      return res.status(400).json({ error: "Username, email, password, and user type are required." });
     }
 
-    // 1. Register user with Supabase Auth
+    // 1. Register with Supabase Auth
     const { data, error } = await supabase.auth.signUp({
       email,
       password,
@@ -69,27 +68,45 @@ const addUser = async (req, res) => {
 
     if (error) {
       console.error("Supabase signUp error:", error.message);
-      throw new Error(error.message);
+
+      // Handle duplicate email from Supabase Auth (rare, but possible)
+      if (error.message.toLowerCase().includes("user already registered")) {
+        return res.status(409).json({ error: "User with this email already exists." });
+      }
+
+      return res.status(400).json({ error: error.message });
     }
 
     const authUser = data.user;
+
     if (!authUser) {
-      console.error("Signup succeeded but no user returned.");
       return res.status(500).json({ error: "Signup succeeded but no user returned." });
     }
 
-    // 2. Create user in public.users table
-    await User.createUser({
-      id: authUser.id,
-      username: authUser.user_metadata.username,
-      email: authUser.email,
-      avatar: avatar || null,
-      bio: bio || null,
-      user_type: userType,
-    });
+    // 2. Add user to public.users table
+    try {
+      await User.createUser({
+        id: authUser.id,
+        username: authUser.user_metadata.username,
+        email: authUser.email,
+        avatar: avatar || null,
+        bio: bio || null,
+        user_type: userType,
+      });
+    } catch (dbError) {
+      console.error("Database insert error:", dbError);
 
+      if (
+        dbError.message.includes('duplicate key') &&
+        dbError.message.includes('users_email_key')
+      ) {
+        return res.status(409).json({ error: "User with this email already exists." });
+      }
 
-    res.status(201).json({
+      return res.status(500).json({ error: "Failed to save user to database." });
+    }
+
+    return res.status(201).json({
       message: "User registered successfully!",
       user: {
         id: authUser.id,
@@ -99,11 +116,13 @@ const addUser = async (req, res) => {
         avatar,
       },
     });
-  } catch (error) {
-    console.error("addUser error:", error.message);
-    res.status(500).json({ error: error.message });
+
+  } catch (err) {
+    console.error("Unexpected addUser error:", err);
+    return res.status(500).json({ error: "An unexpected error occurred during registration." });
   }
 };
+
 
 // ✅ POST /api/users/login
 const loginUser = async (req, res) => {

@@ -92,10 +92,10 @@ export default function MarqueeDemo() {
     const fetchUserIdeas = async () => {
       try {
         const data = await fetcher(`/ideas`);
-        console.log("Fetched ideas:", data); // Debugging line
+        console.log("Fetched ideas:", data.data); // Debugging line
 
-        if (Array.isArray(data) && data.length > 0) {
-          setIdeas(data);
+        if (Array.isArray(data.data) && data.data.length > 0) {
+          setIdeas(data.data);
         } else {
           setIdeas([]);
         }
