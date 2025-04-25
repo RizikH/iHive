@@ -226,7 +226,9 @@ export default function ChatWidget() {
       roomId: chatId,
     };
 
+    socket?.emit('joinRoom', { roomId: chatId, userId: currentUser.id });
     socket?.emit('message', msg);
+
     setOpenChats(prev =>
       prev.map(chat =>
         chat.id === chatId ? { ...chat, messages: [...chat.messages, msg] } : chat
