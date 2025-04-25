@@ -13,6 +13,8 @@
   border-radius: 16px;
   box-shadow: 0 4px 24px rgba(0, 0, 0, 0.08);
   overflow: hidden;
+  display: flex;
+  flex-direction: column;
 }
 
 .modal-container {
@@ -20,6 +22,7 @@
   width: 100%;
   height: 100%;
   border-radius: 16px;
+  overflow: hidden;
 }
 
 /* =============================================
@@ -94,6 +97,7 @@
   line-height: 1.6;
   font-size: 14px;
   color: #444;
+  max-height: calc(80vh - 100px);
 }
 
 .content-placeholder {
@@ -139,17 +143,24 @@
 .file-tree-container::-webkit-scrollbar,
 .content-body::-webkit-scrollbar {
   width: 8px;
+  height: 8px;
 }
 
 .file-tree-container::-webkit-scrollbar-track,
 .content-body::-webkit-scrollbar-track {
-  background: transparent;
+  background: #f1f1f1;
+  border-radius: 4px;
 }
 
 .file-tree-container::-webkit-scrollbar-thumb,
 .content-body::-webkit-scrollbar-thumb {
-  background: rgba(0, 0, 0, 0.1);
+  background: rgba(0, 0, 0, 0.2);
   border-radius: 4px;
+}
+
+.file-tree-container::-webkit-scrollbar-thumb:hover,
+.content-body::-webkit-scrollbar-thumb:hover {
+  background: rgba(0, 0, 0, 0.3);
 }
 
 /* =============================================
@@ -268,4 +279,79 @@
   flex-direction: column;
   align-items: center;
   padding: 2rem;
+}
+
+/* =============================================
+     Markdown Content
+     ============================================= */
+.markdown-content {
+  width: 100%;
+  max-width: 100%;
+  overflow-wrap: break-word;
+  word-wrap: break-word;
+  word-break: break-word;
+}
+
+.markdown-content img {
+  max-width: 100%;
+  height: auto;
+  border-radius: 4px;
+  margin: 1rem 0;
+}
+
+.markdown-content pre {
+  max-width: 100%;
+  overflow-x: auto;
+  padding: 1rem;
+  background-color: #f6f8fa;
+  border-radius: 6px;
+  margin: 1rem 0;
+}
+
+.markdown-content table {
+  width: 100%;
+  border-collapse: collapse;
+  margin: 1rem 0;
+  overflow-x: auto;
+  display: block;
+}
+
+.markdown-content table th,
+.markdown-content table td {
+  border: 1px solid #ddd;
+  padding: 8px;
+  text-align: left;
+}
+
+.markdown-content table th {
+  background-color: #f6f8fa;
+}
+
+.markdown-content h1,
+.markdown-content h2,
+.markdown-content h3,
+.markdown-content h4,
+.markdown-content h5,
+.markdown-content h6 {
+  margin-top: 1.5rem;
+  margin-bottom: 1rem;
+}
+
+.markdown-content p {
+  margin: 1rem 0;
+}
+
+.markdown-content ul,
+.markdown-content ol {
+  margin: 1rem 0;
+  padding-left: 2rem;
+}
+
+/* Dark mode styles for markdown */
+:global(.dark) .markdown-content pre {
+  background-color: #2d2d2d;
+}
+
+:global(.dark) .markdown-content table th {
+  background-color: #2d2d2d;
 }
