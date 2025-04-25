@@ -1,64 +1,46 @@
 "use client";
 
 import Link from "next/link";
-import styles from "@/app/styles/home.module.css"; // ✅ Fixed Import Path
-import "@/components/"; // ✅ Fixed Import Path
-import React from "react";
 import Image from "next/image";
+import styles from "@/app/styles/home.module.css";
+import React from "react";
 import NavBar from "@/components/nav-bar";
 
 export default function Home() {
   return (
     <div className={styles.container}>
       {/* Navigation Bar */}
-
       <nav className={styles.navBar}>
         <NavBar />
       </nav>
 
-      {/* Split Layout */}
-      <div className={styles.splitContainer}>
-        {/* Entrepreneur Side */}
-        <section className={styles.entrepreneurSide}>
-          <h1>For Entrepreneurs</h1>
-          <p>🚀 Launch your startup and find investors.</p>
-          <Link href="/entrepreneur">
-            <span className={styles.entrepreneurButton}>Explore Entrepreneurs</span>
-          </Link>
+      {/* Hero Section */}
+      <div className={styles.landingContent}>
+        <h1 className={styles.welcomeTitle}>
+          Hi, welcome to <span className={styles.brandName}>iHive</span>
+          <Image
+            src="/Images/iHive.png"
+            alt="iHive Logo"
+            width={40}
+            height={40}
+            className={styles.inlineLogo}
+          />
+        </h1>
 
-          <div className={styles.featuredProjects}>
-            <h2>Featured Startups</h2>
-            <article className={styles.projectCard}>
-              <h3>Startup Name</h3>
-              <p>Brief description of the startup...</p>
-            </article>
-            <article className={styles.projectCard}>
-              <h3>Startup Name</h3>
-              <p>Brief description of the startup...</p>
-            </article>
-          </div>
-        </section>
+        <p className={styles.description}>
+          iHive is your collaborative launchpad for turning bold ideas into reality. Think of it as GitHub for innovation — a platform where entrepreneurs can showcase their projects, collaborate with others, and connect with investors ready to support the next big thing.
+        </p>
 
-        {/* Investor Side */}
-        <section className={styles.investorSide}>
-          <h1>For Investors</h1>
-          <p>💰 Discover innovative startups to invest in.</p>
-          <Link href="/investor">
-            <span className={styles.investorButton}>Explore Investors</span>
-          </Link>
+        <h2 className={styles.callToActionTitle}>
+          Are you ready to embark on a journey and make your goals come true?
+        </h2>
+        <p className={styles.callToActionText}>
+          Join iHive today and break through the limits. Whether you're building or backing, your future starts here.
+        </p>
 
-          <div className={styles.featuredInvestments}>
-            <h2>Top Investments</h2>
-            <article className={styles.investmentCard}>
-              <h3>Investment Opportunity</h3>
-              <p>Brief description of the opportunity...</p>
-            </article>
-            <article className={styles.investmentCard}>
-              <h3>Investment Opportunity</h3>
-              <p>Brief description of the opportunity...</p>
-            </article>
-          </div>
-        </section>
+        <Link href="/get-started">
+          <button className={styles.getStartedButton}>Login / Register</button>
+        </Link>
       </div>
     </div>
   );

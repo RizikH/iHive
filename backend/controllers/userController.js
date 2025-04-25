@@ -79,7 +79,7 @@ const addUser = async (req, res) => {
     }
 
     // 2. Create user in public.users table
-    const createduser = await User.createUser({
+    await User.createUser({
       id: authUser.id,
       username: authUser.user_metadata.username,
       email: authUser.email,

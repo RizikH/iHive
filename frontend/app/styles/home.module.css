@@ -165,4 +165,67 @@
     transform: scale(1.05);
 }
 
+/* Landing Page Hero Styles */
+.landingContent {
+    text-align: center;
+    max-width: 800px;
+    margin: 0 auto;
+    padding: 4rem 2rem;
+}
 
+.welcomeTitle {
+    font-size: 3rem;
+    font-weight: bold;
+    color: #1a1a1a;
+    margin-bottom: 1.5rem;
+}
+
+.brandName {
+    color: rgb(254 210 43 / var(--tw-bg-opacity, 1));
+}
+
+.description {
+    font-size: 1.25rem;
+    color: #444;
+    margin-bottom: 2.5rem;
+    line-height: 1.6;
+}
+
+.callToActionTitle {
+    font-size: 2rem;
+    font-weight: 600;
+    margin-top: 2rem;
+    margin-bottom: 1rem;
+    color: #222;
+}
+
+.callToActionText {
+    font-size: 1.1rem;
+    color: #555;
+    margin-bottom: 2rem;
+    max-width: 600px;
+    margin-left: auto;
+    margin-right: auto;
+}
+
+.getStartedButton {
+    padding: 1rem 2rem;
+    font-size: 1rem;
+    font-weight: 600;
+    background-color: #4a90e2;
+    color: #fff;
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: background-color 0.3s ease, transform 0.2s ease;
+}
+
+.getStartedButton:hover {
+    background-color: #357abd;
+    transform: scale(1.05);
+}
+.inlineLogo {
+    display: inline-block;
+    margin-left: 0.5rem;
+    vertical-align: middle;
+}
