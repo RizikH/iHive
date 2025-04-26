@@ -41,9 +41,11 @@ const RepositoryModal = ({
     try {
       setError(null);
       const ideaData = await fetcher(`/ideas/public?id=${repoId}`, 'GET');
-      if (!ideaData) throw new Error("Failed to load repository details");
-      setRepoDetails(ideaData);
-      return ideaData;
+      if (ideaData.status !== 200 || !ideaData.data) {
+        throw new Error(ideaData.data.error || "Failed to load repository details");
+      }
+      setRepoDetails(ideaData.data);
+      return ideaData.data;
     } catch (err) {
       console.error("Error fetching repository details:", err);
       setError("Failed to load repository details");
@@ -54,18 +56,19 @@ const RepositoryModal = ({
 
   const fetchFiles = useCallback(async () => {
     try {
-      const filesData = await fetcher(`/files/public?idea_id=${repoId}`, 'GET');
-      if (!filesData) throw new Error("Failed to load files data");
-  
-      setFiles(filesData.data);
-      return filesData;
+      const files = await fetcher(`/files/public?idea_id=${repoId}`, 'GET');
+      if (files.status !== 200 || !files.data) {
+        throw new Error(files.data.error || "Failed to load files data");
+      }
+      setFiles(files.data);
+      return files.data;
     } catch (err) {
       console.error("Error fetching files:", err);
+      setError("Failed to load files data");
       setFiles([]);
       return [];
     }
   }, [repoId]);
-  
 
   useEffect(() => {
     if (isOpen && repoId) {
@@ -200,26 +203,6 @@ const RepositoryModal = ({
                                 {successMessage}
                               </div>
                             )}
-                          </div>
-                        </div>
-                      )}
-
-
-                      {/* handle entrepreneur view */}
-                      {!isInvestorView && (
-                        <div className="mt-4 border-t pt-4">
-                          <div className="flex justify-between items-center">
-                            <div>
-                              <h4 className="text-sm font-medium">Want to see the full repository?</h4>
-                              <p className="text-xs text-gray-600 mt-1">Open the complete repository editor</p>
-                            </div>
-                            <Link
-                              href={`/repository?id=${repoId}`}
-                              className={styles.viewRepositoryButton}
-                            >
-                              <span className={styles.viewRepositoryButtonIcon}>🚀</span>
-                              View Full Repository
-                            </Link>
                           </div>
                         </div>
                       )}

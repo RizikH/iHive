@@ -1,3 +1,5 @@
+"use client";
+
 import React, { useState, useEffect } from 'react';
 import styles from '@/app/styles/setting.module.css';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
@@ -18,16 +20,17 @@ const BasicInfo = () => {
         created_at: '',
         bio: '',
     });
+    const [bioEditable, setBioEditable] = useState(false);
     const [successMessage, setSuccessMessage] = useState('');
     const [errorMessage, setErrorMessage] = useState('');
     const [loading, setLoading] = useState(false);
+    const updateUser = useAuthStore((state) => state.updateCurrentUserBio);
 
     useEffect(() => {
-        const username = currentUser?.username || '';
-        const bio = localStorage.getItem('bio') || '';
-        const email = currentUser?.email || '';
-        const created_at = currentUser?.created_at || '';
-        setFormData({ username, bio, email, created_at });
+        if (currentUser) {
+            const { username = '', bio = '', email = '', created_at = '' } = currentUser;
+            setFormData({ username, bio, email, created_at });
+        }
     }, [currentUser]);
 
     const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
@@ -41,8 +44,10 @@ const BasicInfo = () => {
     const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
         e.preventDefault();
         setLoading(true);
+        setSuccessMessage('');
+        setErrorMessage('');
         try {
-            const res = await fetcher(`/users/update/`, 'PUT', {
+            const res = await fetcher(`/users/update?id=${currentUser.id}`, 'PUT', {
                 bio: formData.bio,
             });
 
@@ -50,27 +55,22 @@ const BasicInfo = () => {
                 throw new Error('Failed to update user information');
             }
             setSuccessMessage('User information updated successfully!');
-            
+            updateUser(formData.bio);
+            setBioEditable(false); // lock after success
         } catch (error) {
             console.error('Error updating user:', error);
             setErrorMessage('Failed to update user information. Please try again.');
-        }
-        finally {
+        } finally {
             setLoading(false);
         }
-    }
+    };
 
     return (
         <div className={styles.settingSection}>
             <h2>Basic Information</h2>
 
-            {successMessage && (
-                <div className={styles.successMessage}>{successMessage}</div>
-            )}
-
-            {errorMessage && (
-                <div className={styles.errorMessage}>{errorMessage}</div>
-            )}
+            {successMessage && <div className={styles.successMessage}>{successMessage}</div>}
+            {errorMessage && <div className={styles.errorMessage}>{errorMessage}</div>}
 
             <form onSubmit={handleSubmit}>
                 {/* Username */}
@@ -82,49 +82,52 @@ const BasicInfo = () => {
                     <span className={styles.formValue}>{formData.username}</span>
                 </div>
 
-                {/* Email (read-only) */}
+                {/* Email */}
                 <div className={styles.formGroup}>
                     <label className={styles.formLabel}>
                         <FontAwesomeIcon icon={faEnvelope} className={styles.icon} />
                         <span className={styles.labelText}>Email:</span>
                     </label>
-                    <span className={styles.formValue}>{currentUser?.email || 'N/A'}</span>
+                    <span className={styles.formValue}>{formData.email}</span>
                 </div>
 
-                {/* Date Joined (read-only) */}
+                {/* Date Joined */}
                 <div className={styles.formGroup}>
                     <label className={styles.formLabel}>
                         <FontAwesomeIcon icon={faCalendar} className={styles.icon} />
                         <span className={styles.labelText}>Date Joined:</span>
                     </label>
                     <span className={styles.formValue}>
-                        {currentUser?.created_at
-                            ? new Date(currentUser.created_at).toLocaleDateString()
-                            : 'N/A'}
+                        {formData.created_at ? new Date(formData.created_at).toLocaleDateString() : 'N/A'}
                     </span>
                 </div>
 
-                {/* Bio (editable) */}
+                {/* Bio */}
                 <div className={styles.formGroup}>
                     <label>Bio</label>
                     <textarea
                         name="bio"
-                        value={currentUser.bio}
+                        value={formData.bio}
+                        readOnly={!bioEditable}
+                        onClick={() => setBioEditable(true)}
                         onChange={handleChange}
                         placeholder="Tell us about yourself"
                         className={styles.textarea}
                         rows={4}
                     />
+
                 </div>
 
                 {/* Submit */}
-                <button
-                    type="submit"
-                    className={styles.saveButton}
-                    disabled={loading}
-                >
-                    {loading ? 'Saving...' : 'Save Changes'}
-                </button>
+                {bioEditable && (
+                    <button
+                        type="submit"
+                        className={styles.saveButton}
+                        disabled={loading}
+                    >
+                        {loading ? 'Saving...' : 'Save Changes'}
+                    </button>
+                )}
             </form>
         </div>
     );

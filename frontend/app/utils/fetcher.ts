@@ -42,6 +42,11 @@ export const fetcher = async (
     };
   }
 
+  // Ensure the returned data always has an error property
+  if (!data.error && !response.ok) {
+    data.error = "An unknown error occurred";
+  }
+
   return {
     ok: response.ok,
     status: response.status,

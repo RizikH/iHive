@@ -24,10 +24,10 @@ router.get("/all", authMiddleware, controller.getUsers);
 router.post("/all", authMiddleware, controller.getUsersByQuery);
 
 router.get("/get/:id", authMiddleware, controller.getUser);
-router.put("/update/:id", authMiddleware, controller.updateUser);
+router.put("/update", authMiddleware, controller.updateUser);
 router.delete("/delete/:id", authMiddleware, controller.deleteUser);
 
-router.put("/update", authMiddleware, controller.updateUserLogin);
+router.put("/update/login/", authMiddleware, controller.updateUserLogin);
 
 router.post("/logout", (req, res) => {
   res.clearCookie("token", {

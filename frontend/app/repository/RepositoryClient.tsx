@@ -7,8 +7,8 @@ import NavBar from "@/components/nav-bar";
 import FileTree, { FileItem } from "@/components/file-tree";
 import FileEditor from "@/components/file-editor";
 import FileViewer from "@/components/file-viewer";
-import Footer from '@/components/footer';
-import { isAuthenticated } from "@/app/utils/isAuthenticated";
+import Footer from "@/components/footer";
+import { useAuthStore } from "@/app/stores/useAuthStore";
 import { fetcher } from "@/app/utils/fetcher";
 
 import styles from "../styles/repository.module.css";
@@ -19,19 +19,17 @@ export const metadata = {
 };
 
 export default function Repository() {
-  const [authChecked, setAuthChecked] = useState(false);
-  const [user, setUser] = useState<any | null>(null);
-  const [files, setFiles] = useState<FileItem[]>([]);
-  const [currentFile, setCurrentFile] = useState<FileItem | null>(null);
-  const [error, setError] = useState<string | null>(null);
-  const [loading, setLoading] = useState(false);
-  const [unauthorized, setUnauthorized] = useState(false);
-
+  const router = useRouter();
   const searchParams = useSearchParams();
   const ideaId = searchParams.get("id");
-  console.log("Idea ID:", ideaId);
 
-  const router = useRouter();
+  const currentUser = useAuthStore((state) => state.currentUser);
+  const [files, setFiles] = useState<FileItem[]>([]);
+  const [currentFile, setCurrentFile] = useState<FileItem | null>(null);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+  const [unauthorized, setUnauthorized] = useState(false);
+  const [authChecked, setAuthChecked] = useState(false);
 
   const fetchFiles = useCallback(async () => {
     try {
@@ -48,23 +46,16 @@ export default function Repository() {
   }, [ideaId]);
 
   useEffect(() => {
-    const checkAuthAndOwnership = async () => {
-      const currentUser = await isAuthenticated();
-
-      if (!currentUser) {
+    const checkOwnership = async () => {
+      if (!currentUser || !currentUser.id) {
         router.push("/get-started");
         return;
       }
 
-      setUser(currentUser);
-
       try {
         const idea = await fetcher(`/ideas/search/id/${ideaId}`);
-        console.log("idea.user_id type:", typeof idea.data.user_id);
-        console.log("idea.user_id:", idea.data.user_id);
-        console.log("currentUser.id:", currentUser);
 
-        if (idea?.data.error === "You do not have access to this idea.") {
+        if (idea?.data?.error) {
           setUnauthorized(true);
         } else {
           await fetchFiles();
@@ -77,8 +68,8 @@ export default function Repository() {
       }
     };
 
-    checkAuthAndOwnership();
-  }, [fetchFiles, ideaId, router]);
+    checkOwnership();
+  }, [currentUser, fetchFiles, ideaId, router]);
 
   const handleSelectFile = (file: FileItem | null) => {
     setCurrentFile(file);
@@ -96,7 +87,7 @@ export default function Repository() {
   if (unauthorized) {
     return (
       <div style={{ padding: "2rem", textAlign: "center", color: "red" }}>
-        <h2>You are not autherized to view this page.</h2>
+        <h2>You are not authorized to view this page.</h2>
         <p>Please contact the owner to request access.</p>
       </div>
     );

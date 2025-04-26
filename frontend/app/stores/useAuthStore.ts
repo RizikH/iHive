@@ -2,7 +2,7 @@ import { create } from "zustand";
 import { fetcher } from "../utils/fetcher";
 
 type User = {
-  bio: string | number | readonly string[] | undefined;
+  bio: string;
   id: string;
   username: string;
   user_type: string;
@@ -17,11 +17,13 @@ type AuthState = {
   setAuthenticated: (user: User | null) => void;
   logout: () => void;
   initializeFromSession: () => void;
+  updateCurrentUserBio: (bio: string) => void; // ⬅️ add this
 };
 
 export const useAuthStore = create<AuthState>((set) => ({
   isAuthenticated: false,
   currentUser: { id: "", username: "", user_type: "", avatar: "", email: "", created_at: "", bio: "" },
+  
   setAuthenticated: (user) => {
     if (user) {
       set({ isAuthenticated: true, currentUser: user });
@@ -31,10 +33,12 @@ export const useAuthStore = create<AuthState>((set) => ({
       sessionStorage.removeItem("auth_user");
     }
   },
+  
   logout: () => {
     set({ isAuthenticated: false, currentUser: { id: "", username: "", user_type: "", avatar: "", email: "", created_at: "", bio: "" } });
     sessionStorage.removeItem("auth_user");
   },
+  
   initializeFromSession: async () => {
     const stored = sessionStorage.getItem("auth_user");
     if (stored) {
@@ -46,6 +50,20 @@ export const useAuthStore = create<AuthState>((set) => ({
       } else {
         set({ isAuthenticated: false, currentUser: { id: "", username: "", user_type: "", avatar: "", email: "", created_at: "", bio: "" } });
       }
+    }
+  },
+
+  updateCurrentUserBio: (bio) => {
+    set((state) => ({
+      currentUser: {
+        ...state.currentUser,
+        bio,
+      },
+    }));
+    const stored = sessionStorage.getItem("auth_user");
+    if (stored) {
+      const updatedUser = { ...JSON.parse(stored), bio };
+      sessionStorage.setItem("auth_user", JSON.stringify(updatedUser));
     }
   },
 }));

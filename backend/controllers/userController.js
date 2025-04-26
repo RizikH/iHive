@@ -168,7 +168,7 @@ const loginUser = async (req, res) => {
 // ✅ PUT /api/users/update/:id
 const updateUser = async (req, res) => {
   const userIdFromToken = req.user?.sub;
-  const userIdFromParams = req.params.id;
+  const userIdFromParams = req.query.id;
 
   if (userIdFromToken !== userIdFromParams) {
     return res.status(403).json({

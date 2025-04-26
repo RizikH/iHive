@@ -68,7 +68,7 @@ const AccountSettings = () => {
     setLoading(true);
   
     try {
-      const res = await fetcher(`/users/update/`, 'PUT', {
+      const res = await fetcher(`/users/update/login`, 'PUT', {
         currentPassword: formData.currentPassword,
         newPassword: formData.newPassword,
         email: currentUser?.email,
