@@ -611,3 +611,81 @@
   border-top: 1px solid #eaeaea;
   font-size: 14px;
 }
+
+/* Add the following styles to the end of the file */
+
+.permissionIndicator {
+  display: flex;
+  align-items: center;
+  margin-left: 8px;
+  padding: 2px 6px;
+  border-radius: 4px;
+  font-size: 0.75rem;
+  background-color: #f0f0f0;
+  cursor: pointer;
+}
+
+.permissionIndicator:hover {
+  background-color: #e0e0e0;
+}
+
+.permissionText {
+  margin-left: 4px;
+}
+
+.permissionsPanel {
+  background-color: #f8f9fa;
+  border: 1px solid #e1e4e8;
+  border-radius: 6px;
+  margin-bottom: 12px;
+  padding: 12px;
+}
+
+.permissionsTitle {
+  font-size: 1rem;
+  font-weight: 600;
+  margin-bottom: 8px;
+}
+
+.permissionOptions {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  margin-bottom: 12px;
+}
+
+.permissionButton {
+  display: flex;
+  align-items: center;
+  padding: 8px 12px;
+  border: 1px solid #d1d5db;
+  border-radius: 4px;
+  background-color: white;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.permissionButton:hover {
+  background-color: #f3f4f6;
+}
+
+.permissionButton span {
+  margin-left: 8px;
+}
+
+.activePermission {
+  background-color: #dbeafe;
+  border-color: #93c5fd;
+}
+
+.permissionInfo {
+  font-size: 0.8rem;
+  color: #4b5563;
+  background-color: #f3f4f6;
+  padding: 8px;
+  border-radius: 4px;
+}
+
+.permissionInfo p {
+  margin: 4px 0;
+}
