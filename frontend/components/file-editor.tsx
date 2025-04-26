@@ -10,20 +10,35 @@ import {
   FiEdit, 
   FiSave, 
   FiX,
-  FiLock
+  FiLock,
+  FiShield,
+  FiGlobe,
+  FiSettings
 } from "react-icons/fi";
+import { useAuthStore } from '@/app/stores/useAuthStore';
 
 type Props = {
   file: FileItem;
   onUpdate: (file: FileItem) => void;
 };
 
+// Permission type definition
+type Permission = 'private' | 'protected' | 'public';
+
 const FileEditor = ({ file, onUpdate }: Props) => {
   const [content, setContent] = useState(file.content || "");
   const [isSaving, setIsSaving] = useState(false);
   const [isEditing, setIsEditing] = useState(false);
   const [copied, setCopied] = useState(false);
+  const [showPermissions, setShowPermissions] = useState(false);
+  const [permissionLevel, setPermissionLevel] = useState<Permission>(
+    file.is_public as Permission || 'private'
+  );
+  const [updatingPermission, setUpdatingPermission] = useState(false);
+  
   const editorRef = useRef<HTMLTextAreaElement>(null);
+  const currentUser = useAuthStore((state) => state.currentUser);
+  const isOwner = currentUser?.id === file.user_id;
   
   // Get language for syntax highlighting
   const getLanguage = (filename: string): string => {
@@ -68,6 +83,10 @@ const FileEditor = ({ file, onUpdate }: Props) => {
     setContent(file.content || "");
     setIsEditing(false); // Reset editing when switching files
     setCopied(false);
+    // Make sure we have a default permission value if is_public is undefined
+    const filePermission = file.is_public || 'private';
+    setPermissionLevel(filePermission as Permission);
+    setShowPermissions(false);
   }, [file]);
 
   const handleInput = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
@@ -114,6 +133,54 @@ const FileEditor = ({ file, onUpdate }: Props) => {
     setIsEditing(false);
   };
 
+  const handlePermissionChange = async (newPermission: Permission) => {
+    if (!file.id || !isOwner) return;
+    
+    setUpdatingPermission(true);
+    try {
+      const response = await fetcher(`/files/${file.id}`, "PUT", {
+        is_public: newPermission
+      });
+      
+      if (response && response.data) {
+        setPermissionLevel(newPermission);
+        const updatedFile = {
+          ...file,
+          is_public: newPermission
+        };
+        onUpdate(updatedFile);
+      } else {
+        throw new Error("Failed to update permission");
+      }
+    } catch (err: any) {
+      console.error("Error updating file permissions:", err);
+      alert("Error updating file permissions: " + err.message);
+    } finally {
+      setUpdatingPermission(false);
+    }
+  };
+
+  const getPermissionIcon = (permission: Permission) => {
+    switch (permission) {
+      case 'private': return <FiLock />;
+      case 'protected': return <FiShield />;
+      case 'public': return <FiGlobe />;
+      default: return <FiLock />;
+    }
+  };
+
+  const getPermissionLabel = (permission: Permission) => {
+    switch (permission) {
+      case 'private': return 'Private (Only you can access)';
+      case 'protected': return 'Protected (Collaborators can access)';
+      case 'public': return 'Public (Anyone can access)';
+      default: return 'Private';
+    }
+  };
+
+  // Also debug the current permission
+  console.log('Current file permission:', file.is_public, 'Current permission state:', permissionLevel);
+
   return (
     <div className={styles.editorWrapper}>
       <div className={styles.editorToolbar}>
@@ -127,6 +194,20 @@ const FileEditor = ({ file, onUpdate }: Props) => {
             )}
           </span>
           <span className={styles.filesize}>{content.length} bytes</span>
+          <span 
+            className={styles.permissionIndicator} 
+            title={getPermissionLabel(permissionLevel)}
+            onClick={() => isOwner && setShowPermissions(!showPermissions)}
+            style={{ 
+              backgroundColor: permissionLevel === 'private' ? '#fee2e2' : 
+                             permissionLevel === 'protected' ? '#fef3c7' : 
+                             '#dcfce7',
+              cursor: isOwner ? 'pointer' : 'default'
+            }}
+          >
+            {getPermissionIcon(permissionLevel)}
+            <span className={styles.permissionText}>{permissionLevel}</span>
+          </span>
         </div>
         
         <div className={styles.editorActions}>
@@ -146,6 +227,15 @@ const FileEditor = ({ file, onUpdate }: Props) => {
               >
                 <FiDownload /> Download
               </button>
+              {isOwner && (
+                <button 
+                  className={styles.toolbarButton}
+                  onClick={() => setShowPermissions(!showPermissions)}
+                  title="Manage permissions"
+                >
+                  <FiSettings /> Permissions
+                </button>
+              )}
               {!file.is_locked && (
                 <button 
                   className={styles.toolbarButton}
@@ -177,6 +267,47 @@ const FileEditor = ({ file, onUpdate }: Props) => {
           )}
         </div>
       </div>
+      
+      {showPermissions && isOwner && (
+        <div className={styles.permissionsPanel}>
+          <h3 className={styles.permissionsTitle}>File Permissions</h3>
+          <div className={styles.permissionOptions}>
+            {(['private', 'protected', 'public'] as Permission[]).map((permission) => (
+              <button
+                key={permission}
+                className={`${styles.permissionButton} ${permissionLevel === permission ? styles.activePermission : ''}`}
+                onClick={() => handlePermissionChange(permission)}
+                disabled={updatingPermission || permissionLevel === permission}
+                style={{
+                  backgroundColor: permission === 'private' ? '#fff1f2' : 
+                                permission === 'protected' ? '#fef9c3' : 
+                                '#f0fdf4',
+                  borderColor: permission === 'private' ? '#fecaca' : 
+                             permission === 'protected' ? '#fde68a' : 
+                             '#bbf7d0',
+                  opacity: permissionLevel === permission ? 1 : 0.8
+                }}
+              >
+                {getPermissionIcon(permission)}
+                <span>{getPermissionLabel(permission)}</span>
+                {permissionLevel === permission && 
+                  <span style={{ marginLeft: 'auto', fontSize: '0.75rem' }}>✓ Current</span>
+                }
+              </button>
+            ))}
+          </div>
+          <div className={styles.permissionInfo}>
+            <p><strong>Private:</strong> Only you can view and edit this file</p>
+            <p><strong>Protected:</strong> Collaborators can view this file based on their permission level</p>
+            <p><strong>Public:</strong> Anyone with access to the repository can view this file</p>
+          </div>
+          {updatingPermission && (
+            <div style={{ textAlign: 'center', padding: '8px', color: '#666' }}>
+              Updating permission...
+            </div>
+          )}
+        </div>
+      )}
       
       {isEditing && !file.is_locked ? (
         <textarea

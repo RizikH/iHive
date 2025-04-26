@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect, useCallback, useRef } from "react";
 import { Dialog, DialogContent, DialogTitle } from "@/components/ui/dialog";
 import styles from "@/app/styles/repository-modal.module.css";
 import { fetcher } from "@/app/utils/fetcher";
@@ -34,6 +34,7 @@ const RepositoryModal = ({
   const [error, setError] = useState<string | null>(null);
   const [investmentAmount, setInvestmentAmount] = useState<number>(0);
   const [successMessage, setSuccessMessage] = useState<string | null>(null);
+  const contentBodyRef = useRef<HTMLDivElement>(null);
 
   const isReadOnly = true;
 
@@ -77,6 +78,12 @@ const RepositoryModal = ({
         .finally(() => setIsLoading(false));
     }
   }, [isOpen, repoId, fetchRepoDetails, fetchFiles]);
+
+  useEffect(() => {
+    if (contentBodyRef.current) {
+      contentBodyRef.current.scrollTop = 0;
+    }
+  }, [currentFile]);
 
   const handleSelectFile = (file: FileItem | null) => {
     setCurrentFile(file);
@@ -138,7 +145,7 @@ const RepositoryModal = ({
                   <h3 className={styles["content-title"]}>{currentFileName}</h3>
                   <div className="text-xs text-gray-500">Preview - Read Only</div>
                 </div>
-                <div className={styles["content-body"]}>
+                <div className={styles["content-body"]} ref={contentBodyRef}>
                   {!currentFile && repoDetails && (
                     <div className="mb-4 p-4 bg-gray-50 rounded-md">
                       <h2 className="text-xl font-bold">{repoDetails.title}</h2>
@@ -211,7 +218,7 @@ const RepositoryModal = ({
 
                   {currentFile ? (
                     currentFile.type === "text" ? (
-                      <div dangerouslySetInnerHTML={{ __html: content }} />
+                      <div className={styles["markdown-content"]} dangerouslySetInnerHTML={{ __html: content }} />
                     ) : (
                       <FileViewer file={currentFile} />
                     )

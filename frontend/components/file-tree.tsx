@@ -28,6 +28,8 @@ export type FileItem = {
   mime_type?: string;
   children?: FileItem[];
   is_locked?: boolean;
+  is_public?: 'private' | 'protected' | 'public';
+  user_id?: string;
 };
 
 type FileTreeProps = {
