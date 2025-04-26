@@ -27,8 +27,8 @@ const initializeSocket = (server, corsOptions) => {
     /**
      * Handle user joining a discussion room based on idea ID.
      */
-    socket.on("joinRoom", ({ ideaId, roomId, userId }) => {
-      const targetRoom = roomId || ideaId;
+    socket.on("joinRoom", ({ roomId, userId }) => {
+      const targetRoom = roomId;
       if (targetRoom) {
         socket.join(targetRoom);
         socket.roomId = targetRoom;

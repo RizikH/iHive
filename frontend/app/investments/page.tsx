@@ -41,7 +41,7 @@ const InvestmentsTab = () => {
     const fetchInvestments = async () => {
       try {
         const data = await fetcher(`/investments/user/${currentUser.id}`);
-        setInvestments(data);
+        setInvestments(data.data);
         setLoading(false);
       } catch (err) {
         setError("Failed to fetch investments");
@@ -93,7 +93,22 @@ const InvestmentsTab = () => {
             <tbody>
               {investments.map((investment) => (
                 <tr key={investment.id}>
-                  <td>{investment.ideas?.title || "Unknown"}</td>
+                  <td>
+                    {investment.ideas?.title ? (
+                      investment.status?.toLowerCase() !== "rejected" ? (
+                        <a
+                          href={`/repository?id=${investment.idea_id}`}
+                          className={styles.linkTitle}
+                        >
+                          {investment.ideas.title}
+                        </a>
+                      ) : (
+                        <span className={styles.rejectedTitle}>{investment.ideas.title}</span>
+                      )
+                    ) : (
+                      "Unknown"
+                    )}
+                  </td>
                   <td>${investment.amount.toLocaleString()}</td>
                   <td>{new Date(investment.invested_at).toLocaleDateString()}</td>
                   <td className={

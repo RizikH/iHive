@@ -47,9 +47,10 @@ const Sponsors = () => {
 
     const fetchInvestments = async () => {
       try {
-        const data: Investor[] = await fetcher(
+        const response = await fetcher(
           `/investments/entrepreneur/${currentUser.id}`
         );
+        const data: Investor[] = response.data;
         const flat = data.flatMap((idea) =>
           idea.investments.map((inv) => ({
             investment: inv,

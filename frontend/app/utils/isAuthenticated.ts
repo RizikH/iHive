@@ -7,7 +7,7 @@ import { fetcher } from "./fetcher";
 export const isAuthenticated = async () => {
   try {
     const user = await fetcher("/users/me");
-    if (user?.id) {
+    if (user?.data.id) {
       return user;
     }
     return null;

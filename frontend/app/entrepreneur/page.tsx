@@ -36,7 +36,7 @@ const EntrepreneurProfile = () => {
 
     try {
       const userData = await fetcher(`/users/get/${currentUser.id}`);
-      setBio(userData.bio || '');
+      setBio(userData.data?.bio || '');
     } catch (err: any) {
       console.error('Error fetching user profile:', err);
       setError(`Failed to load profile data: ${err.message || 'Unknown error'}`);

@@ -77,9 +77,17 @@ const NavBar = ({
     (link) => link.label !== "My Repositories"
   );
 
+  // Determine logo link based on user type
+  const logoHref =
+    currentUser?.user_type === "investor"
+      ? "/investor"
+      : currentUser?.user_type === "entrepreneur"
+      ? "/entrepreneur"
+      : "/";
+
   return (
     <nav className={styles.navContainer}>
-      <Link href="/" className={styles.logo}>
+      <Link href={logoHref} className={styles.logo}>
         <Image
           src={logoPath}
           alt="Logo"

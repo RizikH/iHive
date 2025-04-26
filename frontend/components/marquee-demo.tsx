@@ -11,6 +11,8 @@ import styles from "@/app/styles/repository-modal.module.css";
 import { fetcher } from "@/app/utils/fetcher";
 import { VisuallyHidden } from "@radix-ui/react-visually-hidden";
 import RepositoryModal from "@/components/repository-modal";
+import { useAuthStore } from '@/app/stores/useAuthStore';
+
 
 // ========================
 // Repository Card Component
@@ -81,26 +83,23 @@ const ReviewCard = ({
 
 export default function MarqueeDemo() {
   const [ideas, setIdeas] = useState<any[]>([]);
-  const [userAvatar, setUserAvatar] = useState('https://avatar.vercel.sh/jack');
-  const [username, setUsername] = useState<string>('@user');
+  const currentUser = useAuthStore((state) => state.currentUser);
+  const username = currentUser?.username || '@user';
+  const userAvatar = currentUser?.avatar || 'https://avatar.vercel.sh/jack';
+
 
   useEffect(() => {
     const fetchUserIdeas = async () => {
       try {
         const data = await fetcher(`/ideas`);
-        
-        if (Array.isArray(data) && data.length > 0) {
-          setIdeas(data);
+        console.log("Fetched ideas:", data.data); // Debugging line
+
+        if (Array.isArray(data.data) && data.data.length > 0) {
+          setIdeas(data.data);
         } else {
           setIdeas([]);
         }
 
-        // Get user info from localStorage (this is still needed for profile display)
-        const savedUsername = localStorage.getItem("username");
-        const savedAvatar = localStorage.getItem("userAvatar");
-
-        if (savedUsername) setUsername(savedUsername);
-        if (savedAvatar) setUserAvatar(savedAvatar);
       } catch (err) {
         console.error("Error loading user ideas:", err);
         setIdeas([]);
@@ -121,7 +120,7 @@ export default function MarqueeDemo() {
             key={idea.id}
             repoId={idea.id}
             ideaTitle={idea.title}
-            username={username}
+            username={'@' + idea.users?.username}
             body={
               idea.description
                 ? idea.description.replace(/<[^>]*>/g, "").substring(0, 120) + "..."
@@ -138,7 +137,7 @@ export default function MarqueeDemo() {
             key={idea.id}
             repoId={idea.id}
             ideaTitle={idea.title}
-            username={username}
+            username={'@' + idea.users?.username}
             body={
               idea.description
                 ? idea.description.replace(/<[^>]*>/g, "").substring(0, 120) + "..."

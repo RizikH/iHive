@@ -69,12 +69,14 @@ export const AuthForm = ({ initialView = "login", onClose }: AuthFormProps) => {
       const response = await fetcher("/users/login", "POST", {
         email: formData.email,
         password: formData.password,
+        userTpe: formData.role,
       });
 
-      const { user } = response;
+      const { user } = response.data;
 
-      if (!Array.isArray(user) || user.length === 0) {
-        throw new Error("Login failed. No user returned.");
+      if (response.status !== 200 || !user) {
+        setError("Invalid email or password.");
+        return;
       }
 
       const currentUser = user[0];
@@ -83,6 +85,9 @@ export const AuthForm = ({ initialView = "login", onClose }: AuthFormProps) => {
         username: currentUser.username,
         user_type: currentUser.user_type,
         avatar: currentUser.avatar || "https://avatar.vercel.sh/jack",
+        email: currentUser.email,
+        created_at: currentUser.created_at,
+        bio: currentUser.bio || "",
       };
 
       setAuthenticated(userData);
@@ -106,25 +111,53 @@ export const AuthForm = ({ initialView = "login", onClose }: AuthFormProps) => {
   };
 
   const handleRegister = async () => {
-    if (!formData.role) throw new Error("Please select a role (Entrepreneur or Investor).");
-    if (!formData.termsAccepted) throw new Error("You must accept the Terms & Privacy Policy.");
+    try {
+      if (!formData.role) throw new Error("Please select a role (Entrepreneur or Investor).");
+      if (!formData.termsAccepted) throw new Error("You must accept the Terms & Privacy Policy.");
 
-    const payload: Record<string, any> = {
-      username: formData.username,
-      email: formData.email,
-      password: formData.password,
-      role: formData.role,
-    };
+      const payload: Record<string, any> = {
+        username: formData.username,
+        email: formData.email,
+        password: formData.password,
+        userType: formData.role,
+      };
 
-    if (formData.role === "entrepreneur") {
-      payload.jobTitle = formData.jobTitle;
-      payload.skills = formData.skills;
+      if (formData.role === "entrepreneur") {
+        payload.jobTitle = formData.jobTitle;
+        payload.skills = formData.skills;
+      }
+
+      const res = await fetcher("/users/register", "POST", payload);
+
+      if (!res.ok) {
+        throw new Error(res.data?.error || res.data?.message || "Registration failed. Please try again.");
+      }
+
+      setSuccess("Registration successful! You can now log in.");
+
+      // Optional: clear form fields
+      setFormData({
+        username: "",
+        email: "",
+        password: "",
+        role: "",
+        jobTitle: "",
+        skills: "",
+        rememberMe: false,
+        termsAccepted: false,
+      });
+
+      // ✅ Delay, then close modal
+      setTimeout(() => {
+        hideForm(); // or use onClose?.()
+      }, 3000);
+
+    } catch (error: any) {
+      console.error("Registration error:", error);
+      setError(error.message || "Registration failed. Please try again.");
     }
-
-    const user = await fetcher("/users/register", "POST", payload);
-    if (!user) throw new Error("Registration failed. Please try again.");
-    setSuccess("Registration successful! You can now log in.");
   };
+
 
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();

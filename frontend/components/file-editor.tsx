@@ -82,7 +82,7 @@ const FileEditor = ({ file, onUpdate }: Props) => {
         ...file,
         content,
       });
-      onUpdate(updated);
+      onUpdate(updated.data);
       setIsEditing(false);
     } catch (err: any) {
       alert("Error saving file: " + err.message);

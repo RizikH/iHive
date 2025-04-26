@@ -15,6 +15,8 @@ const authRateLimiter = rateLimit({
 // Enable file upload middleware
 router.use(fileUpload());
 
+router.get('/public', fileController.getPublicFiles);
+
 // Apply rate limiter to all routes
 router.use(authRateLimiter);
 
@@ -25,6 +27,8 @@ router.get('/:id/view', authenticate, fileController.streamFile);
 
 // Gets a file by ID
 router.get('/:id', authenticate, fileController.getFileById);
+
+router.get('/public', fileController.getPublicFiles);
 
 // 🔐 Protected Routes
 router.post('/', authenticate, fileController.createFile);

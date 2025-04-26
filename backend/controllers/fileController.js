@@ -131,8 +131,8 @@ const getFiles = async (req, res) => {
       const fileLevel = file.is_public === "public"
         ? 0
         : file.is_public === "protected"
-        ? 1
-        : 2;
+          ? 1
+          : 2;
 
       const canView = isOwner || (userLevel !== null && canAccess(fileLevel, userLevel));
 
@@ -186,8 +186,8 @@ const getFileById = async (req, res) => {
     }
 
     const fileLevel = file.is_public === "public" ? 0
-                    : file.is_public === "protected" ? 1
-                    : 2;
+      : file.is_public === "protected" ? 1
+        : 2;
 
     const canView = isOwner || (userLevel !== null && canAccess(fileLevel, userLevel));
 
@@ -309,8 +309,8 @@ const streamFile = async (req, res) => {
     }
 
     const fileLevel = file.is_public === "public" ? 0
-                    : file.is_public === "protected" ? 1
-                    : 2;
+      : file.is_public === "protected" ? 1
+        : 2;
 
     const canStream = isOwner || (userLevel !== null && canAccess(fileLevel, userLevel));
 
@@ -355,6 +355,48 @@ const moveFile = async (req, res) => {
   }
 };
 
+const getPublicFiles = async (req, res) => {
+  try {
+    const ideaId = req.query.idea_id;
+    const idea = await Idea.getIdeaById(ideaId);
+    if (!idea) {
+      return res.status(404).json({ error: "Idea not found" });
+    }
+
+    const files = await File.getAll(ideaId);
+
+    const streamedFiles = files.map((file) => {
+      const isPublic = file.is_public === "public";
+
+      if (isPublic) {
+        return { ...file, is_locked: false };
+      } else {
+        // Lock protected and private files
+        return {
+          id: file.id,
+          name: file.name,
+          type: file.type,
+          idea_id: file.idea_id,
+          parent_id: file.parent_id,
+          user_id: file.user_id,
+          mime_type: file.mime_type,
+          created_at: file.created_at,
+          updated_at: file.updated_at,
+          is_public: file.is_public,
+          is_locked: true,
+          path: null, // Remove path to prevent unauthorized access
+        };
+      }
+    });
+
+    res.json(streamedFiles);
+
+  } catch (err) {
+    console.error("❌ Error in getFiles:", err);
+    res.status(500).json({ error: err.message });
+  }
+};
+
 module.exports = {
   uploadFile,
   deleteFile,
@@ -364,4 +406,5 @@ module.exports = {
   updateFile,
   streamFile,
   moveFile,
+  getPublicFiles,
 };

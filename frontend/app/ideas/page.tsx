@@ -39,7 +39,7 @@ const IdeasPage = () => {
       try {
         setIsLoading(true);
         const fetchedIdeas = await fetcher("/ideas");
-        setIdeas(fetchedIdeas);
+        setIdeas(fetchedIdeas.data);
       } catch (error) {
         console.error("Error fetching ideas:", error);
         setError("Failed to load ideas");
@@ -102,7 +102,7 @@ const IdeasPage = () => {
         }
       );
 
-      setIdeas((prev) => [...prev, savedIdea.idea || savedIdea]);
+      setIdeas((prev) => [...prev, savedIdea.data.idea || savedIdea]);
       setShowForm(false);
       setFormData({ title: "", description: "" });
     } catch (error) {

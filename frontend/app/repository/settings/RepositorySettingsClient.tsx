@@ -1,12 +1,12 @@
 "use client";
 
-import React, { useEffect, useState } from "react";
+import React, { use, useEffect, useState } from "react";
 import { useSearchParams } from "next/navigation";
 import NavBar from "@/components/nav-bar";
 import Footer from "@/components/footer";
 import { fetcher } from "@/app/utils/fetcher";
 import styles from "@/app/styles/collab.module.css";
-import { permission } from "process";
+import { useAuthStore } from '@/app/stores/useAuthStore';
 
 export default function RepositorySettingsClient() {
     const [collaborators, setCollaborators] = useState<any[]>([]);
@@ -14,11 +14,34 @@ export default function RepositorySettingsClient() {
     const [error, setError] = useState<string | null>(null);
     const [email, setEmail] = useState("");
     const [permission, setPermission] = useState("public");
+    const currentUser = useAuthStore((state) => state.currentUser);
+    const isAuthenticated = useAuthStore((state) => state.isAuthenticated);
+    const [idea, setIdea] = useState<any | null>(null);
 
 
     const searchParams = useSearchParams();
     const ideaId = Number(searchParams.get("id"));
 
+    useEffect(() => {
+        const fetchIdeas = async () => {
+            try {
+                const data = await fetcher(`/ideas/search/id/${ideaId}`);
+                console.log("Ideas data:", data);
+                if (data) {
+                    setIdea(data);
+                } else {
+                    setError("Failed to load ideas");
+                }
+            } catch (err: any) {
+                console.error("Error fetching ideas:", err);
+                setError("Failed to load ideas");
+            } finally {
+                setLoading(false);
+            }
+        };
+
+        fetchIdeas();
+    }, [ideaId, currentUser?.email, currentUser?.username]);
 
     const getCollaborators = async (ideaId: number) => {
         try {
@@ -89,7 +112,6 @@ export default function RepositorySettingsClient() {
         }
     };
 
-
     useEffect(() => {
         if (!ideaId) return;
 
@@ -97,13 +119,56 @@ export default function RepositorySettingsClient() {
         getCollaborators(ideaId)
             .then((data) => {
                 if (data) {
-                    setCollaborators(data);
+                    setCollaborators(data.data);
                 } else {
                     setError("Failed to load collaborators");
                 }
             })
             .finally(() => setLoading(false));
     }, [ideaId]);
+
+    if (!isAuthenticated) {
+        return (
+            <div className={styles.pageContainer}>
+                <NavBar
+                    title="iHive-Entrepreneur"
+                    links={[
+                        { href: "/entrepreneur", label: "Profile" },
+                        { href: "/setting", label: "Setting" },
+                        { href: "/sponsors", label: "Offers" },
+                        { href: "/get-started", label: "Sign Out" },
+                    ]}
+                />
+                <main className={styles.mainContent}>
+                    <h1>Unauthorized</h1>
+                    <p>Please login to view this page.</p>
+                </main>
+                <Footer role="Entrepreneur" />
+            </div>
+        );
+    }
+    if (currentUser.id !== idea?.user_id) {
+        return (
+            <div className={styles.pageContainer}>
+                <NavBar
+                    title="iHive-Entrepreneur"
+                    links={[
+                        { href: "/entrepreneur", label: "Profile" },
+                        { href: "/setting", label: "Setting" },
+                        { href: "/sponsors", label: "Offers" },
+                        { href: "/get-started", label: "Sign Out" },
+                    ]}
+                />
+                <main className={styles.mainContent}>
+                    <h1>Unauthorized</h1>
+                    <p>You do not have permission to view this page.</p>
+                </main>
+                <Footer role="Entrepreneur" />
+            </div>
+        );
+    }
+
+
 
     return (
         <div className={styles.pageContainer}>

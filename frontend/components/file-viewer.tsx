@@ -73,10 +73,10 @@ const FileViewer = ({ file }: Props) => {
           const blob = await fetcher(`/files/${file.id}/view`, "GET", null, {}, "blob");
 
           if (getLanguage(file.name) === "markdown" || isCodeFile(file.name)) {
-            const text = await blob.text();
+            const text = await blob.data.text();
             setFileTextContent(text);
           } else {
-            objectUrl = URL.createObjectURL(blob);
+            objectUrl = URL.createObjectURL(blob.data);
             setFileBlobUrl(objectUrl);
           }
         } catch (err) {

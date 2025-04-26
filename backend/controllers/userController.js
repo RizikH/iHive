@@ -50,14 +50,14 @@ const getUser = async (req, res) => {
 // ✅ POST /api/users/register
 const addUser = async (req, res) => {
   try {
-    const { username, email, password, bio, avatar } = req.body;
+    const { username, email, password, bio, avatar, userType } = req.body;
+    console.debug("addUser request body:", req.body);
 
-    if (!username || !email || !password) {
-      console.debug("Validation failed: Missing required fields");
-      return res.status(400).json({ error: "Username, email, and password are required." });
+    if (!username || !email || !password || !userType) {
+      return res.status(400).json({ error: "Username, email, password, and user type are required." });
     }
 
-    // 1. Register user with Supabase Auth
+    // 1. Register with Supabase Auth
     const { data, error } = await supabase.auth.signUp({
       email,
       password,
@@ -68,27 +68,45 @@ const addUser = async (req, res) => {
 
     if (error) {
       console.error("Supabase signUp error:", error.message);
-      throw new Error(error.message);
+
+      // Handle duplicate email from Supabase Auth (rare, but possible)
+      if (error.message.toLowerCase().includes("user already registered")) {
+        return res.status(409).json({ error: "User with this email already exists." });
+      }
+
+      return res.status(400).json({ error: error.message });
     }
 
     const authUser = data.user;
+
     if (!authUser) {
-      console.error("Signup succeeded but no user returned.");
       return res.status(500).json({ error: "Signup succeeded but no user returned." });
     }
 
+    // 2. Add user to public.users table
+    try {
+      await User.createUser({
+        id: authUser.id,
+        username: authUser.user_metadata.username,
+        email: authUser.email,
+        avatar: avatar || null,
+        bio: bio || null,
+        user_type: userType,
+      });
+    } catch (dbError) {
+      console.error("Database insert error:", dbError);
 
-    // 2. Create user in public.users table
-    await User.createUser({
-      id: authUser.id,
-      username: authUser.user_metadata.username,
-      email: authUser.email,
-      avatar: avatar || null,
-      bio: bio || null,
-    });
+      if (
+        dbError.message.includes('duplicate key') &&
+        dbError.message.includes('users_email_key')
+      ) {
+        return res.status(409).json({ error: "User with this email already exists." });
+      }
 
+      return res.status(500).json({ error: "Failed to save user to database." });
+    }
 
-    res.status(201).json({
+    return res.status(201).json({
       message: "User registered successfully!",
       user: {
         id: authUser.id,
@@ -98,11 +116,13 @@ const addUser = async (req, res) => {
         avatar,
       },
     });
-  } catch (error) {
-    console.error("addUser error:", error.message);
-    res.status(500).json({ error: error.message });
+
+  } catch (err) {
+    console.error("Unexpected addUser error:", err);
+    return res.status(500).json({ error: "An unexpected error occurred during registration." });
   }
 };
+
 
 // ✅ POST /api/users/login
 const loginUser = async (req, res) => {
@@ -157,12 +177,7 @@ const updateUser = async (req, res) => {
   }
 
   try {
-    const {
-      username,
-      email,
-      bio
-    } = req.body;
-    const updatedUser = await User.updateUser(userIdFromParams, username, email, bio);
+    const updatedUser = await User.updateUser(userIdFromParams, req.body);
     res.json(updatedUser);
   } catch (error) {
     res.status(500).json({
@@ -170,6 +185,62 @@ const updateUser = async (req, res) => {
     });
   }
 };
+
+// ✅ PUT /api/users/update/login/:id
+const updateUserLogin = async (req, res) => {
+  const userIdFromToken = req.user?.sub;
+  const userIdFromParams = req.body.id;
+
+  if (userIdFromToken !== userIdFromParams) {
+    return res.status(403).json({
+      error: "Forbidden: You can only update your own profile.",
+    });
+  }
+
+  const { currentPassword, newPassword, email } = req.body;
+
+  if (!currentPassword || !newPassword || !email) {
+    return res.status(400).json({
+      error: "Missing current password, new password, or email.",
+    });
+  }
+
+  try {
+    // Step 1: Try to re-authenticate with current password
+    const { error: loginError } = await supabase.auth.signInWithPassword({
+      email,
+      password: currentPassword,
+    });
+
+    if (loginError) {
+      return res.status(401).json({
+        error: "Current password is incorrect.",
+      });
+    }
+
+    // Step 2: Update the password
+    const { error: updateError } = await supabase.auth.updateUser({
+      password: newPassword,
+    });
+
+    if (updateError) {
+      return res.status(400).json({
+        error: updateError.message,
+      });
+    }
+
+    res.json({
+      message: "Password updated successfully.",
+    });
+  } catch (err) {
+    console.error("Error updating password:", err);
+    res.status(500).json({
+      error: err.message,
+    });
+  }
+};
+
+
 
 // ✅ DELETE /api/users/delete/:id
 const deleteUser = async (req, res) => {
@@ -208,4 +279,5 @@ module.exports = {
   updateUser,
   deleteUser,
   getUsersByQuery,
+  updateUserLogin,
 };

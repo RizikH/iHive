@@ -5,7 +5,7 @@ const getAllIdeas = async () => {
     const { data, error } = await supabase
         .from("ideas")
         .select(`
-            *,
+            *, users(*),
             idea_tags (
                 *,
                 tags (*)
@@ -99,7 +99,7 @@ const deleteIdea = async (id) => {
 const getIdeaById = async (id) => {
     const { data, error } = await supabase
         .from("ideas")
-        .select("*")
+        .select("*, users(*)")
         .eq("id", id)
         .single();
 

@@ -10,6 +10,7 @@ import "../styles/globals.css";
 import RepositoryModal from "@/components/repository-modal";
 import { fetcher } from "@/app/utils/fetcher";
 import { isAuthenticated } from "@/app/utils/isAuthenticated";
+import NavBar from "@/components/nav-bar";
 
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:5000/api";
@@ -77,8 +78,8 @@ const InvestorPage = () => {
         const fetchIdeas = async () => {
             try {
                 const data = await fetcher("/ideas");
-                setAllIdeas(data || []);
-                setIdeas(data || []);
+                setAllIdeas(data.data || []);
+                setIdeas(data.data || []);
             } catch (err: any) {
                 setErrorIdeas(err.message || "An unknown error occurred.");
             } finally {
@@ -98,7 +99,7 @@ const InvestorPage = () => {
 
             try {
                 const data = await fetcher(`/ideas/search/title/${encodeURIComponent(searchTerm)}`);
-                setIdeas(data || []);
+                setIdeas(data.data || []);
             } catch (err: any) {
                 setErrorIdeas(err.message || "An unknown error occurred.");
             }
@@ -113,8 +114,8 @@ const InvestorPage = () => {
         const fetchAllTags = async () => {
             try {
                 const data = await fetcher("/tags/all");
-                setAllTags(data || []);
-                setFilteredTags(data || []);
+                setAllTags(data.data || []);
+                setFilteredTags(data.data || []);
             } catch (err) {
                 console.error("Error fetching tags:", err);
             }
@@ -173,37 +174,37 @@ const InvestorPage = () => {
 
     const handleInvest = async (ideaId: string, amount: number) => {
         const userId = user?.id;
-      
+
         if (!userId) {
-          alert("You must be logged in to invest.");
-          return;
+            alert("You must be logged in to invest.");
+            return;
         }
-      
+
         try {
-          const res = await fetch(`${API_URL}/investments`, {
-            method: "POST",
-            headers: {
-              "Content-Type": "application/json",
-            },
-            body: JSON.stringify({
-              idea_id: ideaId,
-              user_id: userId,
-              amount,
-            }),
-          });
-      
-          const data = await res.json();
-      
-          if (res.ok) {
-            alert("Investment successful!");
-          } else {
-            alert(`Investment failed: ${data.error}`);
-          }
+            const res = await fetch(`${API_URL}/investments`, {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json",
+                },
+                body: JSON.stringify({
+                    idea_id: ideaId,
+                    user_id: userId,
+                    amount,
+                }),
+            });
+
+            const data = await res.json();
+
+            if (res.ok) {
+                alert("Investment successful!");
+            } else {
+                alert(`Investment failed: ${data.error}`);
+            }
         } catch (err) {
-          console.error("Investment error:", err);
-          alert("Something went wrong while processing your investment.");
+            console.error("Investment error:", err);
+            alert("Something went wrong while processing your investment.");
         }
-      };    
+    };
 
     // Fetch files for the selected idea
     const searchParams = useSearchParams();
@@ -220,47 +221,28 @@ const InvestorPage = () => {
                 <link rel="icon" href="/Images/iHive.png" />
             </Head>
 
-            <nav className={styles.navContainer}>
-                <div className={styles.logo}>
-                    <Image
-                        src="/Images/iHive.png"
-                        alt="Logo"
-                        title="Home"
-                        width={35}
-                        height={35}
-                        className={styles.logoImage}
-                    />
-                    <Link href="/">iHive-Investors</Link>
-                </div>
-                <div className={styles["nav-links"]}>
-                    <Link href="/investments">Investments</Link>
-                    <Link href="setting">Settings</Link>
-                    <Link href="get-started">Signout</Link>
-                    <Link href="setting">
-                        <Image
-                            src="/Images/Yixi.jpeg"
-                            alt="Investor Profile"
-                            width={40}
-                            height={40}
-                            className={styles.avatarIcon}
+            <NavBar
+                title="iHive-Investors"
+                profileHref="/investor-profile"
+                profileImgSrc="/Images/Yixi.jpeg"
+                extraLinks={[{ href: "/investments", label: "Investments" }]}
+                searchBar={
+                    <div className={styles.searchContainer}>
+                        <input
+                            type="text"
+                            className={styles.searchInput}
+                            placeholder="Search ideas..."
+                            value={searchTerm}
+                            onChange={(e) => setSearchTerm(e.target.value)}
                         />
-                    </Link>
-                </div>
+                        <button className={styles.searchButton}>Search</button>
+                        <button className={styles.filterButton} onClick={() => setShowFilterPopup(true)}>
+                            Filter
+                        </button>
+                    </div>
+                }
+            />
 
-                <div className={styles.searchContainer}>
-                    <input
-                        type="text"
-                        className={styles.searchInput}
-                        placeholder="Search ideas..."
-                        value={searchTerm}
-                        onChange={(e) => setSearchTerm(e.target.value)}
-                    />
-                    <button className={styles.searchButton}>Search</button>
-                    <button className={styles.filterButton} onClick={() => setShowFilterPopup(true)}>
-                        Filter
-                    </button>
-                </div>
-            </nav>
 
             {showFilterPopup && (
                 <div className={styles.filterPopup}>
