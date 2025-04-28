@@ -17,7 +17,6 @@ const BasicInfo = () => {
     const [formData, setFormData] = useState({
         username: '',
         email: '',
-        created_at: '',
         bio: '',
     });
     const [bioEditable, setBioEditable] = useState(false);
@@ -28,8 +27,8 @@ const BasicInfo = () => {
 
     useEffect(() => {
         if (currentUser) {
-            const { username = '', bio = '', email = '', created_at = '' } = currentUser;
-            setFormData({ username, bio, email, created_at });
+            const { username = '', bio = '', email = '' } = currentUser;
+            setFormData({ username, bio, email });
         }
     }, [currentUser]);
 
@@ -97,9 +96,6 @@ const BasicInfo = () => {
                         <FontAwesomeIcon icon={faCalendar} className={styles.icon} />
                         <span className={styles.labelText}>Date Joined:</span>
                     </label>
-                    <span className={styles.formValue}>
-                        {formData.created_at ? new Date(formData.created_at).toLocaleDateString() : 'N/A'}
-                    </span>
                 </div>
 
                 {/* Bio */}
