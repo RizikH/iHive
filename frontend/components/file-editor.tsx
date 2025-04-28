@@ -4,11 +4,11 @@ import { FileItem } from "./file-tree";
 import { fetcher } from "@/app/utils/fetcher";
 import { Prism as SyntaxHighlighter } from "react-syntax-highlighter";
 import { oneLight } from "react-syntax-highlighter/dist/esm/styles/prism";
-import { 
-  FiCopy, 
-  FiDownload, 
-  FiEdit, 
-  FiSave, 
+import {
+  FiCopy,
+  FiDownload,
+  FiEdit,
+  FiSave,
   FiX,
   FiLock,
   FiShield,
@@ -22,7 +22,6 @@ type Props = {
   onUpdate: (file: FileItem) => void;
 };
 
-// Permission type definition
 type Permission = 'private' | 'protected' | 'public';
 
 const FileEditor = ({ file, onUpdate }: Props) => {
@@ -32,58 +31,38 @@ const FileEditor = ({ file, onUpdate }: Props) => {
   const [copied, setCopied] = useState(false);
   const [showPermissions, setShowPermissions] = useState(false);
   const [permissionLevel, setPermissionLevel] = useState<Permission>(
-    file.is_public as Permission || 'private'
+    file.permission_level as Permission || 'private'
   );
   const [updatingPermission, setUpdatingPermission] = useState(false);
-  
+
   const editorRef = useRef<HTMLTextAreaElement>(null);
   const currentUser = useAuthStore((state) => state.currentUser);
   const isOwner = currentUser?.id === file.user_id;
-  
-  // Get language for syntax highlighting
+
   const getLanguage = (filename: string): string => {
     const ext = filename.split(".").pop()?.toLowerCase();
     switch (ext) {
-      case "js":
-      case "jsx":
-        return "javascript";
-      case "ts":
-      case "tsx":
-        return "typescript";
-      case "py":
-        return "python";
-      case "java":
-        return "java";
-      case "c":
-        return "c";
-      case "cpp":
-      case "cc":
-      case "cxx":
-        return "cpp";
-      case "css":
-        return "css";
-      case "html":
-        return "html";
-      case "json":
-        return "json";
-      case "md":
-        return "markdown";
-      case "sql":
-        return "sql";
-      case "sh":
-        return "bash";
-      case "php":
-        return "php";
-      default:
-        return "text";
+      case "js": case "jsx": return "javascript";
+      case "ts": case "tsx": return "typescript";
+      case "py": return "python";
+      case "java": return "java";
+      case "c": return "c";
+      case "cpp": case "cc": case "cxx": return "cpp";
+      case "css": return "css";
+      case "html": return "html";
+      case "json": return "json";
+      case "md": return "markdown";
+      case "sql": return "sql";
+      case "sh": return "bash";
+      case "php": return "php";
+      default: return "text";
     }
   };
-  
+
   useEffect(() => {
     setContent(file.content || "");
-    setIsEditing(false); // Reset editing when switching files
+    setIsEditing(false);
     setCopied(false);
-    // Make sure we have a default permission value if is_public is undefined
     const filePermission = file.is_public || 'private';
     setPermissionLevel(filePermission as Permission);
     setShowPermissions(false);
@@ -98,7 +77,6 @@ const FileEditor = ({ file, onUpdate }: Props) => {
     setIsSaving(true);
     try {
       const updated = await fetcher(`/files/${file.id}`, "PUT", {
-        ...file,
         content,
       });
       onUpdate(updated.data);
@@ -109,15 +87,16 @@ const FileEditor = ({ file, onUpdate }: Props) => {
       setIsSaving(false);
     }
   };
-  
+
   const handleCopy = () => {
+    if (!content) return;
     navigator.clipboard.writeText(content);
     setCopied(true);
     setTimeout(() => setCopied(false), 2000);
   };
-  
+
   const handleDownload = () => {
-    const blob = new Blob([content], { type: 'text/plain' });
+    const blob = new Blob([content || ""], { type: 'text/plain' });
     const url = URL.createObjectURL(blob);
     const a = document.createElement('a');
     a.href = url;
@@ -127,7 +106,7 @@ const FileEditor = ({ file, onUpdate }: Props) => {
     document.body.removeChild(a);
     URL.revokeObjectURL(url);
   };
-  
+
   const handleCancel = () => {
     setContent(file.content || "");
     setIsEditing(false);
@@ -135,18 +114,19 @@ const FileEditor = ({ file, onUpdate }: Props) => {
 
   const handlePermissionChange = async (newPermission: Permission) => {
     if (!file.id || !isOwner) return;
-    
+
     setUpdatingPermission(true);
     try {
-      const response = await fetcher(`/files/${file.id}`, "PUT", {
-        is_public: newPermission
+      const { data } = await fetcher(`/files/${file.id}`, "PUT", {
+        permission_level: newPermission
       });
-      
-      if (response && response.data) {
+
+      if (data) {
         setPermissionLevel(newPermission);
         const updatedFile = {
           ...file,
-          is_public: newPermission
+          is_public: data.is_public,
+          permission_level: data.permission_level,
         };
         onUpdate(updatedFile);
       } else {
@@ -178,15 +158,14 @@ const FileEditor = ({ file, onUpdate }: Props) => {
     }
   };
 
-  // Also debug the current permission
-  console.log('Current file permission:', file.is_public, 'Current permission state:', permissionLevel);
+  const canEditFile = file.type === "text" && !file.is_locked;
 
   return (
     <div className={styles.editorWrapper}>
       <div className={styles.editorToolbar}>
         <div className={styles.editorInfo}>
           <span className={styles.filename}>
-            {file.name} 
+            {file.name}
             {file.is_locked && (
               <span className={styles.lockIcon} title="This file is locked and cannot be edited">
                 <FiLock />
@@ -194,14 +173,14 @@ const FileEditor = ({ file, onUpdate }: Props) => {
             )}
           </span>
           <span className={styles.filesize}>{content.length} bytes</span>
-          <span 
-            className={styles.permissionIndicator} 
+          <span
+            className={styles.permissionIndicator}
             title={getPermissionLabel(permissionLevel)}
             onClick={() => isOwner && setShowPermissions(!showPermissions)}
-            style={{ 
-              backgroundColor: permissionLevel === 'private' ? '#fee2e2' : 
-                             permissionLevel === 'protected' ? '#fef3c7' : 
-                             '#dcfce7',
+            style={{
+              backgroundColor: permissionLevel === 'private' ? '#fee2e2' :
+                permissionLevel === 'protected' ? '#fef3c7' :
+                  '#dcfce7',
               cursor: isOwner ? 'pointer' : 'default'
             }}
           >
@@ -209,26 +188,27 @@ const FileEditor = ({ file, onUpdate }: Props) => {
             <span className={styles.permissionText}>{permissionLevel}</span>
           </span>
         </div>
-        
+
         <div className={styles.editorActions}>
           {!isEditing ? (
             <>
-              <button 
-                className={styles.toolbarButton} 
-                onClick={handleCopy} 
-                title="Copy to clipboard"
-              >
-                <FiCopy /> {copied ? "Copied!" : "Copy"}
-              </button>
-              <button 
+              <button
                 className={styles.toolbarButton}
                 onClick={handleDownload}
                 title="Download file"
               >
                 <FiDownload /> Download
               </button>
+              <button
+                className={styles.toolbarButton}
+                onClick={handleCopy}
+                disabled={!content}
+                title={content ? "Copy to clipboard" : "No content to copy"}
+              >
+                <FiCopy /> {copied ? "Copied!" : "Copy"}
+              </button>
               {isOwner && (
-                <button 
+                <button
                   className={styles.toolbarButton}
                   onClick={() => setShowPermissions(!showPermissions)}
                   title="Manage permissions"
@@ -236,8 +216,8 @@ const FileEditor = ({ file, onUpdate }: Props) => {
                   <FiSettings /> Permissions
                 </button>
               )}
-              {!file.is_locked && (
-                <button 
+              {canEditFile && (
+                <button
                   className={styles.toolbarButton}
                   onClick={() => setIsEditing(true)}
                   title="Edit file"
@@ -248,16 +228,16 @@ const FileEditor = ({ file, onUpdate }: Props) => {
             </>
           ) : (
             <>
-              <button 
+              <button
                 className={styles.toolbarButton}
                 onClick={handleCancel}
                 title="Cancel editing"
               >
                 <FiX /> Cancel
               </button>
-              <button 
+              <button
                 className={`${styles.toolbarButton} ${styles.saveButton}`}
-                onClick={handleSave} 
+                onClick={handleSave}
                 disabled={isSaving}
                 title="Save changes"
               >
@@ -267,7 +247,7 @@ const FileEditor = ({ file, onUpdate }: Props) => {
           )}
         </div>
       </div>
-      
+
       {showPermissions && isOwner && (
         <div className={styles.permissionsPanel}>
           <h3 className={styles.permissionsTitle}>File Permissions</h3>
@@ -279,18 +259,18 @@ const FileEditor = ({ file, onUpdate }: Props) => {
                 onClick={() => handlePermissionChange(permission)}
                 disabled={updatingPermission || permissionLevel === permission}
                 style={{
-                  backgroundColor: permission === 'private' ? '#fff1f2' : 
-                                permission === 'protected' ? '#fef9c3' : 
-                                '#f0fdf4',
-                  borderColor: permission === 'private' ? '#fecaca' : 
-                             permission === 'protected' ? '#fde68a' : 
-                             '#bbf7d0',
+                  backgroundColor: permission === 'private' ? '#fff1f2' :
+                    permission === 'protected' ? '#fef9c3' :
+                      '#f0fdf4',
+                  borderColor: permission === 'private' ? '#fecaca' :
+                    permission === 'protected' ? '#fde68a' :
+                      '#bbf7d0',
                   opacity: permissionLevel === permission ? 1 : 0.8
                 }}
               >
                 {getPermissionIcon(permission)}
                 <span>{getPermissionLabel(permission)}</span>
-                {permissionLevel === permission && 
+                {permissionLevel === permission &&
                   <span style={{ marginLeft: 'auto', fontSize: '0.75rem' }}>✓ Current</span>
                 }
               </button>
@@ -308,10 +288,10 @@ const FileEditor = ({ file, onUpdate }: Props) => {
           )}
         </div>
       )}
-      
-      {isEditing && !file.is_locked ? (
+
+      {isEditing && canEditFile ? (
         <textarea
-          ref={editorRef as React.RefObject<HTMLTextAreaElement>}
+          ref={editorRef}
           className={styles.editableContent}
           value={content}
           onChange={handleInput}
@@ -326,8 +306,8 @@ const FileEditor = ({ file, onUpdate }: Props) => {
               style={oneLight}
               showLineNumbers
               wrapLines
-              customStyle={{ 
-                margin: 0, 
+              customStyle={{
+                margin: 0,
                 borderRadius: '0 0 6px 6px',
                 backgroundColor: '#f6f8fa'
               }}
@@ -336,13 +316,13 @@ const FileEditor = ({ file, onUpdate }: Props) => {
             </SyntaxHighlighter>
           ) : (
             <div className={styles.emptyFile}>
-              <h3>Welcome to iHive Editor!</h3>
-              <p>Select or create a file to begin editing.</p>
+              <h3>No content available</h3>
+              <p>This file might be binary (like an image, PDF, etc).</p>
             </div>
           )}
         </div>
       )}
-      
+
       {file.is_locked && (
         <div className={styles.lockedFileMessage}>
           <FiLock /> This file is locked and cannot be edited

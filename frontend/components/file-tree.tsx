@@ -28,7 +28,8 @@ export type FileItem = {
   mime_type?: string;
   children?: FileItem[];
   is_locked?: boolean;
-  is_public?: 'private' | 'protected' | 'public';
+  is_public?: boolean;
+  permission_level: "public" | "private" | "protected";
   user_id?: string;
 };
 
@@ -38,6 +39,7 @@ type FileTreeProps = {
   onRefresh: () => void;
   selectedId: string | null;
   ideaId: number;
+  isReadOnly?: boolean; // Optional prop to indicate read-only mode
 };
 
 
@@ -62,26 +64,29 @@ const getFileIcon = (file: FileItem) => {
   return file.type === "text" ? <FiFileText /> : <FiFile />;
 };
 
-const FileTree = ({ files, onSelect, onRefresh, selectedId, ideaId }: FileTreeProps) => {
+const FileTree = ({ files, onSelect, onRefresh, selectedId, ideaId, isReadOnly }: FileTreeProps) => {
   const [expanded, setExpanded] = useState<Record<string, boolean>>({});
   const [draggedItem, setDraggedItem] = useState<string | null>(null);
   const [dropTarget, setDropTarget] = useState<string | null>(null);
   const fileTreeRef = useRef<HTMLDivElement>(null);
+  const isPreviewMode = isReadOnly || false;
 
-  // Auto-expand first level folders at first load
-  React.useEffect(() => {
-    const topLevelFolders = files
-      .filter(f => f.type === "folder" && f.parent_id === null)
+
+
+  // Auto-expand all folders at first load
+  useEffect(() => {
+    const allFolderIds = files
+      .filter(f => f.type === "folder")
       .map(f => f.id);
 
-    if (topLevelFolders.length > 0) {
+    if (allFolderIds.length > 0) {
       const newExpanded: Record<string, boolean> = {};
-      topLevelFolders.forEach(id => { newExpanded[id] = true; });
-      setExpanded(prev => ({ ...prev, ...newExpanded }));
+      allFolderIds.forEach(id => { newExpanded[id] = true; });
+      setExpanded(newExpanded); // override instead of merging
     }
   }, [files]);
 
-  // REMOVE the global click outside listener that was causing issues
+
   // Handle deselection only when clicking on empty areas of the tree
 
   const selectedFile = files.find((f) => f.id === selectedId) || null;
@@ -194,10 +199,12 @@ const FileTree = ({ files, onSelect, onRefresh, selectedId, ideaId }: FileTreePr
 
 
   const handleDragStart = (e: React.DragEvent, id: string) => {
+    if (isPreviewMode) return;
     setDraggedItem(id);
     e.dataTransfer.setData('text/plain', id);
     e.dataTransfer.effectAllowed = 'move';
   };
+
 
   const handleDragOver = (e: React.DragEvent, id: string, type: string) => {
     e.preventDefault();
@@ -274,23 +281,28 @@ const FileTree = ({ files, onSelect, onRefresh, selectedId, ideaId }: FileTreePr
         key={item.id}
         className={`${styles.treeItem} ${selectedId === item.id ? styles.selected : ""} ${dropTarget === item.id ? styles.dropTarget : ""}`}
         draggable={!isPreviewMode && !item.is_locked}
-        onDragStart={(e) => !item.is_locked && handleDragStart(e, item.id)}
-        onDragOver={(e) => handleDragOver(e, item.id, item.type)}
+        onDragStart={(e) => !isPreviewMode && !item.is_locked && handleDragStart(e, item.id)}
+        onDragOver={(e) => !isPreviewMode && handleDragOver(e, item.id, item.type)}
         onDragLeave={handleDragLeave}
-        onDrop={(e) => handleDrop(e, item.id)}
+        onDrop={(e) => !isPreviewMode && handleDrop(e, item.id)}
       >
         <div
           className={`${styles.fileItem} ${item.is_locked ? styles.lockedItem : ''}`}
           onClick={(e) => {
             e.stopPropagation();
-            // Only allow selection of non-locked files
-            if (!item.is_locked) {
+
+            // 🛡️ Allow selection if:
+            // - Not preview mode (full access)
+            // - OR item is not locked (even in readonly mode)
+            if (!isPreviewMode || !item.is_locked) {
               onSelect(item);
-              if (item.type === "folder") {
+
+              if (item.type === "folder" && (!isPreviewMode || !item.is_locked)) {
                 toggleExpand(item.id);
               }
             }
           }}
+
         >
 
           <div className={styles.fileItemLeft}>
@@ -298,8 +310,7 @@ const FileTree = ({ files, onSelect, onRefresh, selectedId, ideaId }: FileTreePr
               <span
                 onClick={(e) => {
                   e.stopPropagation();
-                  // Only toggle expansion of non-locked folders
-                  if (!item.is_locked) {
+                  if (!isPreviewMode) {
                     toggleExpand(item.id);
                   }
                 }}
@@ -321,7 +332,6 @@ const FileTree = ({ files, onSelect, onRefresh, selectedId, ideaId }: FileTreePr
               </span>
             )}
           </div>
-
 
           {!isPreviewMode && selectedId === item.id && !item.is_locked && (
             <button
@@ -346,8 +356,8 @@ const FileTree = ({ files, onSelect, onRefresh, selectedId, ideaId }: FileTreePr
   };
 
 
+
   const treeData = buildTree(files);
-  const isPreviewMode = false;
 
   // Handler to deselect when clicking on empty space in the tree
   const handleTreeClick = (e: React.MouseEvent) => {
@@ -365,22 +375,26 @@ const FileTree = ({ files, onSelect, onRefresh, selectedId, ideaId }: FileTreePr
   return (
     <div className={styles.fileTreeContainer} ref={fileTreeRef} onClick={handleTreeClick}>
       <div className={styles.treeActionsTop} onClick={(e) => e.stopPropagation()}>
-        <button onClick={() => handleCreate("folder")} title="Create new folder">
-          <FiFolderPlus /> Folder
-        </button>
-        <button onClick={() => handleCreate("text")} title="Create new file">
-          <FiFilePlus /> File
-        </button>
-        <label title="Upload a file">
-          <FiUpload /> Upload
-          <input
-            type="file"
-            onChange={handleUpload}
-          />
-
-
-        </label>
+        {!isPreviewMode && (
+          <>
+            <button onClick={() => handleCreate("folder")} title="Create new folder">
+              <FiFolderPlus /> Folder
+            </button>
+            <button onClick={() => handleCreate("text")} title="Create new file">
+              <FiFilePlus /> File
+            </button>
+            <label title="Upload a file">
+              <FiUpload /> Upload
+              <input
+                type="file"
+                onChange={handleUpload}
+              />
+            </label>
+          </>
+        )}
       </div>
+
+
 
       <div className={styles.fileTreeList}>
         {treeData.length ? renderTree(treeData) : (

@@ -3,13 +3,8 @@
 import Image from "next/image";
 import { cn } from "@/lib/utils";
 import { Marquee } from "@/components/magicui/marquee";
-import Link from "next/link";
 import { useState, useEffect } from "react";
-import FileTreeDemo from "@/components/file-tree-demo";
-import { Dialog, DialogContent, DialogTitle } from "../components/ui/dialog";
-import styles from "@/app/styles/repository-modal.module.css";
 import { fetcher } from "@/app/utils/fetcher";
-import { VisuallyHidden } from "@radix-ui/react-visually-hidden";
 import RepositoryModal from "@/components/repository-modal";
 import { useAuthStore } from '@/app/stores/useAuthStore';
 
@@ -72,6 +67,7 @@ const ReviewCard = ({
         onClose={() => setIsModalOpen(false)}
         repoId={repoId}
         title={ideaTitle}
+        isInvestorView={false}
       />
     </>
   );

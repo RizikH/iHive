@@ -12,31 +12,22 @@ const authRateLimiter = rateLimit({
   message: "Too many requests from this IP, please try again later.",
 });
 
-// Enable file upload middleware
 router.use(fileUpload());
 
+// ❗ fixed routes FIRST
 router.get('/public', fileController.getPublicFiles);
-
-// Apply rate limiter to all routes
-router.use(authRateLimiter);
-
-router.get('/', authenticate, fileController.getFiles);
+router.post('/upload', authenticate, fileController.uploadFile);
+router.post('/move/:id', authenticate, fileController.moveFile);
 
 // protected route for streaming files
 router.get('/:id/view', authenticate, fileController.streamFile);
 
-// Gets a file by ID
+// now dynamic ID routes
+router.get('/', authenticate, fileController.getFiles);
 router.get('/:id', authenticate, fileController.getFileById);
-
-router.get('/public', fileController.getPublicFiles);
-
-// 🔐 Protected Routes
 router.post('/', authenticate, fileController.createFile);
 router.put('/:id', authenticate, fileController.updateFile);
 router.delete('/:id', authenticate, fileController.deleteFile);
 
-router.post('/upload', authenticate, fileController.uploadFile);
-
-router.post('/move/:id', authenticate, fileController.moveFile);
 
 module.exports = router;

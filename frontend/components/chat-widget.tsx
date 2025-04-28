@@ -71,9 +71,11 @@ export default function ChatWidget() {
           : "http://localhost:5000";
 
       socket = io(socketUrl, {
+        path: "/socket.io",
         transports: ["websocket"],
         withCredentials: true,
       });
+
 
       connectedRef.current = true;
 
@@ -92,7 +94,7 @@ export default function ChatWidget() {
       if (msg.sender_id === currentUser.id) return;
 
       if (audioRef.current) {
-        audioRef.current.play().catch(() => {});
+        audioRef.current.play().catch(() => { });
       }
 
       setOpenChats((prev) => {
@@ -275,7 +277,7 @@ export default function ChatWidget() {
   };
 
   if (!isAuthenticated) return null;
-  
+
   return (
     <div className="fixed bottom-4 right-4 z-50 flex flex-row-reverse items-end gap-2">
       <audio ref={audioRef} src="/media/notification.mp3" preload="auto" />

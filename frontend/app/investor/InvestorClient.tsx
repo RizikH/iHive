@@ -329,8 +329,8 @@ const InvestorPage = () => {
                                 }}
                                 className={styles.investButton}
                             >
-                                <span className={styles.investButtonIcon}>💰</span>
-                                Invest
+                                <span className={styles.investButtonIcon}></span>
+                                Learn More
                             </button>
                         </div>
                     ))}

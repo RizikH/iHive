@@ -110,6 +110,7 @@ const getFiles = async (req, res) => {
     const userId = req.user?.sub;
 
     const idea = await Idea.getIdeaById(ideaId);
+
     if (!idea) {
       return res.status(404).json({ error: "Idea not found" });
     }
@@ -128,13 +129,17 @@ const getFiles = async (req, res) => {
     }
 
     const filteredFiles = files.map((file) => {
-      const fileLevel = file.is_public === "public"
+      const fileLevel = file.permission_level === "public"
         ? 0
-        : file.is_public === "protected"
+        : file.permission_level === "protected"
           ? 1
           : 2;
 
-      const canView = isOwner || (userLevel !== null && canAccess(fileLevel, userLevel));
+      const canView = isOwner || (
+        userLevel === null
+          ? fileLevel === 0
+          : canAccess(fileLevel, userLevel)
+      );
 
       if (canView) {
         return { ...file, is_locked: false };
@@ -258,35 +263,36 @@ const createFile = async (req, res) => {
   }
 };
 
-// Update file metadata
 const updateFile = async (req, res) => {
+  // Update file details
+  console.log("Updating file with ID:", req.params.id);
+  console.log("Request body:", req.body);
+  console.log("Request user:", req.user);
+  console.log("Request params:", req.params);
   try {
-    const file = await File.getById(req.params.id);
-    if (!file) return res.status(404).json({ error: "File not found" });
+    const id = req.params.id;
+    if (!id) return res.status(404).json({ error: "File not found" });
 
     const userId = req.user?.sub;
+
+    const file = await File.getById(id);
+    console.log("File:", file);
+    if (!file) return res.status(404).json({ error: "File not found" });
+
     if (file.user_id !== userId) {
       return res.status(403).json({ error: "Not authorized to update this file." });
     }
 
-    const { name, content, parent_id, type, idea_id, is_public } = req.body;
+    const updates = req.body;
 
-    const updatedFields = {
-      name,
-      content,
-      parent_id,
-      type,
-      idea_id,
-      is_public
-    };
-
-    const updatedFile = await File.update(req.params.id, updatedFields);
+    const updatedFile = await File.update(id, updates);
     res.json(updatedFile);
   } catch (err) {
     console.error("❌ Error in updateFile:", err);
     res.status(400).json({ error: err.message });
   }
 };
+
 
 const streamFile = async (req, res) => {
   try {

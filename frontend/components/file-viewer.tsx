@@ -111,7 +111,7 @@ const FileViewer = ({ file }: Props) => {
     <div className={styles.markdownViewer}>
       <ReactMarkdown
         remarkPlugins={[remarkGfm]}
-        rehypePlugins={[rehypeRaw]} // Added rehypeRaw for HTML rendering
+        rehypePlugins={[rehypeRaw]}
         components={{
           code: (props: any) => {
             const { inline, className, children, ...rest } = props;
@@ -170,20 +170,26 @@ const FileViewer = ({ file }: Props) => {
 
   return (
     <div className={styles.viewerWrapper}>
-      <h3>{file.name}</h3>
-
-      {file.type === "text" ? (
-        getLanguage(file.name) === "markdown"
-          ? renderMarkdown(file.content || "")
-          : renderCodeBlock(file.content || "")
-      ) : file.type === "upload" && getLanguage(file.name) === "markdown" ? (
-        renderMarkdown(fileTextContent)
-      ) : file.type === "upload" && isCodeFile(file.name) ? (
-        renderCodeBlock(fileTextContent)
-      ) : fileBlobUrl ? (
-        renderUploadPreview()
+      {file.type === "folder" ? (
+        <></> // Show absolutely nothing if it's a folder
       ) : (
-        <p>🪵 Preview not available for this file type.</p>
+        <>
+          <h3>{file.name}</h3>
+
+          {file.type === "text" ? (
+            getLanguage(file.name) === "markdown"
+              ? renderMarkdown(file.content || "")
+              : renderCodeBlock(file.content || "")
+          ) : file.type === "upload" && getLanguage(file.name) === "markdown" ? (
+            renderMarkdown(fileTextContent)
+          ) : file.type === "upload" && isCodeFile(file.name) ? (
+            renderCodeBlock(fileTextContent)
+          ) : fileBlobUrl ? (
+            renderUploadPreview()
+          ) : (
+            <p>🪵 Preview not available for this file type.</p>
+          )}
+        </>
       )}
     </div>
   );

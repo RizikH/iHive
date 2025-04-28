@@ -15,7 +15,7 @@ const RepositoryModal = ({
   onClose,
   repoId,
   title,
-  isInvestorView = false,
+  isInvestorView,
   onInvest,
 }: {
   isOpen: boolean;
@@ -36,7 +36,6 @@ const RepositoryModal = ({
   const [successMessage, setSuccessMessage] = useState<string | null>(null);
   const contentBodyRef = useRef<HTMLDivElement>(null);
 
-  const isReadOnly = true;
 
   const fetchRepoDetails = useCallback(async () => {
     try {
@@ -57,7 +56,11 @@ const RepositoryModal = ({
 
   const fetchFiles = useCallback(async () => {
     try {
-      const files = await fetcher(`/files/public?idea_id=${repoId}`, 'GET');
+      const files = await fetcher(`/files?idea_id=${repoId}`, 'GET');
+
+      console.log("Fetched files:", files.data); // Debugging line
+      console.log("requested repo id: , repoId"); // Debugging line
+      
       if (files.status !== 200 || !files.data) {
         throw new Error(files.data.error || "Failed to load files data");
       }
@@ -135,6 +138,7 @@ const RepositoryModal = ({
                       onRefresh={handleRefresh}
                       selectedId={currentFile?.id || null}
                       ideaId={Number(repoId) || 0}
+                      isReadOnly={true}
                     />
                   )}
                 </div>

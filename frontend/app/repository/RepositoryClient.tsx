@@ -30,11 +30,26 @@ export default function Repository() {
   const [error, setError] = useState<string | null>(null);
   const [unauthorized, setUnauthorized] = useState(false);
   const [authChecked, setAuthChecked] = useState(false);
+  const [idea, setIdea] = useState<any>(null);
+
+
+  const fetchIdeaDetails = useCallback(async () => {
+    try {
+      const ideaData = await fetcher(`/ideas/public?id=${ideaId}`, "GET");
+      if (ideaData.status !== 200 || !ideaData.data) {
+        throw new Error(ideaData.data.error || "Failed to load idea details");
+      }
+      setIdea(ideaData.data);
+    } catch (err) {
+      console.error("Error fetching idea details:", err);
+      setError("Failed to load idea details");
+    }
+  }, [ideaId]);
 
   const fetchFiles = useCallback(async () => {
     try {
       setLoading(true);
-      const path = ideaId ? `/files?idea_id=${ideaId}` : "/files";
+      const path = `/files?idea_id=${ideaId}`;
       const data = await fetcher(path);
       setFiles(data.data);
     } catch (err) {
@@ -58,6 +73,7 @@ export default function Repository() {
         if (idea?.data?.error) {
           setUnauthorized(true);
         } else {
+          await fetchIdeaDetails();
           await fetchFiles();
         }
       } catch (err) {
@@ -112,7 +128,7 @@ export default function Repository() {
           {error && <div className={styles.error}>{error}</div>}
 
           <div className={styles.sideBar}>
-            <h2>File Tree</h2>
+            <h2>{idea.title}</h2>
             <FileTree
               files={files}
               onSelect={handleSelectFile}

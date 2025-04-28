@@ -26,9 +26,8 @@ export default function RepositorySettingsClient() {
         const fetchIdeas = async () => {
             try {
                 const data = await fetcher(`/ideas/search/id/${ideaId}`);
-                console.log("Ideas data:", data);
-                if (data) {
-                    setIdea(data);
+                if (data.status === 200 && data.data) {
+                    setIdea(data.data);
                 } else {
                     setError("Failed to load ideas");
                 }
@@ -46,7 +45,6 @@ export default function RepositorySettingsClient() {
     const getCollaborators = async (ideaId: number) => {
         try {
             const data = await fetcher(`/collabs/${ideaId}`);
-            console.log("Collaborators data:", data);
             return data;
         } catch (err) {
             console.error("Error fetching collaborators:", err);
@@ -160,6 +158,8 @@ export default function RepositorySettingsClient() {
                     ]}
                 />
                 <main className={styles.mainContent}>
+                    <p>user id: {currentUser.id}</p>
+                    <p>idea id: {idea?.user_id}</p>
                     <h1>Unauthorized</h1>
                     <p>You do not have permission to view this page.</p>
                 </main>

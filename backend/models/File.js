@@ -49,6 +49,10 @@ const File = {
 
   // Update file by ID
   async update(id, updates) {
+    if (updates?.permission_level === 'public') {
+      updates.is_public = true;
+    }
+
     const { data, error } = await db
       .from('files')
       .update(updates)
