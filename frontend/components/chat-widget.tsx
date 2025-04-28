@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useRef, useState, useCallback } from "react";
+import { useEffect, useRef, useState } from "react";
 import io, { Socket } from "socket.io-client";
 import { fetcher } from "@/app/utils/fetcher";
 import { useAuthStore } from "@/app/stores/useAuthStore";
@@ -41,66 +41,26 @@ export default function ChatWidget() {
   const inputRefs = useRef<{ [key: string]: HTMLInputElement | null }>({});
   const connectedRef = useRef(false);
 
-  // ✅ Properly placed handlers
-
-  const handleMessage = useCallback((msg: Message) => {
-    if (msg.sender_id === currentUser.id) return;
-
-    if (audioRef.current) {
-      audioRef.current.play().catch(() => {});
+  // Fetch contacts
+  useEffect(() => {
+    if (!isAuthenticated || !currentUser.id) {
+      setOpenChats([]);
+      return;
     }
 
-    setOpenChats((prev) => {
-      const exists = prev.find((chat) => chat.id === msg.roomId);
-      if (exists) {
-        return prev.map((chat) =>
-          chat.id === msg.roomId
-            ? { ...chat, messages: [...chat.messages, msg], typing: false }
-            : chat
-        );
+    const fetchExistingContacts = async () => {
+      try {
+        const contacts = await fetcher(`/chat/contacts/${currentUser.id}`);
+        setExistingContacts(contacts.data);
+      } catch (err) {
+        console.error("Failed to fetch contacts:", err);
       }
+    };
 
-      socket?.emit("joinRoom", {
-        roomId: msg.roomId,
-        userId: currentUser.id,
-      });
+    fetchExistingContacts();
+  }, [currentUser.id, isAuthenticated]);
 
-      return [
-        ...prev,
-        {
-          id: msg.roomId!,
-          username: msg.senderName,
-          avatar: msg.senderAvatar || "/Images/sample.jpeg",
-          minimized: true,
-          messages: [msg],
-          typing: false,
-        },
-      ];
-    });
-  }, [currentUser.id]);
-
-  const handleIncomingTyping = useCallback(({ roomId, senderId }: { roomId: string; senderId: string; }) => {
-    if (senderId === currentUser.id) return;
-
-    setOpenChats((prev) =>
-      prev.map((chat) =>
-        chat.id === roomId ? { ...chat, typing: senderId } : chat
-      )
-    );
-
-    setTimeout(() => {
-      setOpenChats((prev) =>
-        prev.map((chat) =>
-          chat.id === roomId ? { ...chat, typing: undefined } : chat
-        )
-      );
-    }, 2000);
-  }, [currentUser.id]);
-
-  const emitTyping = (chatId: string) => {
-    socket?.emit("typing", { roomId: chatId, userId: currentUser.id });
-  };
-
+  // Init socket and events
   useEffect(() => {
     if (!isAuthenticated || !currentUser?.id) return;
 
@@ -118,6 +78,7 @@ export default function ChatWidget() {
 
       connectedRef.current = true;
 
+      // 🔁 Re-join all rooms on connection
       socket.on("connect", () => {
         openChats.forEach((chat) => {
           socket?.emit("joinRoom", {
@@ -128,15 +89,76 @@ export default function ChatWidget() {
       });
     }
 
+    const handleMessage = (msg: Message) => {
+      if (msg.sender_id === currentUser.id) return;
+
+      if (audioRef.current) {
+        audioRef.current.play().catch(() => {});
+      }
+
+      setOpenChats((prev) => {
+        const exists = prev.find((chat) => chat.id === msg.roomId);
+        if (exists) {
+          return prev.map((chat) =>
+            chat.id === msg.roomId
+              ? { ...chat, messages: [...chat.messages, msg], typing: false }
+              : chat
+          );
+        }
+
+        socket?.emit("joinRoom", {
+          roomId: msg.roomId,
+          userId: currentUser.id,
+        });
+
+        return [
+          ...prev,
+          {
+            id: msg.roomId!,
+            username: msg.senderName,
+            avatar: msg.senderAvatar || "/Images/sample.jpeg",
+            minimized: true,
+            messages: [msg],
+            typing: false,
+          },
+        ];
+      });
+    };
+
+    const handleTyping = ({
+      roomId,
+      senderId,
+    }: {
+      roomId: string;
+      senderId: string;
+    }) => {
+      if (senderId === currentUser.id) return;
+
+      setOpenChats((prev) =>
+        prev.map((chat) =>
+          chat.id === roomId ? { ...chat, typing: senderId } : chat
+        )
+      );
+
+      setTimeout(() => {
+        setOpenChats((prev) =>
+          prev.map((chat) =>
+            chat.id === roomId ? { ...chat, typing: undefined } : chat
+          )
+        );
+      }, 2000);
+    };
+
     socket?.on("message", handleMessage);
-    socket?.on("typing", handleIncomingTyping);
+    socket?.on("typing", handleTyping);
 
     return () => {
       socket?.off("message", handleMessage);
-      socket?.off("typing", handleIncomingTyping);
+      socket?.off("typing", handleTyping);
     };
-  }, [isAuthenticated, currentUser.id, openChats, handleMessage, handleIncomingTyping]);
+  }, [isAuthenticated, currentUser.id, openChats]);
 
+  // Disconnect on logout
   useEffect(() => {
     if (!isAuthenticated) {
       if (socket) {
@@ -150,6 +172,7 @@ export default function ChatWidget() {
     }
   }, [isAuthenticated]);
 
+  // Scroll to latest message
   useEffect(() => {
     openChats.forEach((chat) => {
       const ref = messageEndRefs.current[chat.id];
@@ -157,6 +180,7 @@ export default function ChatWidget() {
     });
   }, [openChats]);
 
+  // Search users
   useEffect(() => {
     const fetchResults = async () => {
       if (!searchQuery.trim() || !currentUser.id)
@@ -216,7 +240,7 @@ export default function ChatWidget() {
   const sendMessage = async (chatId: string, content: string) => {
     if (!content.trim()) return;
 
-    socket?.emit("joinRoom", { roomId: chatId, userId: currentUser.id });
+    socket?.emit("joinRoom", { roomId: chatId, userId: currentUser.id }); // 🔁
 
     const msg: Message = {
       sender_id: currentUser.id,
@@ -247,11 +271,16 @@ export default function ChatWidget() {
     }
   };
 
-  if (!isAuthenticated) return null;
+  const handleTyping = (chatId: string) => {
+    socket?.emit("typing", { roomId: chatId, userId: currentUser.id });
+  };
 
+  if (!isAuthenticated) return null;
+  
   return (
     <div className="fixed bottom-4 right-4 z-50 flex flex-row-reverse items-end gap-2">
       <audio ref={audioRef} src="/media/notification.mp3" preload="auto" />
+
       {/* Chat launcher */}
       {chatMenuOpen ? (
         <div className="bg-gray-100 border rounded shadow-lg p-4 w-72">
@@ -262,7 +291,7 @@ export default function ChatWidget() {
           <div className="mb-2">
             <span className="text-sm text-gray-600">Recent Contacts:</span>
             <div className="max-h-28 overflow-y-auto mt-1 mb-2">
-              {existingContacts.map((user) => (
+              {existingContacts.map(user => (
                 <div
                   key={user.id}
                   onClick={() => {
@@ -272,12 +301,14 @@ export default function ChatWidget() {
                   className="flex items-center gap-2 p-2 bg-white rounded hover:bg-gray-50 cursor-pointer"
                 >
                   <Image
-                    src={user.avatar || "/Images/sample.jpeg"}
+                    src={user.avatar || '/Images/sample.jpeg'}
                     width={24}
                     height={24}
                     className="w-6 h-6 rounded-full"
                     alt={user.username}
                   />
+
+
                   <span>{user.username}</span>
                 </div>
               ))}
@@ -287,28 +318,22 @@ export default function ChatWidget() {
           <input
             placeholder="Search users..."
             value={searchQuery}
-            onChange={(e) => setSearchQuery(e.target.value)}
+            onChange={e => setSearchQuery(e.target.value)}
             className="w-full border rounded px-2 py-1 mb-2"
             autoComplete="off"
           />
           <div className="max-h-48 overflow-y-auto space-y-2">
-            {searchResults.map((user) => (
+            {searchResults.map(user => (
               <div
                 key={user.id}
                 onClick={() => {
                   openChat(user);
                   setChatMenuOpen(false);
-                  setSearchQuery("");
+                  setSearchQuery('');
                 }}
                 className="flex items-center gap-2 p-2 bg-white rounded hover:bg-gray-50 cursor-pointer"
               >
-                <Image
-                  src={user.avatar}
-                  className="w-8 h-8 rounded-full"
-                  alt={user.username}
-                  width={24}
-                  height={24}
-                />
+                <Image src={user.avatar} className="w-8 h-8 rounded-full" alt={''} />
                 <span>{user.username}</span>
               </div>
             ))}
@@ -324,20 +349,20 @@ export default function ChatWidget() {
       )}
 
       {/* Chat windows */}
-      {openChats.map((chat) => (
+      {openChats.map(chat => (
         <div
           key={chat.id}
-          className={`bg-white w-80 border rounded shadow-lg flex flex-col overflow-hidden transition-all duration-300 ${chat.minimized ? "h-10" : "h-96"}`}
+          className={`bg-white w-80 border rounded shadow-lg flex flex-col overflow-hidden transition-all duration-300 ${chat.minimized ? 'h-10' : 'h-96'}`}
         >
           <div className="flex justify-between items-center bg-gray-200 px-3 py-2">
             <div className="flex items-center gap-2">
               {chat.avatar && (
                 <Image
                   src={chat.avatar}
-                  width={24}
-                  height={24}
+                  width={24} // Explicitly set the width
+                  height={24} // Explicitly set the height
                   className="w-6 h-6 rounded-full"
-                  alt={chat.username}
+                  alt={chat.username || 'User Avatar'}
                 />
               )}
               <span className="font-medium text-sm">{chat.username}</span>
@@ -345,20 +370,16 @@ export default function ChatWidget() {
             <div className="flex gap-2">
               <button
                 onClick={() =>
-                  setOpenChats((prev) =>
-                    prev.map((c) =>
+                  setOpenChats(prev =>
+                    prev.map(c =>
                       c.id === chat.id ? { ...c, minimized: !c.minimized } : c
                     )
                   )
                 }
               >
-                {chat.minimized ? "🔼" : "🔽"}
+                {chat.minimized ? '🔼' : '🔽'}
               </button>
-              <button
-                onClick={() =>
-                  setOpenChats((prev) => prev.filter((c) => c.id !== chat.id))
-                }
-              >
+              <button onClick={() => setOpenChats(prev => prev.filter(c => c.id !== chat.id))}>
                 ✕
               </button>
             </div>
@@ -372,10 +393,10 @@ export default function ChatWidget() {
                   return (
                     <div
                       key={i}
-                      className={`flex ${isOwn ? "justify-end" : "justify-start"}`}
+                      className={`flex ${isOwn ? 'justify-end' : 'justify-start'}`}
                     >
                       <div
-                        className={`px-3 py-2 max-w-xs rounded-lg text-sm ${isOwn ? "bg-gray-200" : "bg-[#FED22B]"} text-black`}
+                        className={`px-3 py-2 max-w-xs rounded-lg text-sm ${isOwn ? 'bg-gray-200' : 'bg-[#FED22B]'} text-black`}
                       >
                         {!isOwn && (
                           <div className="text-xs text-gray-600 mb-1 text-right">
@@ -390,33 +411,26 @@ export default function ChatWidget() {
 
                 {chat.typing && (
                   <div className="text-xs text-gray-500 italic text-right">
-                    {chat.messages.at(-1)?.sender_id !== currentUser.id &&
-                      "Typing..."}
+                    {chat.messages.at(-1)?.sender_id !== currentUser.id && 'Typing...'}
                   </div>
                 )}
 
-                <div
-                  ref={(el) => {
-                    messageEndRefs.current[chat.id] = el;
-                  }}
-                />
+                <div ref={el => { messageEndRefs.current[chat.id] = el; }} />
               </div>
               <div className="p-2 border-t flex gap-2">
                 <input
-                  ref={(el) => {
-                    inputRefs.current[chat.id] = el;
-                  }}
+                  ref={el => { inputRefs.current[chat.id] = el; }}
                   className="flex-1 border rounded px-2 py-1 text-sm"
                   placeholder="Type a message..."
                   onKeyDown={(e) => {
-                    if (e.key === "Enter") {
+                    if (e.key === 'Enter') {
                       const content = e.currentTarget.value.trim();
                       if (content) {
                         sendMessage(chat.id, content);
-                        e.currentTarget.value = "";
+                        e.currentTarget.value = '';
                       }
                     } else {
-                      emitTyping(chat.id);
+                      handleTyping(chat.id);
                     }
                   }}
                 />
