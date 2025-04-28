@@ -1,15 +1,14 @@
 "use client";
 
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useCallback } from "react";
 import Head from "next/head";
 import Link from "next/link";
 import Image from "next/image";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import styles from "../styles/investor.module.css";
 import "../styles/globals.css";
 import RepositoryModal from "@/components/repository-modal";
 import { fetcher } from "@/app/utils/fetcher";
-import { isAuthenticated } from "@/app/utils/isAuthenticated";
 import NavBar from "@/components/nav-bar";
 import { useAuthStore } from "@/app/stores/useAuthStore";
 
@@ -38,8 +37,13 @@ interface Idea {
 }
 
 const InvestorPage = () => {
-    const [authChecked, setAuthChecked] = useState(false);
-    const { currentUser } = useAuthStore((state) => state);
+    const router = useRouter();
+    const searchParams = useSearchParams();
+    const ideaId = searchParams.get("id");
+
+    const isAuthenticated = useAuthStore(state => state.isAuthenticated);
+    const currentUser = useAuthStore(state => state.currentUser);
+
     const [ideas, setIdeas] = useState<Idea[]>([]);
     const [loadingIdeas, setLoadingIdeas] = useState(true);
     const [errorIdeas, setErrorIdeas] = useState<string | null>(null);
@@ -55,20 +59,11 @@ const InvestorPage = () => {
     const [selectedRepo, setSelectedRepo] = useState<string | null>(null);
     const [isModalOpen, setIsModalOpen] = useState(false);
 
-    const router = useRouter();
-
     useEffect(() => {
-        const checkAuth = async () => {
-            const currentUser = await isAuthenticated();
-            if (!currentUser) {
-                router.push("/get-started");
-            } else {
-                setAuthChecked(true);
-            }
-        };
-
-        checkAuth();
-    }, [router]);
+        if (!isAuthenticated) {
+            router.push("/get-started");
+        }
+    }, [isAuthenticated, router]);
 
     useEffect(() => {
         const fetchIdeas = async () => {
@@ -77,7 +72,6 @@ const InvestorPage = () => {
                 setAllIdeas(data.data || []);
                 setIdeas(data.data || []);
             } catch (err: any) {
-                console.error("Error fetching ideas:", err);
                 setErrorIdeas(err.message || "An unknown error occurred.");
             } finally {
                 setLoadingIdeas(false);
@@ -86,6 +80,24 @@ const InvestorPage = () => {
 
         fetchIdeas();
     }, []);
+
+    useEffect(() => {
+        const fetchSearchedIdeas = async () => {
+            if (!searchTerm || searchTerm.trim().length < 1) {
+                setIdeas(allIdeas);
+                return;
+            }
+
+            try {
+                const data = await fetcher(`/ideas/search/title/${encodeURIComponent(searchTerm)}`);
+                setIdeas(data.data || []);
+            } catch (err: any) {
+                setErrorIdeas(err.message || "An unknown error occurred.");
+            }
+        };
+
+        fetchSearchedIdeas();
+    }, [searchTerm, allIdeas]);
 
     useEffect(() => {
         const fetchAllTags = async () => {
@@ -101,17 +113,50 @@ const InvestorPage = () => {
         fetchAllTags();
     }, []);
 
+    const handleTagSearch = (e: React.ChangeEvent<HTMLInputElement>) => {
+        const searchTerm = e.target.value.trim().toLowerCase();
+        setFilteredTags(
+            searchTerm === ""
+                ? allTags
+                : allTags.filter(tag => tag.name.toLowerCase().includes(searchTerm))
+        );
+        setDropdownVisible(true);
+    };
+
     const handleAddTag = (tag: Tag) => {
-        if (!tagsFilter.some((t) => t.id === tag.id)) {
-            setTagsFilter((prev) => [...prev, tag]);
+        if (!tagsFilter.some(t => t.id === tag.id)) {
+            setTagsFilter(prev => [...prev, tag]);
         }
         setDropdownVisible(false);
     };
 
-    const handleInvest = async (ideaId: string, amount: number) => {
-        const userId = currentUser?.id;
+    const handleRemoveTag = (tag: Tag) => {
+        setTagsFilter(prev => prev.filter(t => t.id !== tag.id));
+    };
 
-        if (!userId) {
+    const handleClearTags = () => setTagsFilter([]);
+
+    const handleApplyFilters = () => {
+        const filteredIdeas = allIdeas.filter(idea => {
+            const matchesTags =
+                tagsFilter.length === 0 ||
+                tagsFilter.some(tag =>
+                    idea.idea_tags?.some(ideaTag => ideaTag.tags.id === tag.id)
+                );
+
+            const matchesPrice =
+                idea.price === undefined ||
+                (idea.price >= priceRange[0] && idea.price <= priceRange[1]);
+
+            return matchesTags && matchesPrice;
+        });
+
+        setIdeas(filteredIdeas);
+        setShowFilterPopup(false);
+    };
+
+    const handleInvest = async (ideaId: string, amount: number) => {
+        if (!currentUser?.id) {
             alert("You must be logged in to invest.");
             return;
         }
@@ -124,7 +169,7 @@ const InvestorPage = () => {
                 },
                 body: JSON.stringify({
                     idea_id: ideaId,
-                    user_id: userId,
+                    user_id: currentUser.id,
                     amount,
                 }),
             });
@@ -142,7 +187,7 @@ const InvestorPage = () => {
         }
     };
 
-    if (!authChecked) return <p>Checking authentication...</p>;
+    if (!isAuthenticated) return <p>Checking authentication...</p>;
 
     return (
         <>
@@ -167,24 +212,98 @@ const InvestorPage = () => {
                             onChange={(e) => setSearchTerm(e.target.value)}
                         />
                         <button className={styles.searchButton}>Search</button>
-                        <button className={styles.filterButton} onClick={() => setShowFilterPopup(true)}>
+                        <button
+                            className={styles.filterButton}
+                            onClick={() => setShowFilterPopup(true)}
+                        >
                             Filter
                         </button>
                     </div>
                 }
             />
 
-            {/* Main Content */}
+            {showFilterPopup && (
+                <div className={styles.filterPopup}>
+                    <div className={styles.filterContent}>
+                        <h3>Filter Ideas</h3>
+                        <input
+                            type="text"
+                            placeholder="Search tags"
+                            onChange={handleTagSearch}
+                            onFocus={() => setDropdownVisible(true)}
+                        />
+                        <button
+                            className={styles.clearTagsButton}
+                            onClick={handleClearTags}
+                        >
+                            Clear All Tags
+                        </button>
+
+                        {dropdownVisible && filteredTags.length > 0 && (
+                            <ul className={styles.tagDropdown}>
+                                {filteredTags.map((tag) => (
+                                    <li key={tag.id} onClick={() => handleAddTag(tag)}>
+                                        {tag.name}
+                                    </li>
+                                ))}
+                            </ul>
+                        )}
+
+                        <div>
+                            {tagsFilter.map((tag) => (
+                                <span key={tag.id} className={styles.tag}>
+                                    {tag.name} <button onClick={() => handleRemoveTag(tag)}>x</button>
+                                </span>
+                            ))}
+                        </div>
+
+                        <div>
+                            <label>Price Range:</label>
+                            <input
+                                type="range"
+                                min="0"
+                                max="10000"
+                                step="100"
+                                value={priceRange[0]}
+                                onChange={(e) => setPriceRange([+e.target.value, priceRange[1]])}
+                            />
+                            <input
+                                type="range"
+                                min="0"
+                                max="10000"
+                                step="100"
+                                value={priceRange[1]}
+                                onChange={(e) => setPriceRange([priceRange[0], +e.target.value])}
+                            />
+                            <p>Price: {priceRange[0]} - {priceRange[1]}</p>
+                        </div>
+
+                        <button
+                            className={styles.applyFiltersButton}
+                            onClick={handleApplyFilters}
+                        >
+                            Apply Filters
+                        </button>
+                    </div>
+                </div>
+            )}
+
             <main className={styles.pageContainer}>
                 <div className={styles.postsGrid}>
                     {loadingIdeas && <p>Loading ideas...</p>}
                     {errorIdeas && <p>Error: {errorIdeas}</p>}
-                    {!loadingIdeas && !errorIdeas && ideas?.length === 0 && <p>No ideas found.</p>}
+                    {!loadingIdeas && !errorIdeas && ideas.length === 0 && <p>No ideas found.</p>}
 
                     {ideas.map((idea) => (
                         <div className={styles.postCard} key={idea.id}>
                             <h3>{idea.title}</h3>
                             <p>{idea.description}</p>
+                            <p>{idea.category}</p>
+                            <p>
+                                {idea.idea_tags && idea.idea_tags.length > 0
+                                    ? idea.idea_tags.map(tag => tag.tags.name).join(", ")
+                                    : "No tags available"}
+                            </p>
                             <button
                                 onClick={() => {
                                     setSelectedRepo(idea.id.toString());
@@ -192,7 +311,8 @@ const InvestorPage = () => {
                                 }}
                                 className={styles.investButton}
                             >
-                                Learn More
+                                <span className={styles.investButtonIcon}>💰</span>
+                                Invest
                             </button>
                         </div>
                     ))}
@@ -212,7 +332,7 @@ const InvestorPage = () => {
 
             <footer className={styles.footer}>
                 <p>
-                    © 2025 iHive · Entrepreneur | <Link href="/terms">Terms</Link> | <Link href="/Privacy">Privacy</Link>
+                    © 2025 iHive · Entrepreneur | <Link href="/terms">Terms</Link> | <Link href="/privacy">Privacy</Link>
                 </p>
             </footer>
         </>
