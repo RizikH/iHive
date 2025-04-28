@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useRef, useState, useCallback } from "react";
 import io, { Socket } from "socket.io-client";
 import { fetcher } from "@/app/utils/fetcher";
 import { useAuthStore } from "@/app/stores/useAuthStore";
@@ -90,7 +90,7 @@ export default function ChatWidget() {
       });
     }
 
-    const handleMessage = (msg: Message) => {
+    const handleMessage = useCallback((msg: Message) => {
       if (msg.sender_id === currentUser.id) return;
 
       if (audioRef.current) {
@@ -124,9 +124,9 @@ export default function ChatWidget() {
           },
         ];
       });
-    };
+    }, [currentUser.id]);
 
-    const handleTyping = ({
+    const handleTyping = useCallback(({
       roomId,
       senderId,
     }: {
@@ -148,7 +148,7 @@ export default function ChatWidget() {
           )
         );
       }, 2000);
-    };
+    }, [currentUser.id]);
 
     socket?.on("message", handleMessage);
     socket?.on("typing", handleTyping);

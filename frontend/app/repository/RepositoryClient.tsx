@@ -13,6 +13,7 @@ import { fetcher } from "@/app/utils/fetcher";
 
 import styles from "../styles/repository.module.css";
 
+
 export const metadata = {
   title: "Entrepreneur Repository",
   description: "Manage your project files on iHive",
@@ -31,6 +32,7 @@ export default function Repository() {
   const [unauthorized, setUnauthorized] = useState(false);
   const [authChecked, setAuthChecked] = useState(false);
   const [idea, setIdea] = useState<any>(null);
+  
 
 
   const fetchIdeaDetails = useCallback(async () => {
@@ -85,7 +87,7 @@ export default function Repository() {
     };
 
     checkOwnership();
-  }, [currentUser, fetchFiles, ideaId, router]);
+  }, [currentUser, fetchFiles, ideaId, router, fetchIdeaDetails]);
 
   const handleSelectFile = (file: FileItem | null) => {
     setCurrentFile(file);
