@@ -5,19 +5,11 @@ import ChatWidget from "./chat-widget";
 import { useAuthStore } from "@/app/stores/useAuthStore";
 
 export default function AppShell({ children }: { children: React.ReactNode }) {
-  const setAuthenticated = useAuthStore((state: any) => state.setAuthenticated);
+  const initializeFromSession = useAuthStore((state) => state.initializeFromSession);
 
   useEffect(() => {
-    const savedUser = sessionStorage.getItem("auth_user");
-    if (savedUser) {
-      try {
-        const parsed = JSON.parse(savedUser);
-        setAuthenticated(parsed);
-      } catch (e) {
-        console.warn("Failed to restore session in layout", e);
-      }
-    }
-  }, [setAuthenticated]);
+    initializeFromSession();
+  }, [initializeFromSession]);
 
   return (
     <>

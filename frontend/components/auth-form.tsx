@@ -33,17 +33,6 @@ export const AuthForm = ({ initialView = "login", onClose }: AuthFormProps) => {
     termsAccepted: false,
   });
 
-  useEffect(() => {
-    const savedUser = sessionStorage.getItem("auth_user");
-    if (savedUser) {
-      try {
-        const parsed = JSON.parse(savedUser);
-        setAuthenticated(parsed);
-      } catch (e) {
-        console.warn("Failed to restore session", e);
-      }
-    }
-  }, [setAuthenticated]);
 
   const hideForm = () => {
     setIsVisible(false);
@@ -91,7 +80,6 @@ export const AuthForm = ({ initialView = "login", onClose }: AuthFormProps) => {
       };
 
       setAuthenticated(userData);
-      sessionStorage.setItem("auth_user", JSON.stringify(userData));
 
       setSuccess("Login successful!");
 

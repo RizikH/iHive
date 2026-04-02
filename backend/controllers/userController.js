@@ -218,10 +218,11 @@ const updateUserLogin = async (req, res) => {
       });
     }
 
-    // Step 2: Update the password
-    const { error: updateError } = await supabase.auth.updateUser({
-      password: newPassword,
-    });
+    // Step 2: Update the password via admin API (service role required)
+    const { error: updateError } = await supabase.auth.admin.updateUserById(
+      userIdFromParams,
+      { password: newPassword }
+    );
 
     if (updateError) {
       return res.status(400).json({
