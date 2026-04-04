@@ -1,82 +1,65 @@
-const investmentModel = require('../models/Investment');
+const Investment = require('../models/Investment');
 
-// GET /api/investments/:idea_id
-const getInvestments = async (req, res) => {
-  const { idea_id } = req.params;
-
+const getInvestmentsByIdea = async (req, res) => {
   try {
-    const investments = await investmentModel.getInvestmentsByIdeaId(idea_id);
-    res.status(200).json(investments);
+    const investments = await Investment.getByIdeaId(req.params.ideaId);
+    res.json(investments);
   } catch (err) {
     res.status(500).json({ error: err.message });
   }
 };
 
-// POST /api/investments
 const createInvestment = async (req, res) => {
-  const { idea_id, user_id, amount } = req.body;
-
-  if (!idea_id || !user_id || !amount) {
-    return res.status(400).json({ error: 'Missing required fields.' });
-  }
-
-  const invested_at = new Date().toISOString();
-
   try {
-    const newInvestment = await investmentModel.addInvestment({
-      idea_id,
-      user_id,
-      amount,
-      invested_at,
-    });
-    res.status(201).json(newInvestment);
+    const { idea_id, amount } = req.body;
+    const user_id = req.user.sub;
+
+    if (!idea_id || !amount) {
+      return res.status(400).json({ error: 'idea_id and amount are required.' });
+    }
+
+    const investment = await Investment.create({ idea_id, user_id, amount });
+    res.status(201).json(investment);
   } catch (err) {
     res.status(500).json({ error: err.message });
   }
 };
 
 const getInvestmentsByUser = async (req, res) => {
-  const { user_id } = req.params;
-
   try {
-    const investments = await investmentModel.getInvestmentsByUserId(user_id);
-    res.status(200).json(investments);
+    const investments = await Investment.getByUserId(req.params.userId);
+    res.json(investments);
   } catch (err) {
     res.status(500).json({ error: err.message });
   }
 };
 
 const getEntrepreneurInvestments = async (req, res) => {
-  const { user_id } = req.params;
-
   try {
-    const investments = await investmentModel.getInvestmentsForEntrepreneur(user_id);
-    res.status(200).json(investments);
+    const investments = await Investment.getForEntrepreneur(req.params.userId);
+    res.json(investments);
   } catch (err) {
     res.status(500).json({ error: err.message });
   }
 };
 
 const updateStatus = async (req, res) => {
-  const { investment_id } = req.params;
-  const { status } = req.body;
-
-  if (!status) {
-    return res.status(400).json({ error: 'Missing required fields.' });
-  }
-
   try {
-    const updatedInvestment = await investmentModel.updateStatus(investment_id, status);
-    res.status(200).json(updatedInvestment);
+    const { status } = req.body;
+
+    if (!status) return res.status(400).json({ error: 'status is required.' });
+
+    const updated = await Investment.updateStatus(req.params.investmentId, status);
+    res.json(updated);
   } catch (err) {
     res.status(500).json({ error: err.message });
   }
-}
+};
 
 module.exports = {
-  getInvestments,
+  getInvestmentsByIdea,
   createInvestment,
   getInvestmentsByUser,
   getEntrepreneurInvestments,
-  updateStatus
+  updateStatus,
 };

@@ -1,69 +1,58 @@
-const supabase = require("../config/db");
+const supabase = require('../config/db');
 
-// Fetch all investments for a specific idea
-const getInvestmentsByIdeaId = async (idea_id) => {
+const getByIdeaId = async (ideaId) => {
   const { data, error } = await supabase
     .from('investments')
     .select('*')
-    .eq('idea_id', idea_id);
+    .eq('idea_id', ideaId);
 
-  if (error) throw error;
+  if (error) throw new Error(error.message);
   return data;
 };
 
-// Create a new investment
-const addInvestment = async ({ idea_id, user_id, amount, invested_at }) => {
+const create = async ({ idea_id, user_id, amount }) => {
   const { data, error } = await supabase
     .from('investments')
-    .insert([{ idea_id, user_id, amount, invested_at }])
+    .insert([{ idea_id, user_id, amount }])
+    .select()
     .single();
 
-  if (error) throw error;
+  if (error) throw new Error(error.message);
+  if (!data) throw new Error('Failed to create investment');
   return data;
 };
 
-// Get all investments made by a specific user
-const getInvestmentsByUserId = async (user_id) => {
+const getByUserId = async (userId) => {
   const { data, error } = await supabase
     .from('investments')
     .select('*, ideas(*)')
-    .eq('user_id', user_id);
+    .eq('user_id', userId);
 
-  if (error) throw error;
-  return Array.isArray(data) ? data : [];
-};
-
-const getInvestmentsForEntrepreneur = async (entrepreneur_id) => {
-  const { data, error } = await supabase
-    .from('ideas')
-    .select('*, investments(*, users(username))') // Ensure investments is the correct relation
-    .eq('user_id', entrepreneur_id); // Ensure user_id is the correct column
-
-  if (error) {
-    console.error('Error fetching investments:', error); // Log the error for debugging
-    throw error; // Rethrow the error for further handling
-  }
-  return data; // Return the fetched data
-};
-
-const updateStatus = async (investment_id, status) => {
-  const { data, error } = await supabase
-    .from('investments')
-    .update({ status }) // ✅ Make sure it's wrapped in an object
-    .eq('id', investment_id)
-    .single();
-
-  if (error) {
-    console.error('[Model] Supabase error:', error.message);
-    throw error;
-  }
+  if (error) throw new Error(error.message);
   return data;
 };
 
-module.exports = {
-  getInvestmentsByIdeaId,
-  addInvestment,
-  getInvestmentsByUserId,
-  getInvestmentsForEntrepreneur,
-  updateStatus
+const getForEntrepreneur = async (entrepreneurId) => {
+  const { data, error } = await supabase
+    .from('ideas')
+    .select('*, investments(*, users!user_id(username))')
+    .eq('user_id', entrepreneurId);
+
+  if (error) throw new Error(error.message);
+  return data;
 };
+
+const updateStatus = async (investmentId, status) => {
+  const { data, error } = await supabase
+    .from('investments')
+    .update({ status })
+    .eq('id', investmentId)
+    .select()
+    .single();
+
+  if (error) throw new Error(error.message);
+  if (!data) throw new Error('Investment not found');
+  return data;
+};
+
+module.exports = { getByIdeaId, create, getByUserId, getForEntrepreneur, updateStatus };

@@ -1,175 +1,107 @@
-const supabase = require("../config/db");
-const openAI = require("../services/chatgptService");
+const supabase = require('../config/db');
 
-const getAllIdeas = async () => {
-    const { data, error } = await supabase
-        .from("ideas")
-        .select(`
-            *, users(*),
-            idea_tags (
-                *,
-                tags (*)
-            )
-        `)
-        .order("created_at", { ascending: false });
+const getAll = async () => {
+  const { data, error } = await supabase
+    .from('ideas')
+    .select(`*, users!user_id(*), idea_tags(*, tags(*))`)
+    .order('created_at', { ascending: false });
 
-    if (error) {
-        console.error("Error fetching ideas:", error);
-        return null;
-    }
-    return data;
+  if (error) throw new Error(error.message);
+  return data;
 };
 
-const createIdea = async (ideaData) => {
-    const { data, error } = await supabase
-        .from("ideas")
-        .insert([ideaData])
-        .select()
-        .single(); 
+const getById = async (id) => {
+  const { data, error } = await supabase
+    .from('ideas')
+    .select('*, users!user_id(*)')
+    .eq('id', id)
+    .single();
 
-    if (error) throw error;
-
-    // Generate tags and category using OpenAI
-    const generatedTags = await openAI.generateTags(data.title, data.description);
-    const generatedCategory = await openAI.generateCategory(data.title, data.description);
-
-    // Update the idea with the generated category
-    const { error: updateError } = await supabase
-        .from("ideas")
-        .update({ category: generatedCategory })
-        .eq("id", data.id);
-
-    if (updateError) throw updateError;
-
-    // Insert tags into the `tags` table and link them
-    const insertedTags = [];
-    for (const tagName of generatedTags) {
-        let { data: existingTag, error: tagError } = await supabase
-            .from("tags")
-            .select("*")
-            .eq("name", tagName)
-            .single();
-
-        if (!existingTag) {
-            ({ data: existingTag, error: tagError } = await supabase
-                .from("tags")
-                .insert({ name: tagName })
-                .select()
-                .single());
-        }
-
-        if (tagError) console.error("Error inserting tag:", tagError);
-
-        if (existingTag) {
-            await supabase
-                .from("idea_tags")
-                .insert({ idea_id: data.id, tag_id: existingTag.id });
-            insertedTags.push(existingTag);
-        }
-    }
-
-    return data;
-};
-
-const updateIdea = async (id, ideaData) => {
-    const { data, error } = await supabase
-        .from("ideas")
-        .update(ideaData)
-        .eq("id", id)
-        .select()
-        .single();
-
-    if (error) throw error;
-    return data;
-};
-
-const deleteIdea = async (id) => {
-    await supabase.from("idea_tags").delete().eq("idea_id", id);
-    const { data, error } = await supabase
-        .from("ideas")
-        .delete()
-        .eq("id", id)
-        .select()
-        .single();
-
-    if (error) throw error;
-    return data;
-};
-
-const getIdeaById = async (id) => {
-    const { data, error } = await supabase
-        .from("ideas")
-        .select("*, users(*)")
-        .eq("id", id)
-        .single();
-
-    if (error) throw error;
-    return data;
-};
-
-const getIdeasByTitle = async (title) => {
-    const { data, error } = await supabase
-        .from("ideas")
-        .select(`
-            *,
-            idea_tags (
-                *,
-                tags (*)
-            )
-        `)
-        .ilike("title", `%${title}%`)
-        .order("created_at", { ascending: false });
-
-    if (error) throw error;
-    return data;
-};
-
-const advancedSearchTags = async (tags) => {
-    const tagIds = tags.map((tag) => tag.id);
-    const { data: ideaTags, error: tagError } = await supabase
-        .from("idea_tags")
-        .select("idea_id")
-        .in("tag_id", tagIds);
-    if (tagError) throw tagError;
-    const ideaIds = ideaTags.map((ideaTag) => ideaTag.idea_id);
-    const { data: ideas, error: ideaError } = await supabase
-        .from("ideas")
-        .select(`
-            *,
-            idea_tags (
-                *,
-                tags (*)
-            )
-        `)
-        .in("id", ideaIds)
-        .order("created_at", { ascending: false });
-    if (ideaError) throw ideaError;
-    return ideas;
+  if (error) throw new Error(error.message);
+  if (!data) throw new Error('Idea not found');
+  return data;
 };
 
 const getAllByUserId = async (userId) => {
-    const { data, error } = await supabase
-        .from("ideas")
-        .select(`
-        *,
-        idea_tags (
-            *,
-            tags (*)
-        )
-    `)
-        .eq("user_id", userId)
-        .order("created_at", { ascending: false });
+  const { data, error } = await supabase
+    .from('ideas')
+    .select(`*, idea_tags(*, tags(*))`)
+    .eq('user_id', userId)
+    .order('created_at', { ascending: false });
 
-    if (error) throw error;
-    return data;
+  if (error) throw new Error(error.message);
+  return data;
 };
-module.exports = {
-    getAllIdeas,
-    getAllByUserId,
-    createIdea,
-    updateIdea,
-    deleteIdea,
-    getIdeaById,
-    getIdeasByTitle,
-    advancedSearchTags,
+
+const create = async ({ user_id, title, description }) => {
+  const { data, error } = await supabase
+    .from('ideas')
+    .insert([{ user_id, title, description }])
+    .select()
+    .single();
+
+  if (error) throw new Error(error.message);
+  return data;
 };
+
+const update = async (id, fields) => {
+  const { data, error } = await supabase
+    .from('ideas')
+    .update(fields)
+    .eq('id', id)
+    .select()
+    .single();
+
+  if (error) throw new Error(error.message);
+  if (!data) throw new Error('Idea not found');
+  return data;
+};
+
+const remove = async (id) => {
+  await supabase.from('idea_tags').delete().eq('idea_id', id);
+
+  const { data, error } = await supabase
+    .from('ideas')
+    .delete()
+    .eq('id', id)
+    .select()
+    .single();
+
+  if (error) throw new Error(error.message);
+  if (!data) throw new Error('Idea not found');
+  return data;
+};
+
+const searchByTitle = async (title) => {
+  const { data, error } = await supabase
+    .from('ideas')
+    .select(`*, idea_tags(*, tags(*))`)
+    .ilike('title', `%${title}%`)
+    .order('created_at', { ascending: false });
+
+  if (error) throw new Error(error.message);
+  return data;
+};
+
+const searchByTagIds = async (tagIds) => {
+  const { data: ideaTags, error: tagError } = await supabase
+    .from('idea_tags')
+    .select('idea_id')
+    .in('tag_id', tagIds);
+
+  if (tagError) throw new Error(tagError.message);
+  if (!ideaTags.length) return [];
+
+  const ideaIds = ideaTags.map(r => r.idea_id);
+
+  const { data, error } = await supabase
+    .from('ideas')
+    .select(`*, idea_tags(*, tags(*))`)
+    .in('id', ideaIds)
+    .order('created_at', { ascending: false });
+
+  if (error) throw new Error(error.message);
+  return data;
+};
+
+module.exports = { getAll, getById, getAllByUserId, create, update, remove, searchByTitle, searchByTagIds };

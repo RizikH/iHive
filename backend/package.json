@@ -5,7 +5,16 @@
     "scripts": {
         "predev": "npx kill-port 5000",
         "dev": "nodemon server.js",
-        "start": "node server.js"
+        "start": "node server.js",
+        "test": "jest --runInBand --forceExit --detectOpenHandles",
+        "test-verbose": "jest --runInBand --forceExit --detectOpenHandles --verbose",
+        "test:models": "jest tests/models --runInBand --forceExit --verbose"
+    },
+    "jest": {
+        "testEnvironment": "node",
+        "setupFiles": ["dotenv/config"],
+        "testMatch": ["**/tests/**/*.test.js"],
+        "testTimeout": 15000
     },
     "dependencies": {
         "@supabase/supabase-js": "latest",
@@ -24,6 +33,7 @@
         "uuid": "^11.1.0"
     },
     "devDependencies": {
+        "jest": "^30.3.0",
         "kill-port": "^2.0.1",
         "nodemon": "^3.1.9",
         "supertest": "^7.1.0"

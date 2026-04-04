@@ -1,54 +1,48 @@
-const { v4: uuidv4 } = require('uuid');
 const Collab = require('../models/Collab');
-const Idea = require('../models/Idea');
+const User = require('../models/User');
 
 const getCollabs = async (req, res) => {
-    try {
-        const ideaId = req.params.ideaId;
-        const collabs = await Collab.getCollabs(ideaId);
-        res.status(200).json(collabs);
-    } catch (error) {
-        console.error("❌ Error while fetching collaborations:", error);
-        res.status(500).json({ error: error.message });
-    }
-}
+  try {
+    const collabs = await Collab.getByIdeaId(req.params.ideaId);
+    res.json(collabs);
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+};
 
 const addCollab = async (req, res) => {
-    try {
-        const { ideaId, email, permission } = req.body;
-        const newCollab = await Collab.addcollabs(ideaId, email, permission);
-        res.status(201).json(newCollab);
-    } catch (error) {
-        console.error("❌ Error while adding collaboration:", error);
-        res.status(500).json({ error: error.message });
-    }
-}
+  try {
+    const { ideaId, email, permissions } = req.body;
+
+    const user = await User.getUserByEmail(email);
+    if (!user) return res.status(404).json({ error: `No user found with email ${email}` });
+
+    const collab = await Collab.add(ideaId, user.id, permissions);
+    res.status(201).json(collab);
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+};
 
 const removeCollab = async (req, res) => {
-    try {
-        const { ideaId, userId } = req.body;
-        const removedCollab = await Collab.removeCollabs(ideaId, userId);
-        res.status(200).json(removedCollab);
-    } catch (error) {
-        console.error("❌ Error while removing collaboration:", error);
-        res.status(500).json({ error: error.message });
-    }
-}
+  try {
+    const { ideaId, userId } = req.params;
+    const removed = await Collab.remove(ideaId, userId);
+    res.json(removed);
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+};
 
 const updateCollab = async (req, res) => {
-    try {
-        const { ideaId, userId, permissions } = req.body;
-        const updatedCollab = await Collab.updateCollabs(ideaId, userId, permissions);
-        res.status(200).json(updatedCollab);
-    } catch (error) {
-        console.error("❌ Error while updating collaboration:", error);
-        res.status(500).json({ error: error.message });
-    }
-}
-
-module.exports = {
-    getCollabs,
-    addCollab,
-    removeCollab,
-    updateCollab,
+  try {
+    const { ideaId, userId } = req.params;
+    const { permissions } = req.body;
+    const updated = await Collab.update(ideaId, userId, permissions);
+    res.json(updated);
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
 };
+
+module.exports = { getCollabs, addCollab, removeCollab, updateCollab };

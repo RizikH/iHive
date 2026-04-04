@@ -1,80 +1,70 @@
-const db = require('../config/db'); // Supabase client
+const supabase = require('../config/db');
 
 const File = {
-  // Create a new file record
   async create(file) {
-    const { name, type, idea_id, parent_id, user_id, path, content, mime_type } = file;
+    const { name, type, idea_id, parent_id, user_id, path, content, mime_type, permission_level } = file;
 
-    const { data, error } = await db
+    const record = { name, type, idea_id, user_id };
+    if (parent_id !== undefined) record.parent_id = parent_id;
+    if (path !== undefined) record.path = path;
+    if (content !== undefined) record.content = content;
+    if (mime_type !== undefined) record.mime_type = mime_type;
+    if (permission_level !== undefined) record.permission_level = permission_level;
+
+    const { data, error } = await supabase
       .from('files')
-      .insert([{
-        name,
-        type,
-        idea_id,
-        parent_id,
-        user_id,
-        path,
-        content,
-        mime_type
-      }])
+      .insert([record])
       .select()
       .single();
 
-    if (error) throw error;
+    if (error) throw new Error(error.message);
     return data;
   },
 
-  // Get all files under an idea (used to build file tree)
   async getAll(idea_id) {
-    const { data, error } = await db
+    const { data, error } = await supabase
       .from('files')
       .select('*')
       .eq('idea_id', idea_id);
 
-    if (error) throw error;
+    if (error) throw new Error(error.message);
     return data;
   },
 
-  // Get single file by ID
   async getById(id) {
-    const { data, error } = await db
+    const { data, error } = await supabase
       .from('files')
       .select('*')
       .eq('id', id)
       .single();
 
-    if (error) throw error;
+    if (error) throw new Error(error.message);
+    if (!data) throw new Error('File not found');
     return data;
   },
 
-  // Update file by ID
   async update(id, updates) {
-    if (updates?.permission_level === 'public') {
-      updates.is_public = true;
-    }
-
-    const { data, error } = await db
+    const { data, error } = await supabase
       .from('files')
       .update(updates)
       .eq('id', id)
       .select()
       .single();
 
-    if (error) throw error;
+    if (error) throw new Error(error.message);
+    if (!data) throw new Error('File not found');
     return data;
   },
 
-  // Delete file by ID
   async remove(id) {
-    const { error } = await db
+    const { error } = await supabase
       .from('files')
       .delete()
       .eq('id', id);
 
-    if (error) throw error;
+    if (error) throw new Error(error.message);
     return { success: true };
-  }
+  },
 };
-
 
 module.exports = File;

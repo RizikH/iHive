@@ -1,19 +1,17 @@
 const express = require('express');
 const router = express.Router();
-const investmentController = require('../controllers/investmentController');
+const controller = require('../controllers/investmentController');
+const authenticate = require('../middleware/auth');
+const rateLimiter = require('../middleware/rateLimiter');
 
-// Route to get all investments for a given idea
-router.get('/:idea_id', investmentController.getInvestments);
+router.use(rateLimiter);
+router.use(authenticate);
 
-// Route to create a new investment
-router.post('/', investmentController.createInvestment);
-
-// Get all investments by a specific user
-router.get('/user/:user_id', investmentController.getInvestmentsByUser);
-
-router.get('/entrepreneur/:user_id', investmentController.getEntrepreneurInvestments);
-
-router.put('/:investment_id', investmentController.updateStatus);
-
+// Specific routes before parameterized routes
+router.get('/user/:userId', controller.getInvestmentsByUser);
+router.get('/entrepreneur/:userId', controller.getEntrepreneurInvestments);
+router.get('/:ideaId', controller.getInvestmentsByIdea);
+router.post('/', controller.createInvestment);
+router.put('/:investmentId', controller.updateStatus);
 
 module.exports = router;
