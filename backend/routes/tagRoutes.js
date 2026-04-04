@@ -1,22 +1,13 @@
-const express = require("express");
+const express = require('express');
 const router = express.Router();
-const tagController = require("../controllers/tagController");
+const controller = require('../controllers/tagController');
+const authenticate = require('../middleware/auth');
+const rateLimiter = require('../middleware/rateLimiter');
 
+router.use(rateLimiter);
 
-router.get("/all", tagController.getAllTags);
-
-// Get tags for a specific idea
-router.get("/idea/:id", tagController.getTagsByIdea);
-
-// Generate & attach tags to an idea
-router.post("/idea/:id", tagController.createTagsForIdea);
-
-// Delete a tag
-router.delete("/:id", tagController.deleteTag);
-
-// Link an existing tag to an idea
-router.post("/link", tagController.linkTagToIdea);
-
-router.get("/search/name", tagController.searchName);
+router.get('/all', controller.getAllTags);
+router.get('/search', controller.searchByName);
+router.delete('/:id', authenticate, controller.deleteTag);
 
 module.exports = router;

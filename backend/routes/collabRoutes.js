@@ -1,22 +1,15 @@
 const express = require('express');
 const router = express.Router();
-const collabController = require('../controllers/collabController');
-const authenticate = require('../middleware/authMiddleware');
-const rateLimit = require('express-rate-limit');
+const controller = require('../controllers/collabController');
+const authenticate = require('../middleware/auth');
+const rateLimiter = require('../middleware/rateLimiter');
 
-// ✅ NEW: Get current user info from token
-const authRateLimiter = rateLimit({
-  windowMs: 15 * 60 * 1000, // 15 minutes
-  max: 100, // max 100 requests per windowMs
-  message: "Too many requests from this IP, please try again later.",
-});
+router.use(rateLimiter);
+router.use(authenticate);
 
-router.use(authRateLimiter);
-
-// 🔐 Protected Routes
-router.get('/:ideaId', authenticate, collabController.getCollabs);
-router.post('/', authenticate, collabController.addCollab);
-router.delete('/', authenticate, collabController.removeCollab);
-router.put('/', authenticate, collabController.updateCollab);
+router.get('/:ideaId', controller.getCollabs);
+router.post('/', controller.addCollab);
+router.put('/:ideaId/:userId', controller.updateCollab);
+router.delete('/:ideaId/:userId', controller.removeCollab);
 
 module.exports = router;
