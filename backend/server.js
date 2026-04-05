@@ -19,15 +19,14 @@ const app = express();
 const server = http.createServer(app);
 
 const allowedOrigins = [
-  "http://localhost:3000",
-  "https://ihive.vercel.app",
-  "https://ihive-git-dev-main-rizik-haddads-projects.vercel.app",
+  /^http:\/\/localhost:\d+$/,
+  /^https:\/\/ihive.*\.vercel\.app$/,
 ];
 
 app.use(
   cors({
     origin: (origin, callback) => {
-      if (!origin || allowedOrigins.includes(origin)) {
+      if (!origin || allowedOrigins.some((o) => o.test(origin))) {
         callback(null, true);
       } else {
         callback(new Error("Not allowed by CORS"));
