@@ -48,3 +48,7 @@ generated/
 .vercel
 .env
 node_modules
+
+# Ignore local tooling and personal files
+.claude/
+Final Report/
